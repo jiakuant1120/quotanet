@@ -1123,6 +1123,346 @@ var (
 			},
 		},
 	}
+	// QuotanetContributionLedgerColumns holds the columns for the "quotanet_contribution_ledger" table.
+	QuotanetContributionLedgerColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "task_id", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "usage_log_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "node_id", Type: field.TypeInt64},
+		{Name: "wallet_address", Type: field.TypeString, Size: 128},
+		{Name: "account_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "platform", Type: field.TypeString, Size: 50},
+		{Name: "model", Type: field.TypeString, Size: 100},
+		{Name: "token_flow", Type: field.TypeInt64, Default: 0},
+		{Name: "amount_cxs", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(30,12)"}},
+		{Name: "rate", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,10)"}},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "pending"},
+		{Name: "payout_batch_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "settled_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
+	}
+	// QuotanetContributionLedgerTable holds the schema information for the "quotanet_contribution_ledger" table.
+	QuotanetContributionLedgerTable = &schema.Table{
+		Name:       "quotanet_contribution_ledger",
+		Columns:    QuotanetContributionLedgerColumns,
+		PrimaryKey: []*schema.Column{QuotanetContributionLedgerColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "quotanetcontributionledger_task_id",
+				Unique:  true,
+				Columns: []*schema.Column{QuotanetContributionLedgerColumns[3]},
+			},
+			{
+				Name:    "quotanetcontributionledger_node_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetContributionLedgerColumns[5], QuotanetContributionLedgerColumns[1]},
+			},
+			{
+				Name:    "quotanetcontributionledger_wallet_address_status",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetContributionLedgerColumns[6], QuotanetContributionLedgerColumns[13]},
+			},
+			{
+				Name:    "quotanetcontributionledger_payout_batch_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetContributionLedgerColumns[14]},
+			},
+			{
+				Name:    "quotanetcontributionledger_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetContributionLedgerColumns[13], QuotanetContributionLedgerColumns[1]},
+			},
+		},
+	}
+	// QuotanetNodesColumns holds the columns for the "quotanet_nodes" table.
+	QuotanetNodesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "node_key", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "name", Type: field.TypeString, Size: 100, Default: ""},
+		{Name: "owner_user_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "wallet_address", Type: field.TypeString, Size: 128},
+		{Name: "token_hash", Type: field.TypeString, Size: 128},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "pending"},
+		{Name: "protocol_version", Type: field.TypeString, Nullable: true, Size: 40},
+		{Name: "client_version", Type: field.TypeString, Nullable: true, Size: 40},
+		{Name: "last_seen_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
+	}
+	// QuotanetNodesTable holds the schema information for the "quotanet_nodes" table.
+	QuotanetNodesTable = &schema.Table{
+		Name:       "quotanet_nodes",
+		Columns:    QuotanetNodesColumns,
+		PrimaryKey: []*schema.Column{QuotanetNodesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "quotanetnode_node_key",
+				Unique:  true,
+				Columns: []*schema.Column{QuotanetNodesColumns[4]},
+			},
+			{
+				Name:    "quotanetnode_wallet_address",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetNodesColumns[7]},
+			},
+			{
+				Name:    "quotanetnode_status",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetNodesColumns[9]},
+			},
+			{
+				Name:    "quotanetnode_last_seen_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetNodesColumns[12]},
+			},
+			{
+				Name:    "quotanetnode_owner_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetNodesColumns[6]},
+			},
+		},
+	}
+	// QuotanetNodeSessionsColumns holds the columns for the "quotanet_node_sessions" table.
+	QuotanetNodeSessionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "session_id", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "node_id", Type: field.TypeInt64},
+		{Name: "instance_id", Type: field.TypeString, Size: 64},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "connected"},
+		{Name: "remote_addr", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "max_concurrency", Type: field.TypeInt, Default: 1},
+		{Name: "current_concurrency", Type: field.TypeInt, Default: 0},
+		{Name: "queue_size", Type: field.TypeInt, Default: 0},
+		{Name: "max_queue_size", Type: field.TypeInt, Default: 0},
+		{Name: "capabilities", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "connected_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "disconnected_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "last_heartbeat_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "close_reason", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "text"}},
+	}
+	// QuotanetNodeSessionsTable holds the schema information for the "quotanet_node_sessions" table.
+	QuotanetNodeSessionsTable = &schema.Table{
+		Name:       "quotanet_node_sessions",
+		Columns:    QuotanetNodeSessionsColumns,
+		PrimaryKey: []*schema.Column{QuotanetNodeSessionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "quotanetnodesession_session_id",
+				Unique:  true,
+				Columns: []*schema.Column{QuotanetNodeSessionsColumns[3]},
+			},
+			{
+				Name:    "quotanetnodesession_node_id_connected_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetNodeSessionsColumns[4], QuotanetNodeSessionsColumns[13]},
+			},
+			{
+				Name:    "quotanetnodesession_status",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetNodeSessionsColumns[6]},
+			},
+			{
+				Name:    "quotanetnodesession_instance_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetNodeSessionsColumns[5]},
+			},
+			{
+				Name:    "quotanetnodesession_last_heartbeat_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetNodeSessionsColumns[15]},
+			},
+		},
+	}
+	// QuotanetPayoutBatchesColumns holds the columns for the "quotanet_payout_batches" table.
+	QuotanetPayoutBatchesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "batch_key", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "window_start", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "window_end", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "draft"},
+		{Name: "network", Type: field.TypeString, Size: 40, Default: "solana-devnet"},
+		{Name: "total_token_flow", Type: field.TypeInt64, Default: 0},
+		{Name: "total_amount_cxs", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(30,12)"}},
+		{Name: "item_count", Type: field.TypeInt, Default: 0},
+		{Name: "created_by", Type: field.TypeInt64, Nullable: true},
+		{Name: "approved_by", Type: field.TypeInt64, Nullable: true},
+	}
+	// QuotanetPayoutBatchesTable holds the schema information for the "quotanet_payout_batches" table.
+	QuotanetPayoutBatchesTable = &schema.Table{
+		Name:       "quotanet_payout_batches",
+		Columns:    QuotanetPayoutBatchesColumns,
+		PrimaryKey: []*schema.Column{QuotanetPayoutBatchesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "quotanetpayoutbatch_batch_key",
+				Unique:  true,
+				Columns: []*schema.Column{QuotanetPayoutBatchesColumns[3]},
+			},
+			{
+				Name:    "quotanetpayoutbatch_status",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetPayoutBatchesColumns[6]},
+			},
+			{
+				Name:    "quotanetpayoutbatch_window_start_window_end",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetPayoutBatchesColumns[4], QuotanetPayoutBatchesColumns[5]},
+			},
+		},
+	}
+	// QuotanetPayoutItemsColumns holds the columns for the "quotanet_payout_items" table.
+	QuotanetPayoutItemsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "item_key", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "batch_id", Type: field.TypeInt64},
+		{Name: "node_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "wallet_address", Type: field.TypeString, Size: 128},
+		{Name: "token_flow", Type: field.TypeInt64, Default: 0},
+		{Name: "amount_cxs", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(30,12)"}},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "pending"},
+		{Name: "tx_hash", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "error_message", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "text"}},
+		{Name: "finalized_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
+	}
+	// QuotanetPayoutItemsTable holds the schema information for the "quotanet_payout_items" table.
+	QuotanetPayoutItemsTable = &schema.Table{
+		Name:       "quotanet_payout_items",
+		Columns:    QuotanetPayoutItemsColumns,
+		PrimaryKey: []*schema.Column{QuotanetPayoutItemsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "quotanetpayoutitem_item_key",
+				Unique:  true,
+				Columns: []*schema.Column{QuotanetPayoutItemsColumns[3]},
+			},
+			{
+				Name:    "quotanetpayoutitem_batch_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetPayoutItemsColumns[4]},
+			},
+			{
+				Name:    "quotanetpayoutitem_wallet_address_status",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetPayoutItemsColumns[6], QuotanetPayoutItemsColumns[9]},
+			},
+			{
+				Name:    "quotanetpayoutitem_tx_hash",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetPayoutItemsColumns[10]},
+			},
+		},
+	}
+	// QuotanetTasksColumns holds the columns for the "quotanet_tasks" table.
+	QuotanetTasksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "task_id", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "request_id", Type: field.TypeString, Size: 64},
+		{Name: "user_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "api_key_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "group_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "account_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "node_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "session_id", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "platform", Type: field.TypeString, Size: 50},
+		{Name: "endpoint", Type: field.TypeString, Size: 100},
+		{Name: "model", Type: field.TypeString, Size: 100},
+		{Name: "stream", Type: field.TypeBool, Default: false},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "queued"},
+		{Name: "error_code", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "error_message", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "text"}},
+		{Name: "prompt_tokens", Type: field.TypeInt, Default: 0},
+		{Name: "completion_tokens", Type: field.TypeInt, Default: 0},
+		{Name: "total_tokens", Type: field.TypeInt, Default: 0},
+		{Name: "first_token_ms", Type: field.TypeInt, Nullable: true},
+		{Name: "duration_ms", Type: field.TypeInt, Nullable: true},
+		{Name: "dispatched_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "completed_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
+	}
+	// QuotanetTasksTable holds the schema information for the "quotanet_tasks" table.
+	QuotanetTasksTable = &schema.Table{
+		Name:       "quotanet_tasks",
+		Columns:    QuotanetTasksColumns,
+		PrimaryKey: []*schema.Column{QuotanetTasksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "quotanettask_task_id",
+				Unique:  true,
+				Columns: []*schema.Column{QuotanetTasksColumns[3]},
+			},
+			{
+				Name:    "quotanettask_request_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetTasksColumns[4]},
+			},
+			{
+				Name:    "quotanettask_node_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetTasksColumns[9], QuotanetTasksColumns[1]},
+			},
+			{
+				Name:    "quotanettask_account_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetTasksColumns[8], QuotanetTasksColumns[1]},
+			},
+			{
+				Name:    "quotanettask_user_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetTasksColumns[5], QuotanetTasksColumns[1]},
+			},
+			{
+				Name:    "quotanettask_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetTasksColumns[15], QuotanetTasksColumns[1]},
+			},
+			{
+				Name:    "quotanettask_session_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetTasksColumns[10]},
+			},
+		},
+	}
+	// QuotanetTaskEventsColumns holds the columns for the "quotanet_task_events" table.
+	QuotanetTaskEventsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "task_id", Type: field.TypeString, Size: 64},
+		{Name: "event_type", Type: field.TypeString, Size: 50},
+		{Name: "sequence", Type: field.TypeInt64},
+		{Name: "payload", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+	}
+	// QuotanetTaskEventsTable holds the schema information for the "quotanet_task_events" table.
+	QuotanetTaskEventsTable = &schema.Table{
+		Name:       "quotanet_task_events",
+		Columns:    QuotanetTaskEventsColumns,
+		PrimaryKey: []*schema.Column{QuotanetTaskEventsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "quotanettaskevent_task_id_sequence",
+				Unique:  true,
+				Columns: []*schema.Column{QuotanetTaskEventsColumns[1], QuotanetTaskEventsColumns[3]},
+			},
+			{
+				Name:    "quotanettaskevent_task_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetTaskEventsColumns[1], QuotanetTaskEventsColumns[5]},
+			},
+			{
+				Name:    "quotanettaskevent_event_type",
+				Unique:  false,
+				Columns: []*schema.Column{QuotanetTaskEventsColumns[2]},
+			},
+		},
+	}
 	// RedeemCodesColumns holds the columns for the "redeem_codes" table.
 	RedeemCodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
@@ -1773,6 +2113,13 @@ var (
 		PromoCodesTable,
 		PromoCodeUsagesTable,
 		ProxiesTable,
+		QuotanetContributionLedgerTable,
+		QuotanetNodesTable,
+		QuotanetNodeSessionsTable,
+		QuotanetPayoutBatchesTable,
+		QuotanetPayoutItemsTable,
+		QuotanetTasksTable,
+		QuotanetTaskEventsTable,
 		RedeemCodesTable,
 		SecuritySecretsTable,
 		SettingsTable,
@@ -1873,6 +2220,27 @@ func init() {
 	}
 	ProxiesTable.Annotation = &entsql.Annotation{
 		Table: "proxies",
+	}
+	QuotanetContributionLedgerTable.Annotation = &entsql.Annotation{
+		Table: "quotanet_contribution_ledger",
+	}
+	QuotanetNodesTable.Annotation = &entsql.Annotation{
+		Table: "quotanet_nodes",
+	}
+	QuotanetNodeSessionsTable.Annotation = &entsql.Annotation{
+		Table: "quotanet_node_sessions",
+	}
+	QuotanetPayoutBatchesTable.Annotation = &entsql.Annotation{
+		Table: "quotanet_payout_batches",
+	}
+	QuotanetPayoutItemsTable.Annotation = &entsql.Annotation{
+		Table: "quotanet_payout_items",
+	}
+	QuotanetTasksTable.Annotation = &entsql.Annotation{
+		Table: "quotanet_tasks",
+	}
+	QuotanetTaskEventsTable.Annotation = &entsql.Annotation{
+		Table: "quotanet_task_events",
 	}
 	RedeemCodesTable.ForeignKeys[0].RefTable = GroupsTable
 	RedeemCodesTable.ForeignKeys[1].RefTable = UsersTable

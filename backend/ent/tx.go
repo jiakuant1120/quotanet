@@ -58,6 +58,20 @@ type Tx struct {
 	PromoCodeUsage *PromoCodeUsageClient
 	// Proxy is the client for interacting with the Proxy builders.
 	Proxy *ProxyClient
+	// QuotaNetContributionLedger is the client for interacting with the QuotaNetContributionLedger builders.
+	QuotaNetContributionLedger *QuotaNetContributionLedgerClient
+	// QuotaNetNode is the client for interacting with the QuotaNetNode builders.
+	QuotaNetNode *QuotaNetNodeClient
+	// QuotaNetNodeSession is the client for interacting with the QuotaNetNodeSession builders.
+	QuotaNetNodeSession *QuotaNetNodeSessionClient
+	// QuotaNetPayoutBatch is the client for interacting with the QuotaNetPayoutBatch builders.
+	QuotaNetPayoutBatch *QuotaNetPayoutBatchClient
+	// QuotaNetPayoutItem is the client for interacting with the QuotaNetPayoutItem builders.
+	QuotaNetPayoutItem *QuotaNetPayoutItemClient
+	// QuotaNetTask is the client for interacting with the QuotaNetTask builders.
+	QuotaNetTask *QuotaNetTaskClient
+	// QuotaNetTaskEvent is the client for interacting with the QuotaNetTaskEvent builders.
+	QuotaNetTaskEvent *QuotaNetTaskEventClient
 	// RedeemCode is the client for interacting with the RedeemCode builders.
 	RedeemCode *RedeemCodeClient
 	// SecuritySecret is the client for interacting with the SecuritySecret builders.
@@ -237,6 +251,13 @@ func (tx *Tx) init() {
 	tx.PromoCode = NewPromoCodeClient(tx.config)
 	tx.PromoCodeUsage = NewPromoCodeUsageClient(tx.config)
 	tx.Proxy = NewProxyClient(tx.config)
+	tx.QuotaNetContributionLedger = NewQuotaNetContributionLedgerClient(tx.config)
+	tx.QuotaNetNode = NewQuotaNetNodeClient(tx.config)
+	tx.QuotaNetNodeSession = NewQuotaNetNodeSessionClient(tx.config)
+	tx.QuotaNetPayoutBatch = NewQuotaNetPayoutBatchClient(tx.config)
+	tx.QuotaNetPayoutItem = NewQuotaNetPayoutItemClient(tx.config)
+	tx.QuotaNetTask = NewQuotaNetTaskClient(tx.config)
+	tx.QuotaNetTaskEvent = NewQuotaNetTaskEventClient(tx.config)
 	tx.RedeemCode = NewRedeemCodeClient(tx.config)
 	tx.SecuritySecret = NewSecuritySecretClient(tx.config)
 	tx.Setting = NewSettingClient(tx.config)

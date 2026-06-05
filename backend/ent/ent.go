@@ -34,6 +34,13 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/promocode"
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetcontributionledger"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetnode"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetnodesession"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetpayoutbatch"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetpayoutitem"
+	"github.com/Wei-Shaw/sub2api/ent/quotanettask"
+	"github.com/Wei-Shaw/sub2api/ent/quotanettaskevent"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
 	"github.com/Wei-Shaw/sub2api/ent/securitysecret"
 	"github.com/Wei-Shaw/sub2api/ent/setting"
@@ -129,6 +136,13 @@ func checkColumn(t, c string) error {
 			promocode.Table:                     promocode.ValidColumn,
 			promocodeusage.Table:                promocodeusage.ValidColumn,
 			proxy.Table:                         proxy.ValidColumn,
+			quotanetcontributionledger.Table:    quotanetcontributionledger.ValidColumn,
+			quotanetnode.Table:                  quotanetnode.ValidColumn,
+			quotanetnodesession.Table:           quotanetnodesession.ValidColumn,
+			quotanetpayoutbatch.Table:           quotanetpayoutbatch.ValidColumn,
+			quotanetpayoutitem.Table:            quotanetpayoutitem.ValidColumn,
+			quotanettask.Table:                  quotanettask.ValidColumn,
+			quotanettaskevent.Table:             quotanettaskevent.ValidColumn,
 			redeemcode.Table:                    redeemcode.ValidColumn,
 			securitysecret.Table:                securitysecret.ValidColumn,
 			setting.Table:                       setting.ValidColumn,

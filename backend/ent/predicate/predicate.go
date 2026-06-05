@@ -72,6 +72,27 @@ type PromoCodeUsage func(*sql.Selector)
 // Proxy is the predicate function for proxy builders.
 type Proxy func(*sql.Selector)
 
+// QuotaNetContributionLedger is the predicate function for quotanetcontributionledger builders.
+type QuotaNetContributionLedger func(*sql.Selector)
+
+// QuotaNetNode is the predicate function for quotanetnode builders.
+type QuotaNetNode func(*sql.Selector)
+
+// QuotaNetNodeSession is the predicate function for quotanetnodesession builders.
+type QuotaNetNodeSession func(*sql.Selector)
+
+// QuotaNetPayoutBatch is the predicate function for quotanetpayoutbatch builders.
+type QuotaNetPayoutBatch func(*sql.Selector)
+
+// QuotaNetPayoutItem is the predicate function for quotanetpayoutitem builders.
+type QuotaNetPayoutItem func(*sql.Selector)
+
+// QuotaNetTask is the predicate function for quotanettask builders.
+type QuotaNetTask func(*sql.Selector)
+
+// QuotaNetTaskEvent is the predicate function for quotanettaskevent builders.
+type QuotaNetTaskEvent func(*sql.Selector)
+
 // RedeemCode is the predicate function for redeemcode builders.
 type RedeemCode func(*sql.Selector)
 

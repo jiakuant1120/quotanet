@@ -27,6 +27,13 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/promocode"
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetcontributionledger"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetnode"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetnodesession"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetpayoutbatch"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetpayoutitem"
+	"github.com/Wei-Shaw/sub2api/ent/quotanettask"
+	"github.com/Wei-Shaw/sub2api/ent/quotanettaskevent"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
 	"github.com/Wei-Shaw/sub2api/ent/schema"
 	"github.com/Wei-Shaw/sub2api/ent/securitysecret"
@@ -1362,6 +1369,592 @@ func init() {
 	proxy.DefaultStatus = proxyDescStatus.Default.(string)
 	// proxy.StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	proxy.StatusValidator = proxyDescStatus.Validators[0].(func(string) error)
+	quotanetcontributionledgerMixin := schema.QuotaNetContributionLedger{}.Mixin()
+	quotanetcontributionledgerMixinFields0 := quotanetcontributionledgerMixin[0].Fields()
+	_ = quotanetcontributionledgerMixinFields0
+	quotanetcontributionledgerFields := schema.QuotaNetContributionLedger{}.Fields()
+	_ = quotanetcontributionledgerFields
+	// quotanetcontributionledgerDescCreatedAt is the schema descriptor for created_at field.
+	quotanetcontributionledgerDescCreatedAt := quotanetcontributionledgerMixinFields0[0].Descriptor()
+	// quotanetcontributionledger.DefaultCreatedAt holds the default value on creation for the created_at field.
+	quotanetcontributionledger.DefaultCreatedAt = quotanetcontributionledgerDescCreatedAt.Default.(func() time.Time)
+	// quotanetcontributionledgerDescUpdatedAt is the schema descriptor for updated_at field.
+	quotanetcontributionledgerDescUpdatedAt := quotanetcontributionledgerMixinFields0[1].Descriptor()
+	// quotanetcontributionledger.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	quotanetcontributionledger.DefaultUpdatedAt = quotanetcontributionledgerDescUpdatedAt.Default.(func() time.Time)
+	// quotanetcontributionledger.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	quotanetcontributionledger.UpdateDefaultUpdatedAt = quotanetcontributionledgerDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// quotanetcontributionledgerDescTaskID is the schema descriptor for task_id field.
+	quotanetcontributionledgerDescTaskID := quotanetcontributionledgerFields[0].Descriptor()
+	// quotanetcontributionledger.TaskIDValidator is a validator for the "task_id" field. It is called by the builders before save.
+	quotanetcontributionledger.TaskIDValidator = func() func(string) error {
+		validators := quotanetcontributionledgerDescTaskID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(task_id string) error {
+			for _, fn := range fns {
+				if err := fn(task_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanetcontributionledgerDescWalletAddress is the schema descriptor for wallet_address field.
+	quotanetcontributionledgerDescWalletAddress := quotanetcontributionledgerFields[3].Descriptor()
+	// quotanetcontributionledger.WalletAddressValidator is a validator for the "wallet_address" field. It is called by the builders before save.
+	quotanetcontributionledger.WalletAddressValidator = func() func(string) error {
+		validators := quotanetcontributionledgerDescWalletAddress.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(wallet_address string) error {
+			for _, fn := range fns {
+				if err := fn(wallet_address); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanetcontributionledgerDescPlatform is the schema descriptor for platform field.
+	quotanetcontributionledgerDescPlatform := quotanetcontributionledgerFields[5].Descriptor()
+	// quotanetcontributionledger.PlatformValidator is a validator for the "platform" field. It is called by the builders before save.
+	quotanetcontributionledger.PlatformValidator = func() func(string) error {
+		validators := quotanetcontributionledgerDescPlatform.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(platform string) error {
+			for _, fn := range fns {
+				if err := fn(platform); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanetcontributionledgerDescModel is the schema descriptor for model field.
+	quotanetcontributionledgerDescModel := quotanetcontributionledgerFields[6].Descriptor()
+	// quotanetcontributionledger.ModelValidator is a validator for the "model" field. It is called by the builders before save.
+	quotanetcontributionledger.ModelValidator = func() func(string) error {
+		validators := quotanetcontributionledgerDescModel.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(model string) error {
+			for _, fn := range fns {
+				if err := fn(model); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanetcontributionledgerDescTokenFlow is the schema descriptor for token_flow field.
+	quotanetcontributionledgerDescTokenFlow := quotanetcontributionledgerFields[7].Descriptor()
+	// quotanetcontributionledger.DefaultTokenFlow holds the default value on creation for the token_flow field.
+	quotanetcontributionledger.DefaultTokenFlow = quotanetcontributionledgerDescTokenFlow.Default.(int64)
+	// quotanetcontributionledgerDescAmountCxs is the schema descriptor for amount_cxs field.
+	quotanetcontributionledgerDescAmountCxs := quotanetcontributionledgerFields[8].Descriptor()
+	// quotanetcontributionledger.DefaultAmountCxs holds the default value on creation for the amount_cxs field.
+	quotanetcontributionledger.DefaultAmountCxs = quotanetcontributionledgerDescAmountCxs.Default.(float64)
+	// quotanetcontributionledgerDescRate is the schema descriptor for rate field.
+	quotanetcontributionledgerDescRate := quotanetcontributionledgerFields[9].Descriptor()
+	// quotanetcontributionledger.DefaultRate holds the default value on creation for the rate field.
+	quotanetcontributionledger.DefaultRate = quotanetcontributionledgerDescRate.Default.(float64)
+	// quotanetcontributionledgerDescStatus is the schema descriptor for status field.
+	quotanetcontributionledgerDescStatus := quotanetcontributionledgerFields[10].Descriptor()
+	// quotanetcontributionledger.DefaultStatus holds the default value on creation for the status field.
+	quotanetcontributionledger.DefaultStatus = quotanetcontributionledgerDescStatus.Default.(string)
+	// quotanetcontributionledger.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	quotanetcontributionledger.StatusValidator = quotanetcontributionledgerDescStatus.Validators[0].(func(string) error)
+	quotanetnodeMixin := schema.QuotaNetNode{}.Mixin()
+	quotanetnodeMixinHooks1 := quotanetnodeMixin[1].Hooks()
+	quotanetnode.Hooks[0] = quotanetnodeMixinHooks1[0]
+	quotanetnodeMixinInters1 := quotanetnodeMixin[1].Interceptors()
+	quotanetnode.Interceptors[0] = quotanetnodeMixinInters1[0]
+	quotanetnodeMixinFields0 := quotanetnodeMixin[0].Fields()
+	_ = quotanetnodeMixinFields0
+	quotanetnodeFields := schema.QuotaNetNode{}.Fields()
+	_ = quotanetnodeFields
+	// quotanetnodeDescCreatedAt is the schema descriptor for created_at field.
+	quotanetnodeDescCreatedAt := quotanetnodeMixinFields0[0].Descriptor()
+	// quotanetnode.DefaultCreatedAt holds the default value on creation for the created_at field.
+	quotanetnode.DefaultCreatedAt = quotanetnodeDescCreatedAt.Default.(func() time.Time)
+	// quotanetnodeDescUpdatedAt is the schema descriptor for updated_at field.
+	quotanetnodeDescUpdatedAt := quotanetnodeMixinFields0[1].Descriptor()
+	// quotanetnode.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	quotanetnode.DefaultUpdatedAt = quotanetnodeDescUpdatedAt.Default.(func() time.Time)
+	// quotanetnode.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	quotanetnode.UpdateDefaultUpdatedAt = quotanetnodeDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// quotanetnodeDescNodeKey is the schema descriptor for node_key field.
+	quotanetnodeDescNodeKey := quotanetnodeFields[0].Descriptor()
+	// quotanetnode.NodeKeyValidator is a validator for the "node_key" field. It is called by the builders before save.
+	quotanetnode.NodeKeyValidator = func() func(string) error {
+		validators := quotanetnodeDescNodeKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(node_key string) error {
+			for _, fn := range fns {
+				if err := fn(node_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanetnodeDescName is the schema descriptor for name field.
+	quotanetnodeDescName := quotanetnodeFields[1].Descriptor()
+	// quotanetnode.DefaultName holds the default value on creation for the name field.
+	quotanetnode.DefaultName = quotanetnodeDescName.Default.(string)
+	// quotanetnode.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	quotanetnode.NameValidator = quotanetnodeDescName.Validators[0].(func(string) error)
+	// quotanetnodeDescWalletAddress is the schema descriptor for wallet_address field.
+	quotanetnodeDescWalletAddress := quotanetnodeFields[3].Descriptor()
+	// quotanetnode.WalletAddressValidator is a validator for the "wallet_address" field. It is called by the builders before save.
+	quotanetnode.WalletAddressValidator = func() func(string) error {
+		validators := quotanetnodeDescWalletAddress.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(wallet_address string) error {
+			for _, fn := range fns {
+				if err := fn(wallet_address); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanetnodeDescTokenHash is the schema descriptor for token_hash field.
+	quotanetnodeDescTokenHash := quotanetnodeFields[4].Descriptor()
+	// quotanetnode.TokenHashValidator is a validator for the "token_hash" field. It is called by the builders before save.
+	quotanetnode.TokenHashValidator = func() func(string) error {
+		validators := quotanetnodeDescTokenHash.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(token_hash string) error {
+			for _, fn := range fns {
+				if err := fn(token_hash); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanetnodeDescStatus is the schema descriptor for status field.
+	quotanetnodeDescStatus := quotanetnodeFields[5].Descriptor()
+	// quotanetnode.DefaultStatus holds the default value on creation for the status field.
+	quotanetnode.DefaultStatus = quotanetnodeDescStatus.Default.(string)
+	// quotanetnode.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	quotanetnode.StatusValidator = quotanetnodeDescStatus.Validators[0].(func(string) error)
+	// quotanetnodeDescProtocolVersion is the schema descriptor for protocol_version field.
+	quotanetnodeDescProtocolVersion := quotanetnodeFields[6].Descriptor()
+	// quotanetnode.ProtocolVersionValidator is a validator for the "protocol_version" field. It is called by the builders before save.
+	quotanetnode.ProtocolVersionValidator = quotanetnodeDescProtocolVersion.Validators[0].(func(string) error)
+	// quotanetnodeDescClientVersion is the schema descriptor for client_version field.
+	quotanetnodeDescClientVersion := quotanetnodeFields[7].Descriptor()
+	// quotanetnode.ClientVersionValidator is a validator for the "client_version" field. It is called by the builders before save.
+	quotanetnode.ClientVersionValidator = quotanetnodeDescClientVersion.Validators[0].(func(string) error)
+	quotanetnodesessionMixin := schema.QuotaNetNodeSession{}.Mixin()
+	quotanetnodesessionMixinFields0 := quotanetnodesessionMixin[0].Fields()
+	_ = quotanetnodesessionMixinFields0
+	quotanetnodesessionFields := schema.QuotaNetNodeSession{}.Fields()
+	_ = quotanetnodesessionFields
+	// quotanetnodesessionDescCreatedAt is the schema descriptor for created_at field.
+	quotanetnodesessionDescCreatedAt := quotanetnodesessionMixinFields0[0].Descriptor()
+	// quotanetnodesession.DefaultCreatedAt holds the default value on creation for the created_at field.
+	quotanetnodesession.DefaultCreatedAt = quotanetnodesessionDescCreatedAt.Default.(func() time.Time)
+	// quotanetnodesessionDescUpdatedAt is the schema descriptor for updated_at field.
+	quotanetnodesessionDescUpdatedAt := quotanetnodesessionMixinFields0[1].Descriptor()
+	// quotanetnodesession.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	quotanetnodesession.DefaultUpdatedAt = quotanetnodesessionDescUpdatedAt.Default.(func() time.Time)
+	// quotanetnodesession.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	quotanetnodesession.UpdateDefaultUpdatedAt = quotanetnodesessionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// quotanetnodesessionDescSessionID is the schema descriptor for session_id field.
+	quotanetnodesessionDescSessionID := quotanetnodesessionFields[0].Descriptor()
+	// quotanetnodesession.SessionIDValidator is a validator for the "session_id" field. It is called by the builders before save.
+	quotanetnodesession.SessionIDValidator = func() func(string) error {
+		validators := quotanetnodesessionDescSessionID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(session_id string) error {
+			for _, fn := range fns {
+				if err := fn(session_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanetnodesessionDescInstanceID is the schema descriptor for instance_id field.
+	quotanetnodesessionDescInstanceID := quotanetnodesessionFields[2].Descriptor()
+	// quotanetnodesession.InstanceIDValidator is a validator for the "instance_id" field. It is called by the builders before save.
+	quotanetnodesession.InstanceIDValidator = func() func(string) error {
+		validators := quotanetnodesessionDescInstanceID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(instance_id string) error {
+			for _, fn := range fns {
+				if err := fn(instance_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanetnodesessionDescStatus is the schema descriptor for status field.
+	quotanetnodesessionDescStatus := quotanetnodesessionFields[3].Descriptor()
+	// quotanetnodesession.DefaultStatus holds the default value on creation for the status field.
+	quotanetnodesession.DefaultStatus = quotanetnodesessionDescStatus.Default.(string)
+	// quotanetnodesession.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	quotanetnodesession.StatusValidator = quotanetnodesessionDescStatus.Validators[0].(func(string) error)
+	// quotanetnodesessionDescRemoteAddr is the schema descriptor for remote_addr field.
+	quotanetnodesessionDescRemoteAddr := quotanetnodesessionFields[4].Descriptor()
+	// quotanetnodesession.RemoteAddrValidator is a validator for the "remote_addr" field. It is called by the builders before save.
+	quotanetnodesession.RemoteAddrValidator = quotanetnodesessionDescRemoteAddr.Validators[0].(func(string) error)
+	// quotanetnodesessionDescMaxConcurrency is the schema descriptor for max_concurrency field.
+	quotanetnodesessionDescMaxConcurrency := quotanetnodesessionFields[5].Descriptor()
+	// quotanetnodesession.DefaultMaxConcurrency holds the default value on creation for the max_concurrency field.
+	quotanetnodesession.DefaultMaxConcurrency = quotanetnodesessionDescMaxConcurrency.Default.(int)
+	// quotanetnodesessionDescCurrentConcurrency is the schema descriptor for current_concurrency field.
+	quotanetnodesessionDescCurrentConcurrency := quotanetnodesessionFields[6].Descriptor()
+	// quotanetnodesession.DefaultCurrentConcurrency holds the default value on creation for the current_concurrency field.
+	quotanetnodesession.DefaultCurrentConcurrency = quotanetnodesessionDescCurrentConcurrency.Default.(int)
+	// quotanetnodesessionDescQueueSize is the schema descriptor for queue_size field.
+	quotanetnodesessionDescQueueSize := quotanetnodesessionFields[7].Descriptor()
+	// quotanetnodesession.DefaultQueueSize holds the default value on creation for the queue_size field.
+	quotanetnodesession.DefaultQueueSize = quotanetnodesessionDescQueueSize.Default.(int)
+	// quotanetnodesessionDescMaxQueueSize is the schema descriptor for max_queue_size field.
+	quotanetnodesessionDescMaxQueueSize := quotanetnodesessionFields[8].Descriptor()
+	// quotanetnodesession.DefaultMaxQueueSize holds the default value on creation for the max_queue_size field.
+	quotanetnodesession.DefaultMaxQueueSize = quotanetnodesessionDescMaxQueueSize.Default.(int)
+	// quotanetnodesessionDescCapabilities is the schema descriptor for capabilities field.
+	quotanetnodesessionDescCapabilities := quotanetnodesessionFields[9].Descriptor()
+	// quotanetnodesession.DefaultCapabilities holds the default value on creation for the capabilities field.
+	quotanetnodesession.DefaultCapabilities = quotanetnodesessionDescCapabilities.Default.(func() map[string]interface{})
+	quotanetpayoutbatchMixin := schema.QuotaNetPayoutBatch{}.Mixin()
+	quotanetpayoutbatchMixinFields0 := quotanetpayoutbatchMixin[0].Fields()
+	_ = quotanetpayoutbatchMixinFields0
+	quotanetpayoutbatchFields := schema.QuotaNetPayoutBatch{}.Fields()
+	_ = quotanetpayoutbatchFields
+	// quotanetpayoutbatchDescCreatedAt is the schema descriptor for created_at field.
+	quotanetpayoutbatchDescCreatedAt := quotanetpayoutbatchMixinFields0[0].Descriptor()
+	// quotanetpayoutbatch.DefaultCreatedAt holds the default value on creation for the created_at field.
+	quotanetpayoutbatch.DefaultCreatedAt = quotanetpayoutbatchDescCreatedAt.Default.(func() time.Time)
+	// quotanetpayoutbatchDescUpdatedAt is the schema descriptor for updated_at field.
+	quotanetpayoutbatchDescUpdatedAt := quotanetpayoutbatchMixinFields0[1].Descriptor()
+	// quotanetpayoutbatch.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	quotanetpayoutbatch.DefaultUpdatedAt = quotanetpayoutbatchDescUpdatedAt.Default.(func() time.Time)
+	// quotanetpayoutbatch.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	quotanetpayoutbatch.UpdateDefaultUpdatedAt = quotanetpayoutbatchDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// quotanetpayoutbatchDescBatchKey is the schema descriptor for batch_key field.
+	quotanetpayoutbatchDescBatchKey := quotanetpayoutbatchFields[0].Descriptor()
+	// quotanetpayoutbatch.BatchKeyValidator is a validator for the "batch_key" field. It is called by the builders before save.
+	quotanetpayoutbatch.BatchKeyValidator = func() func(string) error {
+		validators := quotanetpayoutbatchDescBatchKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(batch_key string) error {
+			for _, fn := range fns {
+				if err := fn(batch_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanetpayoutbatchDescStatus is the schema descriptor for status field.
+	quotanetpayoutbatchDescStatus := quotanetpayoutbatchFields[3].Descriptor()
+	// quotanetpayoutbatch.DefaultStatus holds the default value on creation for the status field.
+	quotanetpayoutbatch.DefaultStatus = quotanetpayoutbatchDescStatus.Default.(string)
+	// quotanetpayoutbatch.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	quotanetpayoutbatch.StatusValidator = quotanetpayoutbatchDescStatus.Validators[0].(func(string) error)
+	// quotanetpayoutbatchDescNetwork is the schema descriptor for network field.
+	quotanetpayoutbatchDescNetwork := quotanetpayoutbatchFields[4].Descriptor()
+	// quotanetpayoutbatch.DefaultNetwork holds the default value on creation for the network field.
+	quotanetpayoutbatch.DefaultNetwork = quotanetpayoutbatchDescNetwork.Default.(string)
+	// quotanetpayoutbatch.NetworkValidator is a validator for the "network" field. It is called by the builders before save.
+	quotanetpayoutbatch.NetworkValidator = quotanetpayoutbatchDescNetwork.Validators[0].(func(string) error)
+	// quotanetpayoutbatchDescTotalTokenFlow is the schema descriptor for total_token_flow field.
+	quotanetpayoutbatchDescTotalTokenFlow := quotanetpayoutbatchFields[5].Descriptor()
+	// quotanetpayoutbatch.DefaultTotalTokenFlow holds the default value on creation for the total_token_flow field.
+	quotanetpayoutbatch.DefaultTotalTokenFlow = quotanetpayoutbatchDescTotalTokenFlow.Default.(int64)
+	// quotanetpayoutbatchDescTotalAmountCxs is the schema descriptor for total_amount_cxs field.
+	quotanetpayoutbatchDescTotalAmountCxs := quotanetpayoutbatchFields[6].Descriptor()
+	// quotanetpayoutbatch.DefaultTotalAmountCxs holds the default value on creation for the total_amount_cxs field.
+	quotanetpayoutbatch.DefaultTotalAmountCxs = quotanetpayoutbatchDescTotalAmountCxs.Default.(float64)
+	// quotanetpayoutbatchDescItemCount is the schema descriptor for item_count field.
+	quotanetpayoutbatchDescItemCount := quotanetpayoutbatchFields[7].Descriptor()
+	// quotanetpayoutbatch.DefaultItemCount holds the default value on creation for the item_count field.
+	quotanetpayoutbatch.DefaultItemCount = quotanetpayoutbatchDescItemCount.Default.(int)
+	quotanetpayoutitemMixin := schema.QuotaNetPayoutItem{}.Mixin()
+	quotanetpayoutitemMixinFields0 := quotanetpayoutitemMixin[0].Fields()
+	_ = quotanetpayoutitemMixinFields0
+	quotanetpayoutitemFields := schema.QuotaNetPayoutItem{}.Fields()
+	_ = quotanetpayoutitemFields
+	// quotanetpayoutitemDescCreatedAt is the schema descriptor for created_at field.
+	quotanetpayoutitemDescCreatedAt := quotanetpayoutitemMixinFields0[0].Descriptor()
+	// quotanetpayoutitem.DefaultCreatedAt holds the default value on creation for the created_at field.
+	quotanetpayoutitem.DefaultCreatedAt = quotanetpayoutitemDescCreatedAt.Default.(func() time.Time)
+	// quotanetpayoutitemDescUpdatedAt is the schema descriptor for updated_at field.
+	quotanetpayoutitemDescUpdatedAt := quotanetpayoutitemMixinFields0[1].Descriptor()
+	// quotanetpayoutitem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	quotanetpayoutitem.DefaultUpdatedAt = quotanetpayoutitemDescUpdatedAt.Default.(func() time.Time)
+	// quotanetpayoutitem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	quotanetpayoutitem.UpdateDefaultUpdatedAt = quotanetpayoutitemDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// quotanetpayoutitemDescItemKey is the schema descriptor for item_key field.
+	quotanetpayoutitemDescItemKey := quotanetpayoutitemFields[0].Descriptor()
+	// quotanetpayoutitem.ItemKeyValidator is a validator for the "item_key" field. It is called by the builders before save.
+	quotanetpayoutitem.ItemKeyValidator = func() func(string) error {
+		validators := quotanetpayoutitemDescItemKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(item_key string) error {
+			for _, fn := range fns {
+				if err := fn(item_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanetpayoutitemDescWalletAddress is the schema descriptor for wallet_address field.
+	quotanetpayoutitemDescWalletAddress := quotanetpayoutitemFields[3].Descriptor()
+	// quotanetpayoutitem.WalletAddressValidator is a validator for the "wallet_address" field. It is called by the builders before save.
+	quotanetpayoutitem.WalletAddressValidator = func() func(string) error {
+		validators := quotanetpayoutitemDescWalletAddress.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(wallet_address string) error {
+			for _, fn := range fns {
+				if err := fn(wallet_address); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanetpayoutitemDescTokenFlow is the schema descriptor for token_flow field.
+	quotanetpayoutitemDescTokenFlow := quotanetpayoutitemFields[4].Descriptor()
+	// quotanetpayoutitem.DefaultTokenFlow holds the default value on creation for the token_flow field.
+	quotanetpayoutitem.DefaultTokenFlow = quotanetpayoutitemDescTokenFlow.Default.(int64)
+	// quotanetpayoutitemDescAmountCxs is the schema descriptor for amount_cxs field.
+	quotanetpayoutitemDescAmountCxs := quotanetpayoutitemFields[5].Descriptor()
+	// quotanetpayoutitem.DefaultAmountCxs holds the default value on creation for the amount_cxs field.
+	quotanetpayoutitem.DefaultAmountCxs = quotanetpayoutitemDescAmountCxs.Default.(float64)
+	// quotanetpayoutitemDescStatus is the schema descriptor for status field.
+	quotanetpayoutitemDescStatus := quotanetpayoutitemFields[6].Descriptor()
+	// quotanetpayoutitem.DefaultStatus holds the default value on creation for the status field.
+	quotanetpayoutitem.DefaultStatus = quotanetpayoutitemDescStatus.Default.(string)
+	// quotanetpayoutitem.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	quotanetpayoutitem.StatusValidator = quotanetpayoutitemDescStatus.Validators[0].(func(string) error)
+	// quotanetpayoutitemDescTxHash is the schema descriptor for tx_hash field.
+	quotanetpayoutitemDescTxHash := quotanetpayoutitemFields[7].Descriptor()
+	// quotanetpayoutitem.TxHashValidator is a validator for the "tx_hash" field. It is called by the builders before save.
+	quotanetpayoutitem.TxHashValidator = quotanetpayoutitemDescTxHash.Validators[0].(func(string) error)
+	quotanettaskMixin := schema.QuotaNetTask{}.Mixin()
+	quotanettaskMixinFields0 := quotanettaskMixin[0].Fields()
+	_ = quotanettaskMixinFields0
+	quotanettaskFields := schema.QuotaNetTask{}.Fields()
+	_ = quotanettaskFields
+	// quotanettaskDescCreatedAt is the schema descriptor for created_at field.
+	quotanettaskDescCreatedAt := quotanettaskMixinFields0[0].Descriptor()
+	// quotanettask.DefaultCreatedAt holds the default value on creation for the created_at field.
+	quotanettask.DefaultCreatedAt = quotanettaskDescCreatedAt.Default.(func() time.Time)
+	// quotanettaskDescUpdatedAt is the schema descriptor for updated_at field.
+	quotanettaskDescUpdatedAt := quotanettaskMixinFields0[1].Descriptor()
+	// quotanettask.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	quotanettask.DefaultUpdatedAt = quotanettaskDescUpdatedAt.Default.(func() time.Time)
+	// quotanettask.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	quotanettask.UpdateDefaultUpdatedAt = quotanettaskDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// quotanettaskDescTaskID is the schema descriptor for task_id field.
+	quotanettaskDescTaskID := quotanettaskFields[0].Descriptor()
+	// quotanettask.TaskIDValidator is a validator for the "task_id" field. It is called by the builders before save.
+	quotanettask.TaskIDValidator = func() func(string) error {
+		validators := quotanettaskDescTaskID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(task_id string) error {
+			for _, fn := range fns {
+				if err := fn(task_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanettaskDescRequestID is the schema descriptor for request_id field.
+	quotanettaskDescRequestID := quotanettaskFields[1].Descriptor()
+	// quotanettask.RequestIDValidator is a validator for the "request_id" field. It is called by the builders before save.
+	quotanettask.RequestIDValidator = func() func(string) error {
+		validators := quotanettaskDescRequestID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(request_id string) error {
+			for _, fn := range fns {
+				if err := fn(request_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanettaskDescSessionID is the schema descriptor for session_id field.
+	quotanettaskDescSessionID := quotanettaskFields[7].Descriptor()
+	// quotanettask.SessionIDValidator is a validator for the "session_id" field. It is called by the builders before save.
+	quotanettask.SessionIDValidator = quotanettaskDescSessionID.Validators[0].(func(string) error)
+	// quotanettaskDescPlatform is the schema descriptor for platform field.
+	quotanettaskDescPlatform := quotanettaskFields[8].Descriptor()
+	// quotanettask.PlatformValidator is a validator for the "platform" field. It is called by the builders before save.
+	quotanettask.PlatformValidator = func() func(string) error {
+		validators := quotanettaskDescPlatform.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(platform string) error {
+			for _, fn := range fns {
+				if err := fn(platform); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanettaskDescEndpoint is the schema descriptor for endpoint field.
+	quotanettaskDescEndpoint := quotanettaskFields[9].Descriptor()
+	// quotanettask.EndpointValidator is a validator for the "endpoint" field. It is called by the builders before save.
+	quotanettask.EndpointValidator = func() func(string) error {
+		validators := quotanettaskDescEndpoint.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(endpoint string) error {
+			for _, fn := range fns {
+				if err := fn(endpoint); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanettaskDescModel is the schema descriptor for model field.
+	quotanettaskDescModel := quotanettaskFields[10].Descriptor()
+	// quotanettask.ModelValidator is a validator for the "model" field. It is called by the builders before save.
+	quotanettask.ModelValidator = func() func(string) error {
+		validators := quotanettaskDescModel.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(model string) error {
+			for _, fn := range fns {
+				if err := fn(model); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanettaskDescStream is the schema descriptor for stream field.
+	quotanettaskDescStream := quotanettaskFields[11].Descriptor()
+	// quotanettask.DefaultStream holds the default value on creation for the stream field.
+	quotanettask.DefaultStream = quotanettaskDescStream.Default.(bool)
+	// quotanettaskDescStatus is the schema descriptor for status field.
+	quotanettaskDescStatus := quotanettaskFields[12].Descriptor()
+	// quotanettask.DefaultStatus holds the default value on creation for the status field.
+	quotanettask.DefaultStatus = quotanettaskDescStatus.Default.(string)
+	// quotanettask.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	quotanettask.StatusValidator = quotanettaskDescStatus.Validators[0].(func(string) error)
+	// quotanettaskDescErrorCode is the schema descriptor for error_code field.
+	quotanettaskDescErrorCode := quotanettaskFields[13].Descriptor()
+	// quotanettask.ErrorCodeValidator is a validator for the "error_code" field. It is called by the builders before save.
+	quotanettask.ErrorCodeValidator = quotanettaskDescErrorCode.Validators[0].(func(string) error)
+	// quotanettaskDescPromptTokens is the schema descriptor for prompt_tokens field.
+	quotanettaskDescPromptTokens := quotanettaskFields[15].Descriptor()
+	// quotanettask.DefaultPromptTokens holds the default value on creation for the prompt_tokens field.
+	quotanettask.DefaultPromptTokens = quotanettaskDescPromptTokens.Default.(int)
+	// quotanettaskDescCompletionTokens is the schema descriptor for completion_tokens field.
+	quotanettaskDescCompletionTokens := quotanettaskFields[16].Descriptor()
+	// quotanettask.DefaultCompletionTokens holds the default value on creation for the completion_tokens field.
+	quotanettask.DefaultCompletionTokens = quotanettaskDescCompletionTokens.Default.(int)
+	// quotanettaskDescTotalTokens is the schema descriptor for total_tokens field.
+	quotanettaskDescTotalTokens := quotanettaskFields[17].Descriptor()
+	// quotanettask.DefaultTotalTokens holds the default value on creation for the total_tokens field.
+	quotanettask.DefaultTotalTokens = quotanettaskDescTotalTokens.Default.(int)
+	quotanettaskeventFields := schema.QuotaNetTaskEvent{}.Fields()
+	_ = quotanettaskeventFields
+	// quotanettaskeventDescTaskID is the schema descriptor for task_id field.
+	quotanettaskeventDescTaskID := quotanettaskeventFields[0].Descriptor()
+	// quotanettaskevent.TaskIDValidator is a validator for the "task_id" field. It is called by the builders before save.
+	quotanettaskevent.TaskIDValidator = func() func(string) error {
+		validators := quotanettaskeventDescTaskID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(task_id string) error {
+			for _, fn := range fns {
+				if err := fn(task_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanettaskeventDescEventType is the schema descriptor for event_type field.
+	quotanettaskeventDescEventType := quotanettaskeventFields[1].Descriptor()
+	// quotanettaskevent.EventTypeValidator is a validator for the "event_type" field. It is called by the builders before save.
+	quotanettaskevent.EventTypeValidator = func() func(string) error {
+		validators := quotanettaskeventDescEventType.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(event_type string) error {
+			for _, fn := range fns {
+				if err := fn(event_type); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// quotanettaskeventDescPayload is the schema descriptor for payload field.
+	quotanettaskeventDescPayload := quotanettaskeventFields[3].Descriptor()
+	// quotanettaskevent.DefaultPayload holds the default value on creation for the payload field.
+	quotanettaskevent.DefaultPayload = quotanettaskeventDescPayload.Default.(func() map[string]interface{})
+	// quotanettaskeventDescCreatedAt is the schema descriptor for created_at field.
+	quotanettaskeventDescCreatedAt := quotanettaskeventFields[4].Descriptor()
+	// quotanettaskevent.DefaultCreatedAt holds the default value on creation for the created_at field.
+	quotanettaskevent.DefaultCreatedAt = quotanettaskeventDescCreatedAt.Default.(func() time.Time)
 	redeemcodeFields := schema.RedeemCode{}.Fields()
 	_ = redeemcodeFields
 	// redeemcodeDescCode is the schema descriptor for code field.

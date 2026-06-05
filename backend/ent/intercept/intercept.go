@@ -31,6 +31,13 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/promocode"
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetcontributionledger"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetnode"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetnodesession"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetpayoutbatch"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetpayoutitem"
+	"github.com/Wei-Shaw/sub2api/ent/quotanettask"
+	"github.com/Wei-Shaw/sub2api/ent/quotanettaskevent"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
 	"github.com/Wei-Shaw/sub2api/ent/securitysecret"
 	"github.com/Wei-Shaw/sub2api/ent/setting"
@@ -696,6 +703,195 @@ func (f TraverseProxy) Traverse(ctx context.Context, q ent.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *ent.ProxyQuery", q)
 }
 
+// The QuotaNetContributionLedgerFunc type is an adapter to allow the use of ordinary function as a Querier.
+type QuotaNetContributionLedgerFunc func(context.Context, *ent.QuotaNetContributionLedgerQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f QuotaNetContributionLedgerFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.QuotaNetContributionLedgerQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.QuotaNetContributionLedgerQuery", q)
+}
+
+// The TraverseQuotaNetContributionLedger type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseQuotaNetContributionLedger func(context.Context, *ent.QuotaNetContributionLedgerQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseQuotaNetContributionLedger) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseQuotaNetContributionLedger) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.QuotaNetContributionLedgerQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.QuotaNetContributionLedgerQuery", q)
+}
+
+// The QuotaNetNodeFunc type is an adapter to allow the use of ordinary function as a Querier.
+type QuotaNetNodeFunc func(context.Context, *ent.QuotaNetNodeQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f QuotaNetNodeFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.QuotaNetNodeQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.QuotaNetNodeQuery", q)
+}
+
+// The TraverseQuotaNetNode type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseQuotaNetNode func(context.Context, *ent.QuotaNetNodeQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseQuotaNetNode) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseQuotaNetNode) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.QuotaNetNodeQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.QuotaNetNodeQuery", q)
+}
+
+// The QuotaNetNodeSessionFunc type is an adapter to allow the use of ordinary function as a Querier.
+type QuotaNetNodeSessionFunc func(context.Context, *ent.QuotaNetNodeSessionQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f QuotaNetNodeSessionFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.QuotaNetNodeSessionQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.QuotaNetNodeSessionQuery", q)
+}
+
+// The TraverseQuotaNetNodeSession type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseQuotaNetNodeSession func(context.Context, *ent.QuotaNetNodeSessionQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseQuotaNetNodeSession) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseQuotaNetNodeSession) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.QuotaNetNodeSessionQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.QuotaNetNodeSessionQuery", q)
+}
+
+// The QuotaNetPayoutBatchFunc type is an adapter to allow the use of ordinary function as a Querier.
+type QuotaNetPayoutBatchFunc func(context.Context, *ent.QuotaNetPayoutBatchQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f QuotaNetPayoutBatchFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.QuotaNetPayoutBatchQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.QuotaNetPayoutBatchQuery", q)
+}
+
+// The TraverseQuotaNetPayoutBatch type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseQuotaNetPayoutBatch func(context.Context, *ent.QuotaNetPayoutBatchQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseQuotaNetPayoutBatch) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseQuotaNetPayoutBatch) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.QuotaNetPayoutBatchQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.QuotaNetPayoutBatchQuery", q)
+}
+
+// The QuotaNetPayoutItemFunc type is an adapter to allow the use of ordinary function as a Querier.
+type QuotaNetPayoutItemFunc func(context.Context, *ent.QuotaNetPayoutItemQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f QuotaNetPayoutItemFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.QuotaNetPayoutItemQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.QuotaNetPayoutItemQuery", q)
+}
+
+// The TraverseQuotaNetPayoutItem type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseQuotaNetPayoutItem func(context.Context, *ent.QuotaNetPayoutItemQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseQuotaNetPayoutItem) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseQuotaNetPayoutItem) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.QuotaNetPayoutItemQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.QuotaNetPayoutItemQuery", q)
+}
+
+// The QuotaNetTaskFunc type is an adapter to allow the use of ordinary function as a Querier.
+type QuotaNetTaskFunc func(context.Context, *ent.QuotaNetTaskQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f QuotaNetTaskFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.QuotaNetTaskQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.QuotaNetTaskQuery", q)
+}
+
+// The TraverseQuotaNetTask type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseQuotaNetTask func(context.Context, *ent.QuotaNetTaskQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseQuotaNetTask) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseQuotaNetTask) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.QuotaNetTaskQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.QuotaNetTaskQuery", q)
+}
+
+// The QuotaNetTaskEventFunc type is an adapter to allow the use of ordinary function as a Querier.
+type QuotaNetTaskEventFunc func(context.Context, *ent.QuotaNetTaskEventQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f QuotaNetTaskEventFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.QuotaNetTaskEventQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.QuotaNetTaskEventQuery", q)
+}
+
+// The TraverseQuotaNetTaskEvent type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseQuotaNetTaskEvent func(context.Context, *ent.QuotaNetTaskEventQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseQuotaNetTaskEvent) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseQuotaNetTaskEvent) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.QuotaNetTaskEventQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.QuotaNetTaskEventQuery", q)
+}
+
 // The RedeemCodeFunc type is an adapter to allow the use of ordinary function as a Querier.
 type RedeemCodeFunc func(context.Context, *ent.RedeemCodeQuery) (ent.Value, error)
 
@@ -1094,6 +1290,20 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.PromoCodeUsageQuery, predicate.PromoCodeUsage, promocodeusage.OrderOption]{typ: ent.TypePromoCodeUsage, tq: q}, nil
 	case *ent.ProxyQuery:
 		return &query[*ent.ProxyQuery, predicate.Proxy, proxy.OrderOption]{typ: ent.TypeProxy, tq: q}, nil
+	case *ent.QuotaNetContributionLedgerQuery:
+		return &query[*ent.QuotaNetContributionLedgerQuery, predicate.QuotaNetContributionLedger, quotanetcontributionledger.OrderOption]{typ: ent.TypeQuotaNetContributionLedger, tq: q}, nil
+	case *ent.QuotaNetNodeQuery:
+		return &query[*ent.QuotaNetNodeQuery, predicate.QuotaNetNode, quotanetnode.OrderOption]{typ: ent.TypeQuotaNetNode, tq: q}, nil
+	case *ent.QuotaNetNodeSessionQuery:
+		return &query[*ent.QuotaNetNodeSessionQuery, predicate.QuotaNetNodeSession, quotanetnodesession.OrderOption]{typ: ent.TypeQuotaNetNodeSession, tq: q}, nil
+	case *ent.QuotaNetPayoutBatchQuery:
+		return &query[*ent.QuotaNetPayoutBatchQuery, predicate.QuotaNetPayoutBatch, quotanetpayoutbatch.OrderOption]{typ: ent.TypeQuotaNetPayoutBatch, tq: q}, nil
+	case *ent.QuotaNetPayoutItemQuery:
+		return &query[*ent.QuotaNetPayoutItemQuery, predicate.QuotaNetPayoutItem, quotanetpayoutitem.OrderOption]{typ: ent.TypeQuotaNetPayoutItem, tq: q}, nil
+	case *ent.QuotaNetTaskQuery:
+		return &query[*ent.QuotaNetTaskQuery, predicate.QuotaNetTask, quotanettask.OrderOption]{typ: ent.TypeQuotaNetTask, tq: q}, nil
+	case *ent.QuotaNetTaskEventQuery:
+		return &query[*ent.QuotaNetTaskEventQuery, predicate.QuotaNetTaskEvent, quotanettaskevent.OrderOption]{typ: ent.TypeQuotaNetTaskEvent, tq: q}, nil
 	case *ent.RedeemCodeQuery:
 		return &query[*ent.RedeemCodeQuery, predicate.RedeemCode, redeemcode.OrderOption]{typ: ent.TypeRedeemCode, tq: q}, nil
 	case *ent.SecuritySecretQuery:

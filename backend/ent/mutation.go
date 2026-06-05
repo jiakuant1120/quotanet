@@ -35,6 +35,13 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/promocode"
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetcontributionledger"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetnode"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetnodesession"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetpayoutbatch"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetpayoutitem"
+	"github.com/Wei-Shaw/sub2api/ent/quotanettask"
+	"github.com/Wei-Shaw/sub2api/ent/quotanettaskevent"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
 	"github.com/Wei-Shaw/sub2api/ent/securitysecret"
 	"github.com/Wei-Shaw/sub2api/ent/setting"
@@ -82,6 +89,13 @@ const (
 	TypePromoCode                     = "PromoCode"
 	TypePromoCodeUsage                = "PromoCodeUsage"
 	TypeProxy                         = "Proxy"
+	TypeQuotaNetContributionLedger    = "QuotaNetContributionLedger"
+	TypeQuotaNetNode                  = "QuotaNetNode"
+	TypeQuotaNetNodeSession           = "QuotaNetNodeSession"
+	TypeQuotaNetPayoutBatch           = "QuotaNetPayoutBatch"
+	TypeQuotaNetPayoutItem            = "QuotaNetPayoutItem"
+	TypeQuotaNetTask                  = "QuotaNetTask"
+	TypeQuotaNetTaskEvent             = "QuotaNetTaskEvent"
 	TypeRedeemCode                    = "RedeemCode"
 	TypeSecuritySecret                = "SecuritySecret"
 	TypeSetting                       = "Setting"
@@ -28750,6 +28764,8825 @@ func (m *ProxyMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Proxy edge %s", name)
+}
+
+// QuotaNetContributionLedgerMutation represents an operation that mutates the QuotaNetContributionLedger nodes in the graph.
+type QuotaNetContributionLedgerMutation struct {
+	config
+	op                 Op
+	typ                string
+	id                 *int64
+	created_at         *time.Time
+	updated_at         *time.Time
+	task_id            *string
+	usage_log_id       *int64
+	addusage_log_id    *int64
+	node_id            *int64
+	addnode_id         *int64
+	wallet_address     *string
+	account_id         *int64
+	addaccount_id      *int64
+	platform           *string
+	model              *string
+	token_flow         *int64
+	addtoken_flow      *int64
+	amount_cxs         *float64
+	addamount_cxs      *float64
+	rate               *float64
+	addrate            *float64
+	status             *string
+	payout_batch_id    *int64
+	addpayout_batch_id *int64
+	settled_at         *time.Time
+	clearedFields      map[string]struct{}
+	done               bool
+	oldValue           func(context.Context) (*QuotaNetContributionLedger, error)
+	predicates         []predicate.QuotaNetContributionLedger
+}
+
+var _ ent.Mutation = (*QuotaNetContributionLedgerMutation)(nil)
+
+// quotanetcontributionledgerOption allows management of the mutation configuration using functional options.
+type quotanetcontributionledgerOption func(*QuotaNetContributionLedgerMutation)
+
+// newQuotaNetContributionLedgerMutation creates new mutation for the QuotaNetContributionLedger entity.
+func newQuotaNetContributionLedgerMutation(c config, op Op, opts ...quotanetcontributionledgerOption) *QuotaNetContributionLedgerMutation {
+	m := &QuotaNetContributionLedgerMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeQuotaNetContributionLedger,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withQuotaNetContributionLedgerID sets the ID field of the mutation.
+func withQuotaNetContributionLedgerID(id int64) quotanetcontributionledgerOption {
+	return func(m *QuotaNetContributionLedgerMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *QuotaNetContributionLedger
+		)
+		m.oldValue = func(ctx context.Context) (*QuotaNetContributionLedger, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().QuotaNetContributionLedger.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withQuotaNetContributionLedger sets the old QuotaNetContributionLedger of the mutation.
+func withQuotaNetContributionLedger(node *QuotaNetContributionLedger) quotanetcontributionledgerOption {
+	return func(m *QuotaNetContributionLedgerMutation) {
+		m.oldValue = func(context.Context) (*QuotaNetContributionLedger, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m QuotaNetContributionLedgerMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m QuotaNetContributionLedgerMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *QuotaNetContributionLedgerMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *QuotaNetContributionLedgerMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().QuotaNetContributionLedger.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *QuotaNetContributionLedgerMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *QuotaNetContributionLedgerMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *QuotaNetContributionLedgerMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *QuotaNetContributionLedgerMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetTaskID sets the "task_id" field.
+func (m *QuotaNetContributionLedgerMutation) SetTaskID(s string) {
+	m.task_id = &s
+}
+
+// TaskID returns the value of the "task_id" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) TaskID() (r string, exists bool) {
+	v := m.task_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTaskID returns the old "task_id" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldTaskID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTaskID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTaskID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTaskID: %w", err)
+	}
+	return oldValue.TaskID, nil
+}
+
+// ResetTaskID resets all changes to the "task_id" field.
+func (m *QuotaNetContributionLedgerMutation) ResetTaskID() {
+	m.task_id = nil
+}
+
+// SetUsageLogID sets the "usage_log_id" field.
+func (m *QuotaNetContributionLedgerMutation) SetUsageLogID(i int64) {
+	m.usage_log_id = &i
+	m.addusage_log_id = nil
+}
+
+// UsageLogID returns the value of the "usage_log_id" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) UsageLogID() (r int64, exists bool) {
+	v := m.usage_log_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUsageLogID returns the old "usage_log_id" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldUsageLogID(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUsageLogID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUsageLogID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUsageLogID: %w", err)
+	}
+	return oldValue.UsageLogID, nil
+}
+
+// AddUsageLogID adds i to the "usage_log_id" field.
+func (m *QuotaNetContributionLedgerMutation) AddUsageLogID(i int64) {
+	if m.addusage_log_id != nil {
+		*m.addusage_log_id += i
+	} else {
+		m.addusage_log_id = &i
+	}
+}
+
+// AddedUsageLogID returns the value that was added to the "usage_log_id" field in this mutation.
+func (m *QuotaNetContributionLedgerMutation) AddedUsageLogID() (r int64, exists bool) {
+	v := m.addusage_log_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearUsageLogID clears the value of the "usage_log_id" field.
+func (m *QuotaNetContributionLedgerMutation) ClearUsageLogID() {
+	m.usage_log_id = nil
+	m.addusage_log_id = nil
+	m.clearedFields[quotanetcontributionledger.FieldUsageLogID] = struct{}{}
+}
+
+// UsageLogIDCleared returns if the "usage_log_id" field was cleared in this mutation.
+func (m *QuotaNetContributionLedgerMutation) UsageLogIDCleared() bool {
+	_, ok := m.clearedFields[quotanetcontributionledger.FieldUsageLogID]
+	return ok
+}
+
+// ResetUsageLogID resets all changes to the "usage_log_id" field.
+func (m *QuotaNetContributionLedgerMutation) ResetUsageLogID() {
+	m.usage_log_id = nil
+	m.addusage_log_id = nil
+	delete(m.clearedFields, quotanetcontributionledger.FieldUsageLogID)
+}
+
+// SetNodeID sets the "node_id" field.
+func (m *QuotaNetContributionLedgerMutation) SetNodeID(i int64) {
+	m.node_id = &i
+	m.addnode_id = nil
+}
+
+// NodeID returns the value of the "node_id" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) NodeID() (r int64, exists bool) {
+	v := m.node_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNodeID returns the old "node_id" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldNodeID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNodeID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNodeID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNodeID: %w", err)
+	}
+	return oldValue.NodeID, nil
+}
+
+// AddNodeID adds i to the "node_id" field.
+func (m *QuotaNetContributionLedgerMutation) AddNodeID(i int64) {
+	if m.addnode_id != nil {
+		*m.addnode_id += i
+	} else {
+		m.addnode_id = &i
+	}
+}
+
+// AddedNodeID returns the value that was added to the "node_id" field in this mutation.
+func (m *QuotaNetContributionLedgerMutation) AddedNodeID() (r int64, exists bool) {
+	v := m.addnode_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetNodeID resets all changes to the "node_id" field.
+func (m *QuotaNetContributionLedgerMutation) ResetNodeID() {
+	m.node_id = nil
+	m.addnode_id = nil
+}
+
+// SetWalletAddress sets the "wallet_address" field.
+func (m *QuotaNetContributionLedgerMutation) SetWalletAddress(s string) {
+	m.wallet_address = &s
+}
+
+// WalletAddress returns the value of the "wallet_address" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) WalletAddress() (r string, exists bool) {
+	v := m.wallet_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWalletAddress returns the old "wallet_address" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldWalletAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWalletAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWalletAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWalletAddress: %w", err)
+	}
+	return oldValue.WalletAddress, nil
+}
+
+// ResetWalletAddress resets all changes to the "wallet_address" field.
+func (m *QuotaNetContributionLedgerMutation) ResetWalletAddress() {
+	m.wallet_address = nil
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *QuotaNetContributionLedgerMutation) SetAccountID(i int64) {
+	m.account_id = &i
+	m.addaccount_id = nil
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) AccountID() (r int64, exists bool) {
+	v := m.account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldAccountID(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// AddAccountID adds i to the "account_id" field.
+func (m *QuotaNetContributionLedgerMutation) AddAccountID(i int64) {
+	if m.addaccount_id != nil {
+		*m.addaccount_id += i
+	} else {
+		m.addaccount_id = &i
+	}
+}
+
+// AddedAccountID returns the value that was added to the "account_id" field in this mutation.
+func (m *QuotaNetContributionLedgerMutation) AddedAccountID() (r int64, exists bool) {
+	v := m.addaccount_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearAccountID clears the value of the "account_id" field.
+func (m *QuotaNetContributionLedgerMutation) ClearAccountID() {
+	m.account_id = nil
+	m.addaccount_id = nil
+	m.clearedFields[quotanetcontributionledger.FieldAccountID] = struct{}{}
+}
+
+// AccountIDCleared returns if the "account_id" field was cleared in this mutation.
+func (m *QuotaNetContributionLedgerMutation) AccountIDCleared() bool {
+	_, ok := m.clearedFields[quotanetcontributionledger.FieldAccountID]
+	return ok
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *QuotaNetContributionLedgerMutation) ResetAccountID() {
+	m.account_id = nil
+	m.addaccount_id = nil
+	delete(m.clearedFields, quotanetcontributionledger.FieldAccountID)
+}
+
+// SetPlatform sets the "platform" field.
+func (m *QuotaNetContributionLedgerMutation) SetPlatform(s string) {
+	m.platform = &s
+}
+
+// Platform returns the value of the "platform" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) Platform() (r string, exists bool) {
+	v := m.platform
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlatform returns the old "platform" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldPlatform(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlatform is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlatform requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlatform: %w", err)
+	}
+	return oldValue.Platform, nil
+}
+
+// ResetPlatform resets all changes to the "platform" field.
+func (m *QuotaNetContributionLedgerMutation) ResetPlatform() {
+	m.platform = nil
+}
+
+// SetModel sets the "model" field.
+func (m *QuotaNetContributionLedgerMutation) SetModel(s string) {
+	m.model = &s
+}
+
+// Model returns the value of the "model" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) Model() (r string, exists bool) {
+	v := m.model
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModel returns the old "model" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldModel(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModel: %w", err)
+	}
+	return oldValue.Model, nil
+}
+
+// ResetModel resets all changes to the "model" field.
+func (m *QuotaNetContributionLedgerMutation) ResetModel() {
+	m.model = nil
+}
+
+// SetTokenFlow sets the "token_flow" field.
+func (m *QuotaNetContributionLedgerMutation) SetTokenFlow(i int64) {
+	m.token_flow = &i
+	m.addtoken_flow = nil
+}
+
+// TokenFlow returns the value of the "token_flow" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) TokenFlow() (r int64, exists bool) {
+	v := m.token_flow
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTokenFlow returns the old "token_flow" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldTokenFlow(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTokenFlow is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTokenFlow requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTokenFlow: %w", err)
+	}
+	return oldValue.TokenFlow, nil
+}
+
+// AddTokenFlow adds i to the "token_flow" field.
+func (m *QuotaNetContributionLedgerMutation) AddTokenFlow(i int64) {
+	if m.addtoken_flow != nil {
+		*m.addtoken_flow += i
+	} else {
+		m.addtoken_flow = &i
+	}
+}
+
+// AddedTokenFlow returns the value that was added to the "token_flow" field in this mutation.
+func (m *QuotaNetContributionLedgerMutation) AddedTokenFlow() (r int64, exists bool) {
+	v := m.addtoken_flow
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTokenFlow resets all changes to the "token_flow" field.
+func (m *QuotaNetContributionLedgerMutation) ResetTokenFlow() {
+	m.token_flow = nil
+	m.addtoken_flow = nil
+}
+
+// SetAmountCxs sets the "amount_cxs" field.
+func (m *QuotaNetContributionLedgerMutation) SetAmountCxs(f float64) {
+	m.amount_cxs = &f
+	m.addamount_cxs = nil
+}
+
+// AmountCxs returns the value of the "amount_cxs" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) AmountCxs() (r float64, exists bool) {
+	v := m.amount_cxs
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAmountCxs returns the old "amount_cxs" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldAmountCxs(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAmountCxs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAmountCxs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAmountCxs: %w", err)
+	}
+	return oldValue.AmountCxs, nil
+}
+
+// AddAmountCxs adds f to the "amount_cxs" field.
+func (m *QuotaNetContributionLedgerMutation) AddAmountCxs(f float64) {
+	if m.addamount_cxs != nil {
+		*m.addamount_cxs += f
+	} else {
+		m.addamount_cxs = &f
+	}
+}
+
+// AddedAmountCxs returns the value that was added to the "amount_cxs" field in this mutation.
+func (m *QuotaNetContributionLedgerMutation) AddedAmountCxs() (r float64, exists bool) {
+	v := m.addamount_cxs
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAmountCxs resets all changes to the "amount_cxs" field.
+func (m *QuotaNetContributionLedgerMutation) ResetAmountCxs() {
+	m.amount_cxs = nil
+	m.addamount_cxs = nil
+}
+
+// SetRate sets the "rate" field.
+func (m *QuotaNetContributionLedgerMutation) SetRate(f float64) {
+	m.rate = &f
+	m.addrate = nil
+}
+
+// Rate returns the value of the "rate" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) Rate() (r float64, exists bool) {
+	v := m.rate
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRate returns the old "rate" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldRate(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRate: %w", err)
+	}
+	return oldValue.Rate, nil
+}
+
+// AddRate adds f to the "rate" field.
+func (m *QuotaNetContributionLedgerMutation) AddRate(f float64) {
+	if m.addrate != nil {
+		*m.addrate += f
+	} else {
+		m.addrate = &f
+	}
+}
+
+// AddedRate returns the value that was added to the "rate" field in this mutation.
+func (m *QuotaNetContributionLedgerMutation) AddedRate() (r float64, exists bool) {
+	v := m.addrate
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRate resets all changes to the "rate" field.
+func (m *QuotaNetContributionLedgerMutation) ResetRate() {
+	m.rate = nil
+	m.addrate = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *QuotaNetContributionLedgerMutation) SetStatus(s string) {
+	m.status = &s
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) Status() (r string, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *QuotaNetContributionLedgerMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetPayoutBatchID sets the "payout_batch_id" field.
+func (m *QuotaNetContributionLedgerMutation) SetPayoutBatchID(i int64) {
+	m.payout_batch_id = &i
+	m.addpayout_batch_id = nil
+}
+
+// PayoutBatchID returns the value of the "payout_batch_id" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) PayoutBatchID() (r int64, exists bool) {
+	v := m.payout_batch_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPayoutBatchID returns the old "payout_batch_id" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldPayoutBatchID(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPayoutBatchID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPayoutBatchID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPayoutBatchID: %w", err)
+	}
+	return oldValue.PayoutBatchID, nil
+}
+
+// AddPayoutBatchID adds i to the "payout_batch_id" field.
+func (m *QuotaNetContributionLedgerMutation) AddPayoutBatchID(i int64) {
+	if m.addpayout_batch_id != nil {
+		*m.addpayout_batch_id += i
+	} else {
+		m.addpayout_batch_id = &i
+	}
+}
+
+// AddedPayoutBatchID returns the value that was added to the "payout_batch_id" field in this mutation.
+func (m *QuotaNetContributionLedgerMutation) AddedPayoutBatchID() (r int64, exists bool) {
+	v := m.addpayout_batch_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPayoutBatchID clears the value of the "payout_batch_id" field.
+func (m *QuotaNetContributionLedgerMutation) ClearPayoutBatchID() {
+	m.payout_batch_id = nil
+	m.addpayout_batch_id = nil
+	m.clearedFields[quotanetcontributionledger.FieldPayoutBatchID] = struct{}{}
+}
+
+// PayoutBatchIDCleared returns if the "payout_batch_id" field was cleared in this mutation.
+func (m *QuotaNetContributionLedgerMutation) PayoutBatchIDCleared() bool {
+	_, ok := m.clearedFields[quotanetcontributionledger.FieldPayoutBatchID]
+	return ok
+}
+
+// ResetPayoutBatchID resets all changes to the "payout_batch_id" field.
+func (m *QuotaNetContributionLedgerMutation) ResetPayoutBatchID() {
+	m.payout_batch_id = nil
+	m.addpayout_batch_id = nil
+	delete(m.clearedFields, quotanetcontributionledger.FieldPayoutBatchID)
+}
+
+// SetSettledAt sets the "settled_at" field.
+func (m *QuotaNetContributionLedgerMutation) SetSettledAt(t time.Time) {
+	m.settled_at = &t
+}
+
+// SettledAt returns the value of the "settled_at" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) SettledAt() (r time.Time, exists bool) {
+	v := m.settled_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSettledAt returns the old "settled_at" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldSettledAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSettledAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSettledAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSettledAt: %w", err)
+	}
+	return oldValue.SettledAt, nil
+}
+
+// ClearSettledAt clears the value of the "settled_at" field.
+func (m *QuotaNetContributionLedgerMutation) ClearSettledAt() {
+	m.settled_at = nil
+	m.clearedFields[quotanetcontributionledger.FieldSettledAt] = struct{}{}
+}
+
+// SettledAtCleared returns if the "settled_at" field was cleared in this mutation.
+func (m *QuotaNetContributionLedgerMutation) SettledAtCleared() bool {
+	_, ok := m.clearedFields[quotanetcontributionledger.FieldSettledAt]
+	return ok
+}
+
+// ResetSettledAt resets all changes to the "settled_at" field.
+func (m *QuotaNetContributionLedgerMutation) ResetSettledAt() {
+	m.settled_at = nil
+	delete(m.clearedFields, quotanetcontributionledger.FieldSettledAt)
+}
+
+// Where appends a list predicates to the QuotaNetContributionLedgerMutation builder.
+func (m *QuotaNetContributionLedgerMutation) Where(ps ...predicate.QuotaNetContributionLedger) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the QuotaNetContributionLedgerMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *QuotaNetContributionLedgerMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.QuotaNetContributionLedger, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *QuotaNetContributionLedgerMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *QuotaNetContributionLedgerMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (QuotaNetContributionLedger).
+func (m *QuotaNetContributionLedgerMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *QuotaNetContributionLedgerMutation) Fields() []string {
+	fields := make([]string, 0, 15)
+	if m.created_at != nil {
+		fields = append(fields, quotanetcontributionledger.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, quotanetcontributionledger.FieldUpdatedAt)
+	}
+	if m.task_id != nil {
+		fields = append(fields, quotanetcontributionledger.FieldTaskID)
+	}
+	if m.usage_log_id != nil {
+		fields = append(fields, quotanetcontributionledger.FieldUsageLogID)
+	}
+	if m.node_id != nil {
+		fields = append(fields, quotanetcontributionledger.FieldNodeID)
+	}
+	if m.wallet_address != nil {
+		fields = append(fields, quotanetcontributionledger.FieldWalletAddress)
+	}
+	if m.account_id != nil {
+		fields = append(fields, quotanetcontributionledger.FieldAccountID)
+	}
+	if m.platform != nil {
+		fields = append(fields, quotanetcontributionledger.FieldPlatform)
+	}
+	if m.model != nil {
+		fields = append(fields, quotanetcontributionledger.FieldModel)
+	}
+	if m.token_flow != nil {
+		fields = append(fields, quotanetcontributionledger.FieldTokenFlow)
+	}
+	if m.amount_cxs != nil {
+		fields = append(fields, quotanetcontributionledger.FieldAmountCxs)
+	}
+	if m.rate != nil {
+		fields = append(fields, quotanetcontributionledger.FieldRate)
+	}
+	if m.status != nil {
+		fields = append(fields, quotanetcontributionledger.FieldStatus)
+	}
+	if m.payout_batch_id != nil {
+		fields = append(fields, quotanetcontributionledger.FieldPayoutBatchID)
+	}
+	if m.settled_at != nil {
+		fields = append(fields, quotanetcontributionledger.FieldSettledAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *QuotaNetContributionLedgerMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case quotanetcontributionledger.FieldCreatedAt:
+		return m.CreatedAt()
+	case quotanetcontributionledger.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case quotanetcontributionledger.FieldTaskID:
+		return m.TaskID()
+	case quotanetcontributionledger.FieldUsageLogID:
+		return m.UsageLogID()
+	case quotanetcontributionledger.FieldNodeID:
+		return m.NodeID()
+	case quotanetcontributionledger.FieldWalletAddress:
+		return m.WalletAddress()
+	case quotanetcontributionledger.FieldAccountID:
+		return m.AccountID()
+	case quotanetcontributionledger.FieldPlatform:
+		return m.Platform()
+	case quotanetcontributionledger.FieldModel:
+		return m.Model()
+	case quotanetcontributionledger.FieldTokenFlow:
+		return m.TokenFlow()
+	case quotanetcontributionledger.FieldAmountCxs:
+		return m.AmountCxs()
+	case quotanetcontributionledger.FieldRate:
+		return m.Rate()
+	case quotanetcontributionledger.FieldStatus:
+		return m.Status()
+	case quotanetcontributionledger.FieldPayoutBatchID:
+		return m.PayoutBatchID()
+	case quotanetcontributionledger.FieldSettledAt:
+		return m.SettledAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *QuotaNetContributionLedgerMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case quotanetcontributionledger.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case quotanetcontributionledger.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case quotanetcontributionledger.FieldTaskID:
+		return m.OldTaskID(ctx)
+	case quotanetcontributionledger.FieldUsageLogID:
+		return m.OldUsageLogID(ctx)
+	case quotanetcontributionledger.FieldNodeID:
+		return m.OldNodeID(ctx)
+	case quotanetcontributionledger.FieldWalletAddress:
+		return m.OldWalletAddress(ctx)
+	case quotanetcontributionledger.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case quotanetcontributionledger.FieldPlatform:
+		return m.OldPlatform(ctx)
+	case quotanetcontributionledger.FieldModel:
+		return m.OldModel(ctx)
+	case quotanetcontributionledger.FieldTokenFlow:
+		return m.OldTokenFlow(ctx)
+	case quotanetcontributionledger.FieldAmountCxs:
+		return m.OldAmountCxs(ctx)
+	case quotanetcontributionledger.FieldRate:
+		return m.OldRate(ctx)
+	case quotanetcontributionledger.FieldStatus:
+		return m.OldStatus(ctx)
+	case quotanetcontributionledger.FieldPayoutBatchID:
+		return m.OldPayoutBatchID(ctx)
+	case quotanetcontributionledger.FieldSettledAt:
+		return m.OldSettledAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown QuotaNetContributionLedger field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *QuotaNetContributionLedgerMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case quotanetcontributionledger.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case quotanetcontributionledger.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case quotanetcontributionledger.FieldTaskID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTaskID(v)
+		return nil
+	case quotanetcontributionledger.FieldUsageLogID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUsageLogID(v)
+		return nil
+	case quotanetcontributionledger.FieldNodeID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNodeID(v)
+		return nil
+	case quotanetcontributionledger.FieldWalletAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWalletAddress(v)
+		return nil
+	case quotanetcontributionledger.FieldAccountID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case quotanetcontributionledger.FieldPlatform:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlatform(v)
+		return nil
+	case quotanetcontributionledger.FieldModel:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModel(v)
+		return nil
+	case quotanetcontributionledger.FieldTokenFlow:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTokenFlow(v)
+		return nil
+	case quotanetcontributionledger.FieldAmountCxs:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAmountCxs(v)
+		return nil
+	case quotanetcontributionledger.FieldRate:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRate(v)
+		return nil
+	case quotanetcontributionledger.FieldStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case quotanetcontributionledger.FieldPayoutBatchID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPayoutBatchID(v)
+		return nil
+	case quotanetcontributionledger.FieldSettledAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSettledAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetContributionLedger field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *QuotaNetContributionLedgerMutation) AddedFields() []string {
+	var fields []string
+	if m.addusage_log_id != nil {
+		fields = append(fields, quotanetcontributionledger.FieldUsageLogID)
+	}
+	if m.addnode_id != nil {
+		fields = append(fields, quotanetcontributionledger.FieldNodeID)
+	}
+	if m.addaccount_id != nil {
+		fields = append(fields, quotanetcontributionledger.FieldAccountID)
+	}
+	if m.addtoken_flow != nil {
+		fields = append(fields, quotanetcontributionledger.FieldTokenFlow)
+	}
+	if m.addamount_cxs != nil {
+		fields = append(fields, quotanetcontributionledger.FieldAmountCxs)
+	}
+	if m.addrate != nil {
+		fields = append(fields, quotanetcontributionledger.FieldRate)
+	}
+	if m.addpayout_batch_id != nil {
+		fields = append(fields, quotanetcontributionledger.FieldPayoutBatchID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *QuotaNetContributionLedgerMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case quotanetcontributionledger.FieldUsageLogID:
+		return m.AddedUsageLogID()
+	case quotanetcontributionledger.FieldNodeID:
+		return m.AddedNodeID()
+	case quotanetcontributionledger.FieldAccountID:
+		return m.AddedAccountID()
+	case quotanetcontributionledger.FieldTokenFlow:
+		return m.AddedTokenFlow()
+	case quotanetcontributionledger.FieldAmountCxs:
+		return m.AddedAmountCxs()
+	case quotanetcontributionledger.FieldRate:
+		return m.AddedRate()
+	case quotanetcontributionledger.FieldPayoutBatchID:
+		return m.AddedPayoutBatchID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *QuotaNetContributionLedgerMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case quotanetcontributionledger.FieldUsageLogID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUsageLogID(v)
+		return nil
+	case quotanetcontributionledger.FieldNodeID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNodeID(v)
+		return nil
+	case quotanetcontributionledger.FieldAccountID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAccountID(v)
+		return nil
+	case quotanetcontributionledger.FieldTokenFlow:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTokenFlow(v)
+		return nil
+	case quotanetcontributionledger.FieldAmountCxs:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAmountCxs(v)
+		return nil
+	case quotanetcontributionledger.FieldRate:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRate(v)
+		return nil
+	case quotanetcontributionledger.FieldPayoutBatchID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPayoutBatchID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetContributionLedger numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *QuotaNetContributionLedgerMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(quotanetcontributionledger.FieldUsageLogID) {
+		fields = append(fields, quotanetcontributionledger.FieldUsageLogID)
+	}
+	if m.FieldCleared(quotanetcontributionledger.FieldAccountID) {
+		fields = append(fields, quotanetcontributionledger.FieldAccountID)
+	}
+	if m.FieldCleared(quotanetcontributionledger.FieldPayoutBatchID) {
+		fields = append(fields, quotanetcontributionledger.FieldPayoutBatchID)
+	}
+	if m.FieldCleared(quotanetcontributionledger.FieldSettledAt) {
+		fields = append(fields, quotanetcontributionledger.FieldSettledAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *QuotaNetContributionLedgerMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *QuotaNetContributionLedgerMutation) ClearField(name string) error {
+	switch name {
+	case quotanetcontributionledger.FieldUsageLogID:
+		m.ClearUsageLogID()
+		return nil
+	case quotanetcontributionledger.FieldAccountID:
+		m.ClearAccountID()
+		return nil
+	case quotanetcontributionledger.FieldPayoutBatchID:
+		m.ClearPayoutBatchID()
+		return nil
+	case quotanetcontributionledger.FieldSettledAt:
+		m.ClearSettledAt()
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetContributionLedger nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *QuotaNetContributionLedgerMutation) ResetField(name string) error {
+	switch name {
+	case quotanetcontributionledger.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case quotanetcontributionledger.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case quotanetcontributionledger.FieldTaskID:
+		m.ResetTaskID()
+		return nil
+	case quotanetcontributionledger.FieldUsageLogID:
+		m.ResetUsageLogID()
+		return nil
+	case quotanetcontributionledger.FieldNodeID:
+		m.ResetNodeID()
+		return nil
+	case quotanetcontributionledger.FieldWalletAddress:
+		m.ResetWalletAddress()
+		return nil
+	case quotanetcontributionledger.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case quotanetcontributionledger.FieldPlatform:
+		m.ResetPlatform()
+		return nil
+	case quotanetcontributionledger.FieldModel:
+		m.ResetModel()
+		return nil
+	case quotanetcontributionledger.FieldTokenFlow:
+		m.ResetTokenFlow()
+		return nil
+	case quotanetcontributionledger.FieldAmountCxs:
+		m.ResetAmountCxs()
+		return nil
+	case quotanetcontributionledger.FieldRate:
+		m.ResetRate()
+		return nil
+	case quotanetcontributionledger.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case quotanetcontributionledger.FieldPayoutBatchID:
+		m.ResetPayoutBatchID()
+		return nil
+	case quotanetcontributionledger.FieldSettledAt:
+		m.ResetSettledAt()
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetContributionLedger field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *QuotaNetContributionLedgerMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *QuotaNetContributionLedgerMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *QuotaNetContributionLedgerMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *QuotaNetContributionLedgerMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *QuotaNetContributionLedgerMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *QuotaNetContributionLedgerMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *QuotaNetContributionLedgerMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown QuotaNetContributionLedger unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *QuotaNetContributionLedgerMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown QuotaNetContributionLedger edge %s", name)
+}
+
+// QuotaNetNodeMutation represents an operation that mutates the QuotaNetNode nodes in the graph.
+type QuotaNetNodeMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *int64
+	created_at       *time.Time
+	updated_at       *time.Time
+	deleted_at       *time.Time
+	node_key         *string
+	name             *string
+	owner_user_id    *int64
+	addowner_user_id *int64
+	wallet_address   *string
+	token_hash       *string
+	status           *string
+	protocol_version *string
+	client_version   *string
+	last_seen_at     *time.Time
+	clearedFields    map[string]struct{}
+	done             bool
+	oldValue         func(context.Context) (*QuotaNetNode, error)
+	predicates       []predicate.QuotaNetNode
+}
+
+var _ ent.Mutation = (*QuotaNetNodeMutation)(nil)
+
+// quotanetnodeOption allows management of the mutation configuration using functional options.
+type quotanetnodeOption func(*QuotaNetNodeMutation)
+
+// newQuotaNetNodeMutation creates new mutation for the QuotaNetNode entity.
+func newQuotaNetNodeMutation(c config, op Op, opts ...quotanetnodeOption) *QuotaNetNodeMutation {
+	m := &QuotaNetNodeMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeQuotaNetNode,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withQuotaNetNodeID sets the ID field of the mutation.
+func withQuotaNetNodeID(id int64) quotanetnodeOption {
+	return func(m *QuotaNetNodeMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *QuotaNetNode
+		)
+		m.oldValue = func(ctx context.Context) (*QuotaNetNode, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().QuotaNetNode.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withQuotaNetNode sets the old QuotaNetNode of the mutation.
+func withQuotaNetNode(node *QuotaNetNode) quotanetnodeOption {
+	return func(m *QuotaNetNodeMutation) {
+		m.oldValue = func(context.Context) (*QuotaNetNode, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m QuotaNetNodeMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m QuotaNetNodeMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *QuotaNetNodeMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *QuotaNetNodeMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().QuotaNetNode.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *QuotaNetNodeMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *QuotaNetNodeMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the QuotaNetNode entity.
+// If the QuotaNetNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *QuotaNetNodeMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *QuotaNetNodeMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *QuotaNetNodeMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the QuotaNetNode entity.
+// If the QuotaNetNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *QuotaNetNodeMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *QuotaNetNodeMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *QuotaNetNodeMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the QuotaNetNode entity.
+// If the QuotaNetNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *QuotaNetNodeMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[quotanetnode.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *QuotaNetNodeMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[quotanetnode.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *QuotaNetNodeMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, quotanetnode.FieldDeletedAt)
+}
+
+// SetNodeKey sets the "node_key" field.
+func (m *QuotaNetNodeMutation) SetNodeKey(s string) {
+	m.node_key = &s
+}
+
+// NodeKey returns the value of the "node_key" field in the mutation.
+func (m *QuotaNetNodeMutation) NodeKey() (r string, exists bool) {
+	v := m.node_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNodeKey returns the old "node_key" field's value of the QuotaNetNode entity.
+// If the QuotaNetNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeMutation) OldNodeKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNodeKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNodeKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNodeKey: %w", err)
+	}
+	return oldValue.NodeKey, nil
+}
+
+// ResetNodeKey resets all changes to the "node_key" field.
+func (m *QuotaNetNodeMutation) ResetNodeKey() {
+	m.node_key = nil
+}
+
+// SetName sets the "name" field.
+func (m *QuotaNetNodeMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *QuotaNetNodeMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the QuotaNetNode entity.
+// If the QuotaNetNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *QuotaNetNodeMutation) ResetName() {
+	m.name = nil
+}
+
+// SetOwnerUserID sets the "owner_user_id" field.
+func (m *QuotaNetNodeMutation) SetOwnerUserID(i int64) {
+	m.owner_user_id = &i
+	m.addowner_user_id = nil
+}
+
+// OwnerUserID returns the value of the "owner_user_id" field in the mutation.
+func (m *QuotaNetNodeMutation) OwnerUserID() (r int64, exists bool) {
+	v := m.owner_user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOwnerUserID returns the old "owner_user_id" field's value of the QuotaNetNode entity.
+// If the QuotaNetNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeMutation) OldOwnerUserID(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOwnerUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOwnerUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOwnerUserID: %w", err)
+	}
+	return oldValue.OwnerUserID, nil
+}
+
+// AddOwnerUserID adds i to the "owner_user_id" field.
+func (m *QuotaNetNodeMutation) AddOwnerUserID(i int64) {
+	if m.addowner_user_id != nil {
+		*m.addowner_user_id += i
+	} else {
+		m.addowner_user_id = &i
+	}
+}
+
+// AddedOwnerUserID returns the value that was added to the "owner_user_id" field in this mutation.
+func (m *QuotaNetNodeMutation) AddedOwnerUserID() (r int64, exists bool) {
+	v := m.addowner_user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearOwnerUserID clears the value of the "owner_user_id" field.
+func (m *QuotaNetNodeMutation) ClearOwnerUserID() {
+	m.owner_user_id = nil
+	m.addowner_user_id = nil
+	m.clearedFields[quotanetnode.FieldOwnerUserID] = struct{}{}
+}
+
+// OwnerUserIDCleared returns if the "owner_user_id" field was cleared in this mutation.
+func (m *QuotaNetNodeMutation) OwnerUserIDCleared() bool {
+	_, ok := m.clearedFields[quotanetnode.FieldOwnerUserID]
+	return ok
+}
+
+// ResetOwnerUserID resets all changes to the "owner_user_id" field.
+func (m *QuotaNetNodeMutation) ResetOwnerUserID() {
+	m.owner_user_id = nil
+	m.addowner_user_id = nil
+	delete(m.clearedFields, quotanetnode.FieldOwnerUserID)
+}
+
+// SetWalletAddress sets the "wallet_address" field.
+func (m *QuotaNetNodeMutation) SetWalletAddress(s string) {
+	m.wallet_address = &s
+}
+
+// WalletAddress returns the value of the "wallet_address" field in the mutation.
+func (m *QuotaNetNodeMutation) WalletAddress() (r string, exists bool) {
+	v := m.wallet_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWalletAddress returns the old "wallet_address" field's value of the QuotaNetNode entity.
+// If the QuotaNetNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeMutation) OldWalletAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWalletAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWalletAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWalletAddress: %w", err)
+	}
+	return oldValue.WalletAddress, nil
+}
+
+// ResetWalletAddress resets all changes to the "wallet_address" field.
+func (m *QuotaNetNodeMutation) ResetWalletAddress() {
+	m.wallet_address = nil
+}
+
+// SetTokenHash sets the "token_hash" field.
+func (m *QuotaNetNodeMutation) SetTokenHash(s string) {
+	m.token_hash = &s
+}
+
+// TokenHash returns the value of the "token_hash" field in the mutation.
+func (m *QuotaNetNodeMutation) TokenHash() (r string, exists bool) {
+	v := m.token_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTokenHash returns the old "token_hash" field's value of the QuotaNetNode entity.
+// If the QuotaNetNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeMutation) OldTokenHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTokenHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTokenHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTokenHash: %w", err)
+	}
+	return oldValue.TokenHash, nil
+}
+
+// ResetTokenHash resets all changes to the "token_hash" field.
+func (m *QuotaNetNodeMutation) ResetTokenHash() {
+	m.token_hash = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *QuotaNetNodeMutation) SetStatus(s string) {
+	m.status = &s
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *QuotaNetNodeMutation) Status() (r string, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the QuotaNetNode entity.
+// If the QuotaNetNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeMutation) OldStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *QuotaNetNodeMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetProtocolVersion sets the "protocol_version" field.
+func (m *QuotaNetNodeMutation) SetProtocolVersion(s string) {
+	m.protocol_version = &s
+}
+
+// ProtocolVersion returns the value of the "protocol_version" field in the mutation.
+func (m *QuotaNetNodeMutation) ProtocolVersion() (r string, exists bool) {
+	v := m.protocol_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProtocolVersion returns the old "protocol_version" field's value of the QuotaNetNode entity.
+// If the QuotaNetNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeMutation) OldProtocolVersion(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProtocolVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProtocolVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProtocolVersion: %w", err)
+	}
+	return oldValue.ProtocolVersion, nil
+}
+
+// ClearProtocolVersion clears the value of the "protocol_version" field.
+func (m *QuotaNetNodeMutation) ClearProtocolVersion() {
+	m.protocol_version = nil
+	m.clearedFields[quotanetnode.FieldProtocolVersion] = struct{}{}
+}
+
+// ProtocolVersionCleared returns if the "protocol_version" field was cleared in this mutation.
+func (m *QuotaNetNodeMutation) ProtocolVersionCleared() bool {
+	_, ok := m.clearedFields[quotanetnode.FieldProtocolVersion]
+	return ok
+}
+
+// ResetProtocolVersion resets all changes to the "protocol_version" field.
+func (m *QuotaNetNodeMutation) ResetProtocolVersion() {
+	m.protocol_version = nil
+	delete(m.clearedFields, quotanetnode.FieldProtocolVersion)
+}
+
+// SetClientVersion sets the "client_version" field.
+func (m *QuotaNetNodeMutation) SetClientVersion(s string) {
+	m.client_version = &s
+}
+
+// ClientVersion returns the value of the "client_version" field in the mutation.
+func (m *QuotaNetNodeMutation) ClientVersion() (r string, exists bool) {
+	v := m.client_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClientVersion returns the old "client_version" field's value of the QuotaNetNode entity.
+// If the QuotaNetNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeMutation) OldClientVersion(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClientVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClientVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClientVersion: %w", err)
+	}
+	return oldValue.ClientVersion, nil
+}
+
+// ClearClientVersion clears the value of the "client_version" field.
+func (m *QuotaNetNodeMutation) ClearClientVersion() {
+	m.client_version = nil
+	m.clearedFields[quotanetnode.FieldClientVersion] = struct{}{}
+}
+
+// ClientVersionCleared returns if the "client_version" field was cleared in this mutation.
+func (m *QuotaNetNodeMutation) ClientVersionCleared() bool {
+	_, ok := m.clearedFields[quotanetnode.FieldClientVersion]
+	return ok
+}
+
+// ResetClientVersion resets all changes to the "client_version" field.
+func (m *QuotaNetNodeMutation) ResetClientVersion() {
+	m.client_version = nil
+	delete(m.clearedFields, quotanetnode.FieldClientVersion)
+}
+
+// SetLastSeenAt sets the "last_seen_at" field.
+func (m *QuotaNetNodeMutation) SetLastSeenAt(t time.Time) {
+	m.last_seen_at = &t
+}
+
+// LastSeenAt returns the value of the "last_seen_at" field in the mutation.
+func (m *QuotaNetNodeMutation) LastSeenAt() (r time.Time, exists bool) {
+	v := m.last_seen_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastSeenAt returns the old "last_seen_at" field's value of the QuotaNetNode entity.
+// If the QuotaNetNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeMutation) OldLastSeenAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastSeenAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastSeenAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastSeenAt: %w", err)
+	}
+	return oldValue.LastSeenAt, nil
+}
+
+// ClearLastSeenAt clears the value of the "last_seen_at" field.
+func (m *QuotaNetNodeMutation) ClearLastSeenAt() {
+	m.last_seen_at = nil
+	m.clearedFields[quotanetnode.FieldLastSeenAt] = struct{}{}
+}
+
+// LastSeenAtCleared returns if the "last_seen_at" field was cleared in this mutation.
+func (m *QuotaNetNodeMutation) LastSeenAtCleared() bool {
+	_, ok := m.clearedFields[quotanetnode.FieldLastSeenAt]
+	return ok
+}
+
+// ResetLastSeenAt resets all changes to the "last_seen_at" field.
+func (m *QuotaNetNodeMutation) ResetLastSeenAt() {
+	m.last_seen_at = nil
+	delete(m.clearedFields, quotanetnode.FieldLastSeenAt)
+}
+
+// Where appends a list predicates to the QuotaNetNodeMutation builder.
+func (m *QuotaNetNodeMutation) Where(ps ...predicate.QuotaNetNode) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the QuotaNetNodeMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *QuotaNetNodeMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.QuotaNetNode, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *QuotaNetNodeMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *QuotaNetNodeMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (QuotaNetNode).
+func (m *QuotaNetNodeMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *QuotaNetNodeMutation) Fields() []string {
+	fields := make([]string, 0, 12)
+	if m.created_at != nil {
+		fields = append(fields, quotanetnode.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, quotanetnode.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, quotanetnode.FieldDeletedAt)
+	}
+	if m.node_key != nil {
+		fields = append(fields, quotanetnode.FieldNodeKey)
+	}
+	if m.name != nil {
+		fields = append(fields, quotanetnode.FieldName)
+	}
+	if m.owner_user_id != nil {
+		fields = append(fields, quotanetnode.FieldOwnerUserID)
+	}
+	if m.wallet_address != nil {
+		fields = append(fields, quotanetnode.FieldWalletAddress)
+	}
+	if m.token_hash != nil {
+		fields = append(fields, quotanetnode.FieldTokenHash)
+	}
+	if m.status != nil {
+		fields = append(fields, quotanetnode.FieldStatus)
+	}
+	if m.protocol_version != nil {
+		fields = append(fields, quotanetnode.FieldProtocolVersion)
+	}
+	if m.client_version != nil {
+		fields = append(fields, quotanetnode.FieldClientVersion)
+	}
+	if m.last_seen_at != nil {
+		fields = append(fields, quotanetnode.FieldLastSeenAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *QuotaNetNodeMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case quotanetnode.FieldCreatedAt:
+		return m.CreatedAt()
+	case quotanetnode.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case quotanetnode.FieldDeletedAt:
+		return m.DeletedAt()
+	case quotanetnode.FieldNodeKey:
+		return m.NodeKey()
+	case quotanetnode.FieldName:
+		return m.Name()
+	case quotanetnode.FieldOwnerUserID:
+		return m.OwnerUserID()
+	case quotanetnode.FieldWalletAddress:
+		return m.WalletAddress()
+	case quotanetnode.FieldTokenHash:
+		return m.TokenHash()
+	case quotanetnode.FieldStatus:
+		return m.Status()
+	case quotanetnode.FieldProtocolVersion:
+		return m.ProtocolVersion()
+	case quotanetnode.FieldClientVersion:
+		return m.ClientVersion()
+	case quotanetnode.FieldLastSeenAt:
+		return m.LastSeenAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *QuotaNetNodeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case quotanetnode.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case quotanetnode.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case quotanetnode.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case quotanetnode.FieldNodeKey:
+		return m.OldNodeKey(ctx)
+	case quotanetnode.FieldName:
+		return m.OldName(ctx)
+	case quotanetnode.FieldOwnerUserID:
+		return m.OldOwnerUserID(ctx)
+	case quotanetnode.FieldWalletAddress:
+		return m.OldWalletAddress(ctx)
+	case quotanetnode.FieldTokenHash:
+		return m.OldTokenHash(ctx)
+	case quotanetnode.FieldStatus:
+		return m.OldStatus(ctx)
+	case quotanetnode.FieldProtocolVersion:
+		return m.OldProtocolVersion(ctx)
+	case quotanetnode.FieldClientVersion:
+		return m.OldClientVersion(ctx)
+	case quotanetnode.FieldLastSeenAt:
+		return m.OldLastSeenAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown QuotaNetNode field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *QuotaNetNodeMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case quotanetnode.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case quotanetnode.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case quotanetnode.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case quotanetnode.FieldNodeKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNodeKey(v)
+		return nil
+	case quotanetnode.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case quotanetnode.FieldOwnerUserID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOwnerUserID(v)
+		return nil
+	case quotanetnode.FieldWalletAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWalletAddress(v)
+		return nil
+	case quotanetnode.FieldTokenHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTokenHash(v)
+		return nil
+	case quotanetnode.FieldStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case quotanetnode.FieldProtocolVersion:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProtocolVersion(v)
+		return nil
+	case quotanetnode.FieldClientVersion:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClientVersion(v)
+		return nil
+	case quotanetnode.FieldLastSeenAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastSeenAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetNode field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *QuotaNetNodeMutation) AddedFields() []string {
+	var fields []string
+	if m.addowner_user_id != nil {
+		fields = append(fields, quotanetnode.FieldOwnerUserID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *QuotaNetNodeMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case quotanetnode.FieldOwnerUserID:
+		return m.AddedOwnerUserID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *QuotaNetNodeMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case quotanetnode.FieldOwnerUserID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOwnerUserID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetNode numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *QuotaNetNodeMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(quotanetnode.FieldDeletedAt) {
+		fields = append(fields, quotanetnode.FieldDeletedAt)
+	}
+	if m.FieldCleared(quotanetnode.FieldOwnerUserID) {
+		fields = append(fields, quotanetnode.FieldOwnerUserID)
+	}
+	if m.FieldCleared(quotanetnode.FieldProtocolVersion) {
+		fields = append(fields, quotanetnode.FieldProtocolVersion)
+	}
+	if m.FieldCleared(quotanetnode.FieldClientVersion) {
+		fields = append(fields, quotanetnode.FieldClientVersion)
+	}
+	if m.FieldCleared(quotanetnode.FieldLastSeenAt) {
+		fields = append(fields, quotanetnode.FieldLastSeenAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *QuotaNetNodeMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *QuotaNetNodeMutation) ClearField(name string) error {
+	switch name {
+	case quotanetnode.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case quotanetnode.FieldOwnerUserID:
+		m.ClearOwnerUserID()
+		return nil
+	case quotanetnode.FieldProtocolVersion:
+		m.ClearProtocolVersion()
+		return nil
+	case quotanetnode.FieldClientVersion:
+		m.ClearClientVersion()
+		return nil
+	case quotanetnode.FieldLastSeenAt:
+		m.ClearLastSeenAt()
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetNode nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *QuotaNetNodeMutation) ResetField(name string) error {
+	switch name {
+	case quotanetnode.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case quotanetnode.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case quotanetnode.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case quotanetnode.FieldNodeKey:
+		m.ResetNodeKey()
+		return nil
+	case quotanetnode.FieldName:
+		m.ResetName()
+		return nil
+	case quotanetnode.FieldOwnerUserID:
+		m.ResetOwnerUserID()
+		return nil
+	case quotanetnode.FieldWalletAddress:
+		m.ResetWalletAddress()
+		return nil
+	case quotanetnode.FieldTokenHash:
+		m.ResetTokenHash()
+		return nil
+	case quotanetnode.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case quotanetnode.FieldProtocolVersion:
+		m.ResetProtocolVersion()
+		return nil
+	case quotanetnode.FieldClientVersion:
+		m.ResetClientVersion()
+		return nil
+	case quotanetnode.FieldLastSeenAt:
+		m.ResetLastSeenAt()
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetNode field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *QuotaNetNodeMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *QuotaNetNodeMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *QuotaNetNodeMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *QuotaNetNodeMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *QuotaNetNodeMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *QuotaNetNodeMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *QuotaNetNodeMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown QuotaNetNode unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *QuotaNetNodeMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown QuotaNetNode edge %s", name)
+}
+
+// QuotaNetNodeSessionMutation represents an operation that mutates the QuotaNetNodeSession nodes in the graph.
+type QuotaNetNodeSessionMutation struct {
+	config
+	op                     Op
+	typ                    string
+	id                     *int64
+	created_at             *time.Time
+	updated_at             *time.Time
+	session_id             *string
+	node_id                *int64
+	addnode_id             *int64
+	instance_id            *string
+	status                 *string
+	remote_addr            *string
+	max_concurrency        *int
+	addmax_concurrency     *int
+	current_concurrency    *int
+	addcurrent_concurrency *int
+	queue_size             *int
+	addqueue_size          *int
+	max_queue_size         *int
+	addmax_queue_size      *int
+	capabilities           *map[string]interface{}
+	connected_at           *time.Time
+	disconnected_at        *time.Time
+	last_heartbeat_at      *time.Time
+	close_reason           *string
+	clearedFields          map[string]struct{}
+	done                   bool
+	oldValue               func(context.Context) (*QuotaNetNodeSession, error)
+	predicates             []predicate.QuotaNetNodeSession
+}
+
+var _ ent.Mutation = (*QuotaNetNodeSessionMutation)(nil)
+
+// quotanetnodesessionOption allows management of the mutation configuration using functional options.
+type quotanetnodesessionOption func(*QuotaNetNodeSessionMutation)
+
+// newQuotaNetNodeSessionMutation creates new mutation for the QuotaNetNodeSession entity.
+func newQuotaNetNodeSessionMutation(c config, op Op, opts ...quotanetnodesessionOption) *QuotaNetNodeSessionMutation {
+	m := &QuotaNetNodeSessionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeQuotaNetNodeSession,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withQuotaNetNodeSessionID sets the ID field of the mutation.
+func withQuotaNetNodeSessionID(id int64) quotanetnodesessionOption {
+	return func(m *QuotaNetNodeSessionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *QuotaNetNodeSession
+		)
+		m.oldValue = func(ctx context.Context) (*QuotaNetNodeSession, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().QuotaNetNodeSession.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withQuotaNetNodeSession sets the old QuotaNetNodeSession of the mutation.
+func withQuotaNetNodeSession(node *QuotaNetNodeSession) quotanetnodesessionOption {
+	return func(m *QuotaNetNodeSessionMutation) {
+		m.oldValue = func(context.Context) (*QuotaNetNodeSession, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m QuotaNetNodeSessionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m QuotaNetNodeSessionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *QuotaNetNodeSessionMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *QuotaNetNodeSessionMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().QuotaNetNodeSession.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *QuotaNetNodeSessionMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *QuotaNetNodeSessionMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the QuotaNetNodeSession entity.
+// If the QuotaNetNodeSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeSessionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *QuotaNetNodeSessionMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *QuotaNetNodeSessionMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *QuotaNetNodeSessionMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the QuotaNetNodeSession entity.
+// If the QuotaNetNodeSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeSessionMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *QuotaNetNodeSessionMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetSessionID sets the "session_id" field.
+func (m *QuotaNetNodeSessionMutation) SetSessionID(s string) {
+	m.session_id = &s
+}
+
+// SessionID returns the value of the "session_id" field in the mutation.
+func (m *QuotaNetNodeSessionMutation) SessionID() (r string, exists bool) {
+	v := m.session_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSessionID returns the old "session_id" field's value of the QuotaNetNodeSession entity.
+// If the QuotaNetNodeSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeSessionMutation) OldSessionID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSessionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSessionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSessionID: %w", err)
+	}
+	return oldValue.SessionID, nil
+}
+
+// ResetSessionID resets all changes to the "session_id" field.
+func (m *QuotaNetNodeSessionMutation) ResetSessionID() {
+	m.session_id = nil
+}
+
+// SetNodeID sets the "node_id" field.
+func (m *QuotaNetNodeSessionMutation) SetNodeID(i int64) {
+	m.node_id = &i
+	m.addnode_id = nil
+}
+
+// NodeID returns the value of the "node_id" field in the mutation.
+func (m *QuotaNetNodeSessionMutation) NodeID() (r int64, exists bool) {
+	v := m.node_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNodeID returns the old "node_id" field's value of the QuotaNetNodeSession entity.
+// If the QuotaNetNodeSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeSessionMutation) OldNodeID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNodeID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNodeID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNodeID: %w", err)
+	}
+	return oldValue.NodeID, nil
+}
+
+// AddNodeID adds i to the "node_id" field.
+func (m *QuotaNetNodeSessionMutation) AddNodeID(i int64) {
+	if m.addnode_id != nil {
+		*m.addnode_id += i
+	} else {
+		m.addnode_id = &i
+	}
+}
+
+// AddedNodeID returns the value that was added to the "node_id" field in this mutation.
+func (m *QuotaNetNodeSessionMutation) AddedNodeID() (r int64, exists bool) {
+	v := m.addnode_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetNodeID resets all changes to the "node_id" field.
+func (m *QuotaNetNodeSessionMutation) ResetNodeID() {
+	m.node_id = nil
+	m.addnode_id = nil
+}
+
+// SetInstanceID sets the "instance_id" field.
+func (m *QuotaNetNodeSessionMutation) SetInstanceID(s string) {
+	m.instance_id = &s
+}
+
+// InstanceID returns the value of the "instance_id" field in the mutation.
+func (m *QuotaNetNodeSessionMutation) InstanceID() (r string, exists bool) {
+	v := m.instance_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInstanceID returns the old "instance_id" field's value of the QuotaNetNodeSession entity.
+// If the QuotaNetNodeSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeSessionMutation) OldInstanceID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInstanceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInstanceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInstanceID: %w", err)
+	}
+	return oldValue.InstanceID, nil
+}
+
+// ResetInstanceID resets all changes to the "instance_id" field.
+func (m *QuotaNetNodeSessionMutation) ResetInstanceID() {
+	m.instance_id = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *QuotaNetNodeSessionMutation) SetStatus(s string) {
+	m.status = &s
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *QuotaNetNodeSessionMutation) Status() (r string, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the QuotaNetNodeSession entity.
+// If the QuotaNetNodeSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeSessionMutation) OldStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *QuotaNetNodeSessionMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetRemoteAddr sets the "remote_addr" field.
+func (m *QuotaNetNodeSessionMutation) SetRemoteAddr(s string) {
+	m.remote_addr = &s
+}
+
+// RemoteAddr returns the value of the "remote_addr" field in the mutation.
+func (m *QuotaNetNodeSessionMutation) RemoteAddr() (r string, exists bool) {
+	v := m.remote_addr
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRemoteAddr returns the old "remote_addr" field's value of the QuotaNetNodeSession entity.
+// If the QuotaNetNodeSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeSessionMutation) OldRemoteAddr(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRemoteAddr is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRemoteAddr requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRemoteAddr: %w", err)
+	}
+	return oldValue.RemoteAddr, nil
+}
+
+// ClearRemoteAddr clears the value of the "remote_addr" field.
+func (m *QuotaNetNodeSessionMutation) ClearRemoteAddr() {
+	m.remote_addr = nil
+	m.clearedFields[quotanetnodesession.FieldRemoteAddr] = struct{}{}
+}
+
+// RemoteAddrCleared returns if the "remote_addr" field was cleared in this mutation.
+func (m *QuotaNetNodeSessionMutation) RemoteAddrCleared() bool {
+	_, ok := m.clearedFields[quotanetnodesession.FieldRemoteAddr]
+	return ok
+}
+
+// ResetRemoteAddr resets all changes to the "remote_addr" field.
+func (m *QuotaNetNodeSessionMutation) ResetRemoteAddr() {
+	m.remote_addr = nil
+	delete(m.clearedFields, quotanetnodesession.FieldRemoteAddr)
+}
+
+// SetMaxConcurrency sets the "max_concurrency" field.
+func (m *QuotaNetNodeSessionMutation) SetMaxConcurrency(i int) {
+	m.max_concurrency = &i
+	m.addmax_concurrency = nil
+}
+
+// MaxConcurrency returns the value of the "max_concurrency" field in the mutation.
+func (m *QuotaNetNodeSessionMutation) MaxConcurrency() (r int, exists bool) {
+	v := m.max_concurrency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaxConcurrency returns the old "max_concurrency" field's value of the QuotaNetNodeSession entity.
+// If the QuotaNetNodeSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeSessionMutation) OldMaxConcurrency(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaxConcurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaxConcurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaxConcurrency: %w", err)
+	}
+	return oldValue.MaxConcurrency, nil
+}
+
+// AddMaxConcurrency adds i to the "max_concurrency" field.
+func (m *QuotaNetNodeSessionMutation) AddMaxConcurrency(i int) {
+	if m.addmax_concurrency != nil {
+		*m.addmax_concurrency += i
+	} else {
+		m.addmax_concurrency = &i
+	}
+}
+
+// AddedMaxConcurrency returns the value that was added to the "max_concurrency" field in this mutation.
+func (m *QuotaNetNodeSessionMutation) AddedMaxConcurrency() (r int, exists bool) {
+	v := m.addmax_concurrency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMaxConcurrency resets all changes to the "max_concurrency" field.
+func (m *QuotaNetNodeSessionMutation) ResetMaxConcurrency() {
+	m.max_concurrency = nil
+	m.addmax_concurrency = nil
+}
+
+// SetCurrentConcurrency sets the "current_concurrency" field.
+func (m *QuotaNetNodeSessionMutation) SetCurrentConcurrency(i int) {
+	m.current_concurrency = &i
+	m.addcurrent_concurrency = nil
+}
+
+// CurrentConcurrency returns the value of the "current_concurrency" field in the mutation.
+func (m *QuotaNetNodeSessionMutation) CurrentConcurrency() (r int, exists bool) {
+	v := m.current_concurrency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrentConcurrency returns the old "current_concurrency" field's value of the QuotaNetNodeSession entity.
+// If the QuotaNetNodeSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeSessionMutation) OldCurrentConcurrency(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrentConcurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrentConcurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrentConcurrency: %w", err)
+	}
+	return oldValue.CurrentConcurrency, nil
+}
+
+// AddCurrentConcurrency adds i to the "current_concurrency" field.
+func (m *QuotaNetNodeSessionMutation) AddCurrentConcurrency(i int) {
+	if m.addcurrent_concurrency != nil {
+		*m.addcurrent_concurrency += i
+	} else {
+		m.addcurrent_concurrency = &i
+	}
+}
+
+// AddedCurrentConcurrency returns the value that was added to the "current_concurrency" field in this mutation.
+func (m *QuotaNetNodeSessionMutation) AddedCurrentConcurrency() (r int, exists bool) {
+	v := m.addcurrent_concurrency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCurrentConcurrency resets all changes to the "current_concurrency" field.
+func (m *QuotaNetNodeSessionMutation) ResetCurrentConcurrency() {
+	m.current_concurrency = nil
+	m.addcurrent_concurrency = nil
+}
+
+// SetQueueSize sets the "queue_size" field.
+func (m *QuotaNetNodeSessionMutation) SetQueueSize(i int) {
+	m.queue_size = &i
+	m.addqueue_size = nil
+}
+
+// QueueSize returns the value of the "queue_size" field in the mutation.
+func (m *QuotaNetNodeSessionMutation) QueueSize() (r int, exists bool) {
+	v := m.queue_size
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQueueSize returns the old "queue_size" field's value of the QuotaNetNodeSession entity.
+// If the QuotaNetNodeSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeSessionMutation) OldQueueSize(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQueueSize is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQueueSize requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQueueSize: %w", err)
+	}
+	return oldValue.QueueSize, nil
+}
+
+// AddQueueSize adds i to the "queue_size" field.
+func (m *QuotaNetNodeSessionMutation) AddQueueSize(i int) {
+	if m.addqueue_size != nil {
+		*m.addqueue_size += i
+	} else {
+		m.addqueue_size = &i
+	}
+}
+
+// AddedQueueSize returns the value that was added to the "queue_size" field in this mutation.
+func (m *QuotaNetNodeSessionMutation) AddedQueueSize() (r int, exists bool) {
+	v := m.addqueue_size
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetQueueSize resets all changes to the "queue_size" field.
+func (m *QuotaNetNodeSessionMutation) ResetQueueSize() {
+	m.queue_size = nil
+	m.addqueue_size = nil
+}
+
+// SetMaxQueueSize sets the "max_queue_size" field.
+func (m *QuotaNetNodeSessionMutation) SetMaxQueueSize(i int) {
+	m.max_queue_size = &i
+	m.addmax_queue_size = nil
+}
+
+// MaxQueueSize returns the value of the "max_queue_size" field in the mutation.
+func (m *QuotaNetNodeSessionMutation) MaxQueueSize() (r int, exists bool) {
+	v := m.max_queue_size
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaxQueueSize returns the old "max_queue_size" field's value of the QuotaNetNodeSession entity.
+// If the QuotaNetNodeSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeSessionMutation) OldMaxQueueSize(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaxQueueSize is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaxQueueSize requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaxQueueSize: %w", err)
+	}
+	return oldValue.MaxQueueSize, nil
+}
+
+// AddMaxQueueSize adds i to the "max_queue_size" field.
+func (m *QuotaNetNodeSessionMutation) AddMaxQueueSize(i int) {
+	if m.addmax_queue_size != nil {
+		*m.addmax_queue_size += i
+	} else {
+		m.addmax_queue_size = &i
+	}
+}
+
+// AddedMaxQueueSize returns the value that was added to the "max_queue_size" field in this mutation.
+func (m *QuotaNetNodeSessionMutation) AddedMaxQueueSize() (r int, exists bool) {
+	v := m.addmax_queue_size
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMaxQueueSize resets all changes to the "max_queue_size" field.
+func (m *QuotaNetNodeSessionMutation) ResetMaxQueueSize() {
+	m.max_queue_size = nil
+	m.addmax_queue_size = nil
+}
+
+// SetCapabilities sets the "capabilities" field.
+func (m *QuotaNetNodeSessionMutation) SetCapabilities(value map[string]interface{}) {
+	m.capabilities = &value
+}
+
+// Capabilities returns the value of the "capabilities" field in the mutation.
+func (m *QuotaNetNodeSessionMutation) Capabilities() (r map[string]interface{}, exists bool) {
+	v := m.capabilities
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCapabilities returns the old "capabilities" field's value of the QuotaNetNodeSession entity.
+// If the QuotaNetNodeSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeSessionMutation) OldCapabilities(ctx context.Context) (v map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCapabilities is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCapabilities requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCapabilities: %w", err)
+	}
+	return oldValue.Capabilities, nil
+}
+
+// ResetCapabilities resets all changes to the "capabilities" field.
+func (m *QuotaNetNodeSessionMutation) ResetCapabilities() {
+	m.capabilities = nil
+}
+
+// SetConnectedAt sets the "connected_at" field.
+func (m *QuotaNetNodeSessionMutation) SetConnectedAt(t time.Time) {
+	m.connected_at = &t
+}
+
+// ConnectedAt returns the value of the "connected_at" field in the mutation.
+func (m *QuotaNetNodeSessionMutation) ConnectedAt() (r time.Time, exists bool) {
+	v := m.connected_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConnectedAt returns the old "connected_at" field's value of the QuotaNetNodeSession entity.
+// If the QuotaNetNodeSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeSessionMutation) OldConnectedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConnectedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConnectedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConnectedAt: %w", err)
+	}
+	return oldValue.ConnectedAt, nil
+}
+
+// ResetConnectedAt resets all changes to the "connected_at" field.
+func (m *QuotaNetNodeSessionMutation) ResetConnectedAt() {
+	m.connected_at = nil
+}
+
+// SetDisconnectedAt sets the "disconnected_at" field.
+func (m *QuotaNetNodeSessionMutation) SetDisconnectedAt(t time.Time) {
+	m.disconnected_at = &t
+}
+
+// DisconnectedAt returns the value of the "disconnected_at" field in the mutation.
+func (m *QuotaNetNodeSessionMutation) DisconnectedAt() (r time.Time, exists bool) {
+	v := m.disconnected_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDisconnectedAt returns the old "disconnected_at" field's value of the QuotaNetNodeSession entity.
+// If the QuotaNetNodeSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeSessionMutation) OldDisconnectedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDisconnectedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDisconnectedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDisconnectedAt: %w", err)
+	}
+	return oldValue.DisconnectedAt, nil
+}
+
+// ClearDisconnectedAt clears the value of the "disconnected_at" field.
+func (m *QuotaNetNodeSessionMutation) ClearDisconnectedAt() {
+	m.disconnected_at = nil
+	m.clearedFields[quotanetnodesession.FieldDisconnectedAt] = struct{}{}
+}
+
+// DisconnectedAtCleared returns if the "disconnected_at" field was cleared in this mutation.
+func (m *QuotaNetNodeSessionMutation) DisconnectedAtCleared() bool {
+	_, ok := m.clearedFields[quotanetnodesession.FieldDisconnectedAt]
+	return ok
+}
+
+// ResetDisconnectedAt resets all changes to the "disconnected_at" field.
+func (m *QuotaNetNodeSessionMutation) ResetDisconnectedAt() {
+	m.disconnected_at = nil
+	delete(m.clearedFields, quotanetnodesession.FieldDisconnectedAt)
+}
+
+// SetLastHeartbeatAt sets the "last_heartbeat_at" field.
+func (m *QuotaNetNodeSessionMutation) SetLastHeartbeatAt(t time.Time) {
+	m.last_heartbeat_at = &t
+}
+
+// LastHeartbeatAt returns the value of the "last_heartbeat_at" field in the mutation.
+func (m *QuotaNetNodeSessionMutation) LastHeartbeatAt() (r time.Time, exists bool) {
+	v := m.last_heartbeat_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastHeartbeatAt returns the old "last_heartbeat_at" field's value of the QuotaNetNodeSession entity.
+// If the QuotaNetNodeSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeSessionMutation) OldLastHeartbeatAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastHeartbeatAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastHeartbeatAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastHeartbeatAt: %w", err)
+	}
+	return oldValue.LastHeartbeatAt, nil
+}
+
+// ClearLastHeartbeatAt clears the value of the "last_heartbeat_at" field.
+func (m *QuotaNetNodeSessionMutation) ClearLastHeartbeatAt() {
+	m.last_heartbeat_at = nil
+	m.clearedFields[quotanetnodesession.FieldLastHeartbeatAt] = struct{}{}
+}
+
+// LastHeartbeatAtCleared returns if the "last_heartbeat_at" field was cleared in this mutation.
+func (m *QuotaNetNodeSessionMutation) LastHeartbeatAtCleared() bool {
+	_, ok := m.clearedFields[quotanetnodesession.FieldLastHeartbeatAt]
+	return ok
+}
+
+// ResetLastHeartbeatAt resets all changes to the "last_heartbeat_at" field.
+func (m *QuotaNetNodeSessionMutation) ResetLastHeartbeatAt() {
+	m.last_heartbeat_at = nil
+	delete(m.clearedFields, quotanetnodesession.FieldLastHeartbeatAt)
+}
+
+// SetCloseReason sets the "close_reason" field.
+func (m *QuotaNetNodeSessionMutation) SetCloseReason(s string) {
+	m.close_reason = &s
+}
+
+// CloseReason returns the value of the "close_reason" field in the mutation.
+func (m *QuotaNetNodeSessionMutation) CloseReason() (r string, exists bool) {
+	v := m.close_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCloseReason returns the old "close_reason" field's value of the QuotaNetNodeSession entity.
+// If the QuotaNetNodeSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetNodeSessionMutation) OldCloseReason(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCloseReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCloseReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCloseReason: %w", err)
+	}
+	return oldValue.CloseReason, nil
+}
+
+// ClearCloseReason clears the value of the "close_reason" field.
+func (m *QuotaNetNodeSessionMutation) ClearCloseReason() {
+	m.close_reason = nil
+	m.clearedFields[quotanetnodesession.FieldCloseReason] = struct{}{}
+}
+
+// CloseReasonCleared returns if the "close_reason" field was cleared in this mutation.
+func (m *QuotaNetNodeSessionMutation) CloseReasonCleared() bool {
+	_, ok := m.clearedFields[quotanetnodesession.FieldCloseReason]
+	return ok
+}
+
+// ResetCloseReason resets all changes to the "close_reason" field.
+func (m *QuotaNetNodeSessionMutation) ResetCloseReason() {
+	m.close_reason = nil
+	delete(m.clearedFields, quotanetnodesession.FieldCloseReason)
+}
+
+// Where appends a list predicates to the QuotaNetNodeSessionMutation builder.
+func (m *QuotaNetNodeSessionMutation) Where(ps ...predicate.QuotaNetNodeSession) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the QuotaNetNodeSessionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *QuotaNetNodeSessionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.QuotaNetNodeSession, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *QuotaNetNodeSessionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *QuotaNetNodeSessionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (QuotaNetNodeSession).
+func (m *QuotaNetNodeSessionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *QuotaNetNodeSessionMutation) Fields() []string {
+	fields := make([]string, 0, 16)
+	if m.created_at != nil {
+		fields = append(fields, quotanetnodesession.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, quotanetnodesession.FieldUpdatedAt)
+	}
+	if m.session_id != nil {
+		fields = append(fields, quotanetnodesession.FieldSessionID)
+	}
+	if m.node_id != nil {
+		fields = append(fields, quotanetnodesession.FieldNodeID)
+	}
+	if m.instance_id != nil {
+		fields = append(fields, quotanetnodesession.FieldInstanceID)
+	}
+	if m.status != nil {
+		fields = append(fields, quotanetnodesession.FieldStatus)
+	}
+	if m.remote_addr != nil {
+		fields = append(fields, quotanetnodesession.FieldRemoteAddr)
+	}
+	if m.max_concurrency != nil {
+		fields = append(fields, quotanetnodesession.FieldMaxConcurrency)
+	}
+	if m.current_concurrency != nil {
+		fields = append(fields, quotanetnodesession.FieldCurrentConcurrency)
+	}
+	if m.queue_size != nil {
+		fields = append(fields, quotanetnodesession.FieldQueueSize)
+	}
+	if m.max_queue_size != nil {
+		fields = append(fields, quotanetnodesession.FieldMaxQueueSize)
+	}
+	if m.capabilities != nil {
+		fields = append(fields, quotanetnodesession.FieldCapabilities)
+	}
+	if m.connected_at != nil {
+		fields = append(fields, quotanetnodesession.FieldConnectedAt)
+	}
+	if m.disconnected_at != nil {
+		fields = append(fields, quotanetnodesession.FieldDisconnectedAt)
+	}
+	if m.last_heartbeat_at != nil {
+		fields = append(fields, quotanetnodesession.FieldLastHeartbeatAt)
+	}
+	if m.close_reason != nil {
+		fields = append(fields, quotanetnodesession.FieldCloseReason)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *QuotaNetNodeSessionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case quotanetnodesession.FieldCreatedAt:
+		return m.CreatedAt()
+	case quotanetnodesession.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case quotanetnodesession.FieldSessionID:
+		return m.SessionID()
+	case quotanetnodesession.FieldNodeID:
+		return m.NodeID()
+	case quotanetnodesession.FieldInstanceID:
+		return m.InstanceID()
+	case quotanetnodesession.FieldStatus:
+		return m.Status()
+	case quotanetnodesession.FieldRemoteAddr:
+		return m.RemoteAddr()
+	case quotanetnodesession.FieldMaxConcurrency:
+		return m.MaxConcurrency()
+	case quotanetnodesession.FieldCurrentConcurrency:
+		return m.CurrentConcurrency()
+	case quotanetnodesession.FieldQueueSize:
+		return m.QueueSize()
+	case quotanetnodesession.FieldMaxQueueSize:
+		return m.MaxQueueSize()
+	case quotanetnodesession.FieldCapabilities:
+		return m.Capabilities()
+	case quotanetnodesession.FieldConnectedAt:
+		return m.ConnectedAt()
+	case quotanetnodesession.FieldDisconnectedAt:
+		return m.DisconnectedAt()
+	case quotanetnodesession.FieldLastHeartbeatAt:
+		return m.LastHeartbeatAt()
+	case quotanetnodesession.FieldCloseReason:
+		return m.CloseReason()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *QuotaNetNodeSessionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case quotanetnodesession.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case quotanetnodesession.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case quotanetnodesession.FieldSessionID:
+		return m.OldSessionID(ctx)
+	case quotanetnodesession.FieldNodeID:
+		return m.OldNodeID(ctx)
+	case quotanetnodesession.FieldInstanceID:
+		return m.OldInstanceID(ctx)
+	case quotanetnodesession.FieldStatus:
+		return m.OldStatus(ctx)
+	case quotanetnodesession.FieldRemoteAddr:
+		return m.OldRemoteAddr(ctx)
+	case quotanetnodesession.FieldMaxConcurrency:
+		return m.OldMaxConcurrency(ctx)
+	case quotanetnodesession.FieldCurrentConcurrency:
+		return m.OldCurrentConcurrency(ctx)
+	case quotanetnodesession.FieldQueueSize:
+		return m.OldQueueSize(ctx)
+	case quotanetnodesession.FieldMaxQueueSize:
+		return m.OldMaxQueueSize(ctx)
+	case quotanetnodesession.FieldCapabilities:
+		return m.OldCapabilities(ctx)
+	case quotanetnodesession.FieldConnectedAt:
+		return m.OldConnectedAt(ctx)
+	case quotanetnodesession.FieldDisconnectedAt:
+		return m.OldDisconnectedAt(ctx)
+	case quotanetnodesession.FieldLastHeartbeatAt:
+		return m.OldLastHeartbeatAt(ctx)
+	case quotanetnodesession.FieldCloseReason:
+		return m.OldCloseReason(ctx)
+	}
+	return nil, fmt.Errorf("unknown QuotaNetNodeSession field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *QuotaNetNodeSessionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case quotanetnodesession.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case quotanetnodesession.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case quotanetnodesession.FieldSessionID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSessionID(v)
+		return nil
+	case quotanetnodesession.FieldNodeID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNodeID(v)
+		return nil
+	case quotanetnodesession.FieldInstanceID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInstanceID(v)
+		return nil
+	case quotanetnodesession.FieldStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case quotanetnodesession.FieldRemoteAddr:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRemoteAddr(v)
+		return nil
+	case quotanetnodesession.FieldMaxConcurrency:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaxConcurrency(v)
+		return nil
+	case quotanetnodesession.FieldCurrentConcurrency:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrentConcurrency(v)
+		return nil
+	case quotanetnodesession.FieldQueueSize:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQueueSize(v)
+		return nil
+	case quotanetnodesession.FieldMaxQueueSize:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaxQueueSize(v)
+		return nil
+	case quotanetnodesession.FieldCapabilities:
+		v, ok := value.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCapabilities(v)
+		return nil
+	case quotanetnodesession.FieldConnectedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConnectedAt(v)
+		return nil
+	case quotanetnodesession.FieldDisconnectedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDisconnectedAt(v)
+		return nil
+	case quotanetnodesession.FieldLastHeartbeatAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastHeartbeatAt(v)
+		return nil
+	case quotanetnodesession.FieldCloseReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCloseReason(v)
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetNodeSession field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *QuotaNetNodeSessionMutation) AddedFields() []string {
+	var fields []string
+	if m.addnode_id != nil {
+		fields = append(fields, quotanetnodesession.FieldNodeID)
+	}
+	if m.addmax_concurrency != nil {
+		fields = append(fields, quotanetnodesession.FieldMaxConcurrency)
+	}
+	if m.addcurrent_concurrency != nil {
+		fields = append(fields, quotanetnodesession.FieldCurrentConcurrency)
+	}
+	if m.addqueue_size != nil {
+		fields = append(fields, quotanetnodesession.FieldQueueSize)
+	}
+	if m.addmax_queue_size != nil {
+		fields = append(fields, quotanetnodesession.FieldMaxQueueSize)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *QuotaNetNodeSessionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case quotanetnodesession.FieldNodeID:
+		return m.AddedNodeID()
+	case quotanetnodesession.FieldMaxConcurrency:
+		return m.AddedMaxConcurrency()
+	case quotanetnodesession.FieldCurrentConcurrency:
+		return m.AddedCurrentConcurrency()
+	case quotanetnodesession.FieldQueueSize:
+		return m.AddedQueueSize()
+	case quotanetnodesession.FieldMaxQueueSize:
+		return m.AddedMaxQueueSize()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *QuotaNetNodeSessionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case quotanetnodesession.FieldNodeID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNodeID(v)
+		return nil
+	case quotanetnodesession.FieldMaxConcurrency:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMaxConcurrency(v)
+		return nil
+	case quotanetnodesession.FieldCurrentConcurrency:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCurrentConcurrency(v)
+		return nil
+	case quotanetnodesession.FieldQueueSize:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddQueueSize(v)
+		return nil
+	case quotanetnodesession.FieldMaxQueueSize:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMaxQueueSize(v)
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetNodeSession numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *QuotaNetNodeSessionMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(quotanetnodesession.FieldRemoteAddr) {
+		fields = append(fields, quotanetnodesession.FieldRemoteAddr)
+	}
+	if m.FieldCleared(quotanetnodesession.FieldDisconnectedAt) {
+		fields = append(fields, quotanetnodesession.FieldDisconnectedAt)
+	}
+	if m.FieldCleared(quotanetnodesession.FieldLastHeartbeatAt) {
+		fields = append(fields, quotanetnodesession.FieldLastHeartbeatAt)
+	}
+	if m.FieldCleared(quotanetnodesession.FieldCloseReason) {
+		fields = append(fields, quotanetnodesession.FieldCloseReason)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *QuotaNetNodeSessionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *QuotaNetNodeSessionMutation) ClearField(name string) error {
+	switch name {
+	case quotanetnodesession.FieldRemoteAddr:
+		m.ClearRemoteAddr()
+		return nil
+	case quotanetnodesession.FieldDisconnectedAt:
+		m.ClearDisconnectedAt()
+		return nil
+	case quotanetnodesession.FieldLastHeartbeatAt:
+		m.ClearLastHeartbeatAt()
+		return nil
+	case quotanetnodesession.FieldCloseReason:
+		m.ClearCloseReason()
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetNodeSession nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *QuotaNetNodeSessionMutation) ResetField(name string) error {
+	switch name {
+	case quotanetnodesession.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case quotanetnodesession.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case quotanetnodesession.FieldSessionID:
+		m.ResetSessionID()
+		return nil
+	case quotanetnodesession.FieldNodeID:
+		m.ResetNodeID()
+		return nil
+	case quotanetnodesession.FieldInstanceID:
+		m.ResetInstanceID()
+		return nil
+	case quotanetnodesession.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case quotanetnodesession.FieldRemoteAddr:
+		m.ResetRemoteAddr()
+		return nil
+	case quotanetnodesession.FieldMaxConcurrency:
+		m.ResetMaxConcurrency()
+		return nil
+	case quotanetnodesession.FieldCurrentConcurrency:
+		m.ResetCurrentConcurrency()
+		return nil
+	case quotanetnodesession.FieldQueueSize:
+		m.ResetQueueSize()
+		return nil
+	case quotanetnodesession.FieldMaxQueueSize:
+		m.ResetMaxQueueSize()
+		return nil
+	case quotanetnodesession.FieldCapabilities:
+		m.ResetCapabilities()
+		return nil
+	case quotanetnodesession.FieldConnectedAt:
+		m.ResetConnectedAt()
+		return nil
+	case quotanetnodesession.FieldDisconnectedAt:
+		m.ResetDisconnectedAt()
+		return nil
+	case quotanetnodesession.FieldLastHeartbeatAt:
+		m.ResetLastHeartbeatAt()
+		return nil
+	case quotanetnodesession.FieldCloseReason:
+		m.ResetCloseReason()
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetNodeSession field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *QuotaNetNodeSessionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *QuotaNetNodeSessionMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *QuotaNetNodeSessionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *QuotaNetNodeSessionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *QuotaNetNodeSessionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *QuotaNetNodeSessionMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *QuotaNetNodeSessionMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown QuotaNetNodeSession unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *QuotaNetNodeSessionMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown QuotaNetNodeSession edge %s", name)
+}
+
+// QuotaNetPayoutBatchMutation represents an operation that mutates the QuotaNetPayoutBatch nodes in the graph.
+type QuotaNetPayoutBatchMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *int64
+	created_at          *time.Time
+	updated_at          *time.Time
+	batch_key           *string
+	window_start        *time.Time
+	window_end          *time.Time
+	status              *string
+	network             *string
+	total_token_flow    *int64
+	addtotal_token_flow *int64
+	total_amount_cxs    *float64
+	addtotal_amount_cxs *float64
+	item_count          *int
+	additem_count       *int
+	created_by          *int64
+	addcreated_by       *int64
+	approved_by         *int64
+	addapproved_by      *int64
+	clearedFields       map[string]struct{}
+	done                bool
+	oldValue            func(context.Context) (*QuotaNetPayoutBatch, error)
+	predicates          []predicate.QuotaNetPayoutBatch
+}
+
+var _ ent.Mutation = (*QuotaNetPayoutBatchMutation)(nil)
+
+// quotanetpayoutbatchOption allows management of the mutation configuration using functional options.
+type quotanetpayoutbatchOption func(*QuotaNetPayoutBatchMutation)
+
+// newQuotaNetPayoutBatchMutation creates new mutation for the QuotaNetPayoutBatch entity.
+func newQuotaNetPayoutBatchMutation(c config, op Op, opts ...quotanetpayoutbatchOption) *QuotaNetPayoutBatchMutation {
+	m := &QuotaNetPayoutBatchMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeQuotaNetPayoutBatch,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withQuotaNetPayoutBatchID sets the ID field of the mutation.
+func withQuotaNetPayoutBatchID(id int64) quotanetpayoutbatchOption {
+	return func(m *QuotaNetPayoutBatchMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *QuotaNetPayoutBatch
+		)
+		m.oldValue = func(ctx context.Context) (*QuotaNetPayoutBatch, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().QuotaNetPayoutBatch.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withQuotaNetPayoutBatch sets the old QuotaNetPayoutBatch of the mutation.
+func withQuotaNetPayoutBatch(node *QuotaNetPayoutBatch) quotanetpayoutbatchOption {
+	return func(m *QuotaNetPayoutBatchMutation) {
+		m.oldValue = func(context.Context) (*QuotaNetPayoutBatch, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m QuotaNetPayoutBatchMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m QuotaNetPayoutBatchMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *QuotaNetPayoutBatchMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *QuotaNetPayoutBatchMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().QuotaNetPayoutBatch.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *QuotaNetPayoutBatchMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *QuotaNetPayoutBatchMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the QuotaNetPayoutBatch entity.
+// If the QuotaNetPayoutBatch object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutBatchMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *QuotaNetPayoutBatchMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *QuotaNetPayoutBatchMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *QuotaNetPayoutBatchMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the QuotaNetPayoutBatch entity.
+// If the QuotaNetPayoutBatch object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutBatchMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *QuotaNetPayoutBatchMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetBatchKey sets the "batch_key" field.
+func (m *QuotaNetPayoutBatchMutation) SetBatchKey(s string) {
+	m.batch_key = &s
+}
+
+// BatchKey returns the value of the "batch_key" field in the mutation.
+func (m *QuotaNetPayoutBatchMutation) BatchKey() (r string, exists bool) {
+	v := m.batch_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBatchKey returns the old "batch_key" field's value of the QuotaNetPayoutBatch entity.
+// If the QuotaNetPayoutBatch object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutBatchMutation) OldBatchKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBatchKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBatchKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBatchKey: %w", err)
+	}
+	return oldValue.BatchKey, nil
+}
+
+// ResetBatchKey resets all changes to the "batch_key" field.
+func (m *QuotaNetPayoutBatchMutation) ResetBatchKey() {
+	m.batch_key = nil
+}
+
+// SetWindowStart sets the "window_start" field.
+func (m *QuotaNetPayoutBatchMutation) SetWindowStart(t time.Time) {
+	m.window_start = &t
+}
+
+// WindowStart returns the value of the "window_start" field in the mutation.
+func (m *QuotaNetPayoutBatchMutation) WindowStart() (r time.Time, exists bool) {
+	v := m.window_start
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWindowStart returns the old "window_start" field's value of the QuotaNetPayoutBatch entity.
+// If the QuotaNetPayoutBatch object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutBatchMutation) OldWindowStart(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWindowStart is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWindowStart requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWindowStart: %w", err)
+	}
+	return oldValue.WindowStart, nil
+}
+
+// ResetWindowStart resets all changes to the "window_start" field.
+func (m *QuotaNetPayoutBatchMutation) ResetWindowStart() {
+	m.window_start = nil
+}
+
+// SetWindowEnd sets the "window_end" field.
+func (m *QuotaNetPayoutBatchMutation) SetWindowEnd(t time.Time) {
+	m.window_end = &t
+}
+
+// WindowEnd returns the value of the "window_end" field in the mutation.
+func (m *QuotaNetPayoutBatchMutation) WindowEnd() (r time.Time, exists bool) {
+	v := m.window_end
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWindowEnd returns the old "window_end" field's value of the QuotaNetPayoutBatch entity.
+// If the QuotaNetPayoutBatch object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutBatchMutation) OldWindowEnd(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWindowEnd is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWindowEnd requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWindowEnd: %w", err)
+	}
+	return oldValue.WindowEnd, nil
+}
+
+// ResetWindowEnd resets all changes to the "window_end" field.
+func (m *QuotaNetPayoutBatchMutation) ResetWindowEnd() {
+	m.window_end = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *QuotaNetPayoutBatchMutation) SetStatus(s string) {
+	m.status = &s
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *QuotaNetPayoutBatchMutation) Status() (r string, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the QuotaNetPayoutBatch entity.
+// If the QuotaNetPayoutBatch object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutBatchMutation) OldStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *QuotaNetPayoutBatchMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetNetwork sets the "network" field.
+func (m *QuotaNetPayoutBatchMutation) SetNetwork(s string) {
+	m.network = &s
+}
+
+// Network returns the value of the "network" field in the mutation.
+func (m *QuotaNetPayoutBatchMutation) Network() (r string, exists bool) {
+	v := m.network
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNetwork returns the old "network" field's value of the QuotaNetPayoutBatch entity.
+// If the QuotaNetPayoutBatch object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutBatchMutation) OldNetwork(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNetwork is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNetwork requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNetwork: %w", err)
+	}
+	return oldValue.Network, nil
+}
+
+// ResetNetwork resets all changes to the "network" field.
+func (m *QuotaNetPayoutBatchMutation) ResetNetwork() {
+	m.network = nil
+}
+
+// SetTotalTokenFlow sets the "total_token_flow" field.
+func (m *QuotaNetPayoutBatchMutation) SetTotalTokenFlow(i int64) {
+	m.total_token_flow = &i
+	m.addtotal_token_flow = nil
+}
+
+// TotalTokenFlow returns the value of the "total_token_flow" field in the mutation.
+func (m *QuotaNetPayoutBatchMutation) TotalTokenFlow() (r int64, exists bool) {
+	v := m.total_token_flow
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTotalTokenFlow returns the old "total_token_flow" field's value of the QuotaNetPayoutBatch entity.
+// If the QuotaNetPayoutBatch object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutBatchMutation) OldTotalTokenFlow(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTotalTokenFlow is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTotalTokenFlow requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTotalTokenFlow: %w", err)
+	}
+	return oldValue.TotalTokenFlow, nil
+}
+
+// AddTotalTokenFlow adds i to the "total_token_flow" field.
+func (m *QuotaNetPayoutBatchMutation) AddTotalTokenFlow(i int64) {
+	if m.addtotal_token_flow != nil {
+		*m.addtotal_token_flow += i
+	} else {
+		m.addtotal_token_flow = &i
+	}
+}
+
+// AddedTotalTokenFlow returns the value that was added to the "total_token_flow" field in this mutation.
+func (m *QuotaNetPayoutBatchMutation) AddedTotalTokenFlow() (r int64, exists bool) {
+	v := m.addtotal_token_flow
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTotalTokenFlow resets all changes to the "total_token_flow" field.
+func (m *QuotaNetPayoutBatchMutation) ResetTotalTokenFlow() {
+	m.total_token_flow = nil
+	m.addtotal_token_flow = nil
+}
+
+// SetTotalAmountCxs sets the "total_amount_cxs" field.
+func (m *QuotaNetPayoutBatchMutation) SetTotalAmountCxs(f float64) {
+	m.total_amount_cxs = &f
+	m.addtotal_amount_cxs = nil
+}
+
+// TotalAmountCxs returns the value of the "total_amount_cxs" field in the mutation.
+func (m *QuotaNetPayoutBatchMutation) TotalAmountCxs() (r float64, exists bool) {
+	v := m.total_amount_cxs
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTotalAmountCxs returns the old "total_amount_cxs" field's value of the QuotaNetPayoutBatch entity.
+// If the QuotaNetPayoutBatch object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutBatchMutation) OldTotalAmountCxs(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTotalAmountCxs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTotalAmountCxs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTotalAmountCxs: %w", err)
+	}
+	return oldValue.TotalAmountCxs, nil
+}
+
+// AddTotalAmountCxs adds f to the "total_amount_cxs" field.
+func (m *QuotaNetPayoutBatchMutation) AddTotalAmountCxs(f float64) {
+	if m.addtotal_amount_cxs != nil {
+		*m.addtotal_amount_cxs += f
+	} else {
+		m.addtotal_amount_cxs = &f
+	}
+}
+
+// AddedTotalAmountCxs returns the value that was added to the "total_amount_cxs" field in this mutation.
+func (m *QuotaNetPayoutBatchMutation) AddedTotalAmountCxs() (r float64, exists bool) {
+	v := m.addtotal_amount_cxs
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTotalAmountCxs resets all changes to the "total_amount_cxs" field.
+func (m *QuotaNetPayoutBatchMutation) ResetTotalAmountCxs() {
+	m.total_amount_cxs = nil
+	m.addtotal_amount_cxs = nil
+}
+
+// SetItemCount sets the "item_count" field.
+func (m *QuotaNetPayoutBatchMutation) SetItemCount(i int) {
+	m.item_count = &i
+	m.additem_count = nil
+}
+
+// ItemCount returns the value of the "item_count" field in the mutation.
+func (m *QuotaNetPayoutBatchMutation) ItemCount() (r int, exists bool) {
+	v := m.item_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemCount returns the old "item_count" field's value of the QuotaNetPayoutBatch entity.
+// If the QuotaNetPayoutBatch object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutBatchMutation) OldItemCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemCount: %w", err)
+	}
+	return oldValue.ItemCount, nil
+}
+
+// AddItemCount adds i to the "item_count" field.
+func (m *QuotaNetPayoutBatchMutation) AddItemCount(i int) {
+	if m.additem_count != nil {
+		*m.additem_count += i
+	} else {
+		m.additem_count = &i
+	}
+}
+
+// AddedItemCount returns the value that was added to the "item_count" field in this mutation.
+func (m *QuotaNetPayoutBatchMutation) AddedItemCount() (r int, exists bool) {
+	v := m.additem_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetItemCount resets all changes to the "item_count" field.
+func (m *QuotaNetPayoutBatchMutation) ResetItemCount() {
+	m.item_count = nil
+	m.additem_count = nil
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (m *QuotaNetPayoutBatchMutation) SetCreatedBy(i int64) {
+	m.created_by = &i
+	m.addcreated_by = nil
+}
+
+// CreatedBy returns the value of the "created_by" field in the mutation.
+func (m *QuotaNetPayoutBatchMutation) CreatedBy() (r int64, exists bool) {
+	v := m.created_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedBy returns the old "created_by" field's value of the QuotaNetPayoutBatch entity.
+// If the QuotaNetPayoutBatch object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutBatchMutation) OldCreatedBy(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
+	}
+	return oldValue.CreatedBy, nil
+}
+
+// AddCreatedBy adds i to the "created_by" field.
+func (m *QuotaNetPayoutBatchMutation) AddCreatedBy(i int64) {
+	if m.addcreated_by != nil {
+		*m.addcreated_by += i
+	} else {
+		m.addcreated_by = &i
+	}
+}
+
+// AddedCreatedBy returns the value that was added to the "created_by" field in this mutation.
+func (m *QuotaNetPayoutBatchMutation) AddedCreatedBy() (r int64, exists bool) {
+	v := m.addcreated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (m *QuotaNetPayoutBatchMutation) ClearCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+	m.clearedFields[quotanetpayoutbatch.FieldCreatedBy] = struct{}{}
+}
+
+// CreatedByCleared returns if the "created_by" field was cleared in this mutation.
+func (m *QuotaNetPayoutBatchMutation) CreatedByCleared() bool {
+	_, ok := m.clearedFields[quotanetpayoutbatch.FieldCreatedBy]
+	return ok
+}
+
+// ResetCreatedBy resets all changes to the "created_by" field.
+func (m *QuotaNetPayoutBatchMutation) ResetCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+	delete(m.clearedFields, quotanetpayoutbatch.FieldCreatedBy)
+}
+
+// SetApprovedBy sets the "approved_by" field.
+func (m *QuotaNetPayoutBatchMutation) SetApprovedBy(i int64) {
+	m.approved_by = &i
+	m.addapproved_by = nil
+}
+
+// ApprovedBy returns the value of the "approved_by" field in the mutation.
+func (m *QuotaNetPayoutBatchMutation) ApprovedBy() (r int64, exists bool) {
+	v := m.approved_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldApprovedBy returns the old "approved_by" field's value of the QuotaNetPayoutBatch entity.
+// If the QuotaNetPayoutBatch object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutBatchMutation) OldApprovedBy(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldApprovedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldApprovedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldApprovedBy: %w", err)
+	}
+	return oldValue.ApprovedBy, nil
+}
+
+// AddApprovedBy adds i to the "approved_by" field.
+func (m *QuotaNetPayoutBatchMutation) AddApprovedBy(i int64) {
+	if m.addapproved_by != nil {
+		*m.addapproved_by += i
+	} else {
+		m.addapproved_by = &i
+	}
+}
+
+// AddedApprovedBy returns the value that was added to the "approved_by" field in this mutation.
+func (m *QuotaNetPayoutBatchMutation) AddedApprovedBy() (r int64, exists bool) {
+	v := m.addapproved_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearApprovedBy clears the value of the "approved_by" field.
+func (m *QuotaNetPayoutBatchMutation) ClearApprovedBy() {
+	m.approved_by = nil
+	m.addapproved_by = nil
+	m.clearedFields[quotanetpayoutbatch.FieldApprovedBy] = struct{}{}
+}
+
+// ApprovedByCleared returns if the "approved_by" field was cleared in this mutation.
+func (m *QuotaNetPayoutBatchMutation) ApprovedByCleared() bool {
+	_, ok := m.clearedFields[quotanetpayoutbatch.FieldApprovedBy]
+	return ok
+}
+
+// ResetApprovedBy resets all changes to the "approved_by" field.
+func (m *QuotaNetPayoutBatchMutation) ResetApprovedBy() {
+	m.approved_by = nil
+	m.addapproved_by = nil
+	delete(m.clearedFields, quotanetpayoutbatch.FieldApprovedBy)
+}
+
+// Where appends a list predicates to the QuotaNetPayoutBatchMutation builder.
+func (m *QuotaNetPayoutBatchMutation) Where(ps ...predicate.QuotaNetPayoutBatch) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the QuotaNetPayoutBatchMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *QuotaNetPayoutBatchMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.QuotaNetPayoutBatch, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *QuotaNetPayoutBatchMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *QuotaNetPayoutBatchMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (QuotaNetPayoutBatch).
+func (m *QuotaNetPayoutBatchMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *QuotaNetPayoutBatchMutation) Fields() []string {
+	fields := make([]string, 0, 12)
+	if m.created_at != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldUpdatedAt)
+	}
+	if m.batch_key != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldBatchKey)
+	}
+	if m.window_start != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldWindowStart)
+	}
+	if m.window_end != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldWindowEnd)
+	}
+	if m.status != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldStatus)
+	}
+	if m.network != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldNetwork)
+	}
+	if m.total_token_flow != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldTotalTokenFlow)
+	}
+	if m.total_amount_cxs != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldTotalAmountCxs)
+	}
+	if m.item_count != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldItemCount)
+	}
+	if m.created_by != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldCreatedBy)
+	}
+	if m.approved_by != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldApprovedBy)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *QuotaNetPayoutBatchMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case quotanetpayoutbatch.FieldCreatedAt:
+		return m.CreatedAt()
+	case quotanetpayoutbatch.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case quotanetpayoutbatch.FieldBatchKey:
+		return m.BatchKey()
+	case quotanetpayoutbatch.FieldWindowStart:
+		return m.WindowStart()
+	case quotanetpayoutbatch.FieldWindowEnd:
+		return m.WindowEnd()
+	case quotanetpayoutbatch.FieldStatus:
+		return m.Status()
+	case quotanetpayoutbatch.FieldNetwork:
+		return m.Network()
+	case quotanetpayoutbatch.FieldTotalTokenFlow:
+		return m.TotalTokenFlow()
+	case quotanetpayoutbatch.FieldTotalAmountCxs:
+		return m.TotalAmountCxs()
+	case quotanetpayoutbatch.FieldItemCount:
+		return m.ItemCount()
+	case quotanetpayoutbatch.FieldCreatedBy:
+		return m.CreatedBy()
+	case quotanetpayoutbatch.FieldApprovedBy:
+		return m.ApprovedBy()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *QuotaNetPayoutBatchMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case quotanetpayoutbatch.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case quotanetpayoutbatch.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case quotanetpayoutbatch.FieldBatchKey:
+		return m.OldBatchKey(ctx)
+	case quotanetpayoutbatch.FieldWindowStart:
+		return m.OldWindowStart(ctx)
+	case quotanetpayoutbatch.FieldWindowEnd:
+		return m.OldWindowEnd(ctx)
+	case quotanetpayoutbatch.FieldStatus:
+		return m.OldStatus(ctx)
+	case quotanetpayoutbatch.FieldNetwork:
+		return m.OldNetwork(ctx)
+	case quotanetpayoutbatch.FieldTotalTokenFlow:
+		return m.OldTotalTokenFlow(ctx)
+	case quotanetpayoutbatch.FieldTotalAmountCxs:
+		return m.OldTotalAmountCxs(ctx)
+	case quotanetpayoutbatch.FieldItemCount:
+		return m.OldItemCount(ctx)
+	case quotanetpayoutbatch.FieldCreatedBy:
+		return m.OldCreatedBy(ctx)
+	case quotanetpayoutbatch.FieldApprovedBy:
+		return m.OldApprovedBy(ctx)
+	}
+	return nil, fmt.Errorf("unknown QuotaNetPayoutBatch field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *QuotaNetPayoutBatchMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case quotanetpayoutbatch.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case quotanetpayoutbatch.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case quotanetpayoutbatch.FieldBatchKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBatchKey(v)
+		return nil
+	case quotanetpayoutbatch.FieldWindowStart:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWindowStart(v)
+		return nil
+	case quotanetpayoutbatch.FieldWindowEnd:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWindowEnd(v)
+		return nil
+	case quotanetpayoutbatch.FieldStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case quotanetpayoutbatch.FieldNetwork:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNetwork(v)
+		return nil
+	case quotanetpayoutbatch.FieldTotalTokenFlow:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTotalTokenFlow(v)
+		return nil
+	case quotanetpayoutbatch.FieldTotalAmountCxs:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTotalAmountCxs(v)
+		return nil
+	case quotanetpayoutbatch.FieldItemCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemCount(v)
+		return nil
+	case quotanetpayoutbatch.FieldCreatedBy:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedBy(v)
+		return nil
+	case quotanetpayoutbatch.FieldApprovedBy:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetApprovedBy(v)
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetPayoutBatch field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *QuotaNetPayoutBatchMutation) AddedFields() []string {
+	var fields []string
+	if m.addtotal_token_flow != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldTotalTokenFlow)
+	}
+	if m.addtotal_amount_cxs != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldTotalAmountCxs)
+	}
+	if m.additem_count != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldItemCount)
+	}
+	if m.addcreated_by != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldCreatedBy)
+	}
+	if m.addapproved_by != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldApprovedBy)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *QuotaNetPayoutBatchMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case quotanetpayoutbatch.FieldTotalTokenFlow:
+		return m.AddedTotalTokenFlow()
+	case quotanetpayoutbatch.FieldTotalAmountCxs:
+		return m.AddedTotalAmountCxs()
+	case quotanetpayoutbatch.FieldItemCount:
+		return m.AddedItemCount()
+	case quotanetpayoutbatch.FieldCreatedBy:
+		return m.AddedCreatedBy()
+	case quotanetpayoutbatch.FieldApprovedBy:
+		return m.AddedApprovedBy()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *QuotaNetPayoutBatchMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case quotanetpayoutbatch.FieldTotalTokenFlow:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTotalTokenFlow(v)
+		return nil
+	case quotanetpayoutbatch.FieldTotalAmountCxs:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTotalAmountCxs(v)
+		return nil
+	case quotanetpayoutbatch.FieldItemCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddItemCount(v)
+		return nil
+	case quotanetpayoutbatch.FieldCreatedBy:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatedBy(v)
+		return nil
+	case quotanetpayoutbatch.FieldApprovedBy:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddApprovedBy(v)
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetPayoutBatch numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *QuotaNetPayoutBatchMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(quotanetpayoutbatch.FieldCreatedBy) {
+		fields = append(fields, quotanetpayoutbatch.FieldCreatedBy)
+	}
+	if m.FieldCleared(quotanetpayoutbatch.FieldApprovedBy) {
+		fields = append(fields, quotanetpayoutbatch.FieldApprovedBy)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *QuotaNetPayoutBatchMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *QuotaNetPayoutBatchMutation) ClearField(name string) error {
+	switch name {
+	case quotanetpayoutbatch.FieldCreatedBy:
+		m.ClearCreatedBy()
+		return nil
+	case quotanetpayoutbatch.FieldApprovedBy:
+		m.ClearApprovedBy()
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetPayoutBatch nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *QuotaNetPayoutBatchMutation) ResetField(name string) error {
+	switch name {
+	case quotanetpayoutbatch.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case quotanetpayoutbatch.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case quotanetpayoutbatch.FieldBatchKey:
+		m.ResetBatchKey()
+		return nil
+	case quotanetpayoutbatch.FieldWindowStart:
+		m.ResetWindowStart()
+		return nil
+	case quotanetpayoutbatch.FieldWindowEnd:
+		m.ResetWindowEnd()
+		return nil
+	case quotanetpayoutbatch.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case quotanetpayoutbatch.FieldNetwork:
+		m.ResetNetwork()
+		return nil
+	case quotanetpayoutbatch.FieldTotalTokenFlow:
+		m.ResetTotalTokenFlow()
+		return nil
+	case quotanetpayoutbatch.FieldTotalAmountCxs:
+		m.ResetTotalAmountCxs()
+		return nil
+	case quotanetpayoutbatch.FieldItemCount:
+		m.ResetItemCount()
+		return nil
+	case quotanetpayoutbatch.FieldCreatedBy:
+		m.ResetCreatedBy()
+		return nil
+	case quotanetpayoutbatch.FieldApprovedBy:
+		m.ResetApprovedBy()
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetPayoutBatch field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *QuotaNetPayoutBatchMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *QuotaNetPayoutBatchMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *QuotaNetPayoutBatchMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *QuotaNetPayoutBatchMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *QuotaNetPayoutBatchMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *QuotaNetPayoutBatchMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *QuotaNetPayoutBatchMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown QuotaNetPayoutBatch unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *QuotaNetPayoutBatchMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown QuotaNetPayoutBatch edge %s", name)
+}
+
+// QuotaNetPayoutItemMutation represents an operation that mutates the QuotaNetPayoutItem nodes in the graph.
+type QuotaNetPayoutItemMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *int64
+	created_at     *time.Time
+	updated_at     *time.Time
+	item_key       *string
+	batch_id       *int64
+	addbatch_id    *int64
+	node_id        *int64
+	addnode_id     *int64
+	wallet_address *string
+	token_flow     *int64
+	addtoken_flow  *int64
+	amount_cxs     *float64
+	addamount_cxs  *float64
+	status         *string
+	tx_hash        *string
+	error_message  *string
+	finalized_at   *time.Time
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*QuotaNetPayoutItem, error)
+	predicates     []predicate.QuotaNetPayoutItem
+}
+
+var _ ent.Mutation = (*QuotaNetPayoutItemMutation)(nil)
+
+// quotanetpayoutitemOption allows management of the mutation configuration using functional options.
+type quotanetpayoutitemOption func(*QuotaNetPayoutItemMutation)
+
+// newQuotaNetPayoutItemMutation creates new mutation for the QuotaNetPayoutItem entity.
+func newQuotaNetPayoutItemMutation(c config, op Op, opts ...quotanetpayoutitemOption) *QuotaNetPayoutItemMutation {
+	m := &QuotaNetPayoutItemMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeQuotaNetPayoutItem,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withQuotaNetPayoutItemID sets the ID field of the mutation.
+func withQuotaNetPayoutItemID(id int64) quotanetpayoutitemOption {
+	return func(m *QuotaNetPayoutItemMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *QuotaNetPayoutItem
+		)
+		m.oldValue = func(ctx context.Context) (*QuotaNetPayoutItem, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().QuotaNetPayoutItem.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withQuotaNetPayoutItem sets the old QuotaNetPayoutItem of the mutation.
+func withQuotaNetPayoutItem(node *QuotaNetPayoutItem) quotanetpayoutitemOption {
+	return func(m *QuotaNetPayoutItemMutation) {
+		m.oldValue = func(context.Context) (*QuotaNetPayoutItem, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m QuotaNetPayoutItemMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m QuotaNetPayoutItemMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *QuotaNetPayoutItemMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *QuotaNetPayoutItemMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().QuotaNetPayoutItem.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *QuotaNetPayoutItemMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *QuotaNetPayoutItemMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the QuotaNetPayoutItem entity.
+// If the QuotaNetPayoutItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutItemMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *QuotaNetPayoutItemMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *QuotaNetPayoutItemMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *QuotaNetPayoutItemMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the QuotaNetPayoutItem entity.
+// If the QuotaNetPayoutItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutItemMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *QuotaNetPayoutItemMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetItemKey sets the "item_key" field.
+func (m *QuotaNetPayoutItemMutation) SetItemKey(s string) {
+	m.item_key = &s
+}
+
+// ItemKey returns the value of the "item_key" field in the mutation.
+func (m *QuotaNetPayoutItemMutation) ItemKey() (r string, exists bool) {
+	v := m.item_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemKey returns the old "item_key" field's value of the QuotaNetPayoutItem entity.
+// If the QuotaNetPayoutItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutItemMutation) OldItemKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemKey: %w", err)
+	}
+	return oldValue.ItemKey, nil
+}
+
+// ResetItemKey resets all changes to the "item_key" field.
+func (m *QuotaNetPayoutItemMutation) ResetItemKey() {
+	m.item_key = nil
+}
+
+// SetBatchID sets the "batch_id" field.
+func (m *QuotaNetPayoutItemMutation) SetBatchID(i int64) {
+	m.batch_id = &i
+	m.addbatch_id = nil
+}
+
+// BatchID returns the value of the "batch_id" field in the mutation.
+func (m *QuotaNetPayoutItemMutation) BatchID() (r int64, exists bool) {
+	v := m.batch_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBatchID returns the old "batch_id" field's value of the QuotaNetPayoutItem entity.
+// If the QuotaNetPayoutItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutItemMutation) OldBatchID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBatchID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBatchID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBatchID: %w", err)
+	}
+	return oldValue.BatchID, nil
+}
+
+// AddBatchID adds i to the "batch_id" field.
+func (m *QuotaNetPayoutItemMutation) AddBatchID(i int64) {
+	if m.addbatch_id != nil {
+		*m.addbatch_id += i
+	} else {
+		m.addbatch_id = &i
+	}
+}
+
+// AddedBatchID returns the value that was added to the "batch_id" field in this mutation.
+func (m *QuotaNetPayoutItemMutation) AddedBatchID() (r int64, exists bool) {
+	v := m.addbatch_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBatchID resets all changes to the "batch_id" field.
+func (m *QuotaNetPayoutItemMutation) ResetBatchID() {
+	m.batch_id = nil
+	m.addbatch_id = nil
+}
+
+// SetNodeID sets the "node_id" field.
+func (m *QuotaNetPayoutItemMutation) SetNodeID(i int64) {
+	m.node_id = &i
+	m.addnode_id = nil
+}
+
+// NodeID returns the value of the "node_id" field in the mutation.
+func (m *QuotaNetPayoutItemMutation) NodeID() (r int64, exists bool) {
+	v := m.node_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNodeID returns the old "node_id" field's value of the QuotaNetPayoutItem entity.
+// If the QuotaNetPayoutItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutItemMutation) OldNodeID(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNodeID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNodeID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNodeID: %w", err)
+	}
+	return oldValue.NodeID, nil
+}
+
+// AddNodeID adds i to the "node_id" field.
+func (m *QuotaNetPayoutItemMutation) AddNodeID(i int64) {
+	if m.addnode_id != nil {
+		*m.addnode_id += i
+	} else {
+		m.addnode_id = &i
+	}
+}
+
+// AddedNodeID returns the value that was added to the "node_id" field in this mutation.
+func (m *QuotaNetPayoutItemMutation) AddedNodeID() (r int64, exists bool) {
+	v := m.addnode_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearNodeID clears the value of the "node_id" field.
+func (m *QuotaNetPayoutItemMutation) ClearNodeID() {
+	m.node_id = nil
+	m.addnode_id = nil
+	m.clearedFields[quotanetpayoutitem.FieldNodeID] = struct{}{}
+}
+
+// NodeIDCleared returns if the "node_id" field was cleared in this mutation.
+func (m *QuotaNetPayoutItemMutation) NodeIDCleared() bool {
+	_, ok := m.clearedFields[quotanetpayoutitem.FieldNodeID]
+	return ok
+}
+
+// ResetNodeID resets all changes to the "node_id" field.
+func (m *QuotaNetPayoutItemMutation) ResetNodeID() {
+	m.node_id = nil
+	m.addnode_id = nil
+	delete(m.clearedFields, quotanetpayoutitem.FieldNodeID)
+}
+
+// SetWalletAddress sets the "wallet_address" field.
+func (m *QuotaNetPayoutItemMutation) SetWalletAddress(s string) {
+	m.wallet_address = &s
+}
+
+// WalletAddress returns the value of the "wallet_address" field in the mutation.
+func (m *QuotaNetPayoutItemMutation) WalletAddress() (r string, exists bool) {
+	v := m.wallet_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWalletAddress returns the old "wallet_address" field's value of the QuotaNetPayoutItem entity.
+// If the QuotaNetPayoutItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutItemMutation) OldWalletAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWalletAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWalletAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWalletAddress: %w", err)
+	}
+	return oldValue.WalletAddress, nil
+}
+
+// ResetWalletAddress resets all changes to the "wallet_address" field.
+func (m *QuotaNetPayoutItemMutation) ResetWalletAddress() {
+	m.wallet_address = nil
+}
+
+// SetTokenFlow sets the "token_flow" field.
+func (m *QuotaNetPayoutItemMutation) SetTokenFlow(i int64) {
+	m.token_flow = &i
+	m.addtoken_flow = nil
+}
+
+// TokenFlow returns the value of the "token_flow" field in the mutation.
+func (m *QuotaNetPayoutItemMutation) TokenFlow() (r int64, exists bool) {
+	v := m.token_flow
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTokenFlow returns the old "token_flow" field's value of the QuotaNetPayoutItem entity.
+// If the QuotaNetPayoutItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutItemMutation) OldTokenFlow(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTokenFlow is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTokenFlow requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTokenFlow: %w", err)
+	}
+	return oldValue.TokenFlow, nil
+}
+
+// AddTokenFlow adds i to the "token_flow" field.
+func (m *QuotaNetPayoutItemMutation) AddTokenFlow(i int64) {
+	if m.addtoken_flow != nil {
+		*m.addtoken_flow += i
+	} else {
+		m.addtoken_flow = &i
+	}
+}
+
+// AddedTokenFlow returns the value that was added to the "token_flow" field in this mutation.
+func (m *QuotaNetPayoutItemMutation) AddedTokenFlow() (r int64, exists bool) {
+	v := m.addtoken_flow
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTokenFlow resets all changes to the "token_flow" field.
+func (m *QuotaNetPayoutItemMutation) ResetTokenFlow() {
+	m.token_flow = nil
+	m.addtoken_flow = nil
+}
+
+// SetAmountCxs sets the "amount_cxs" field.
+func (m *QuotaNetPayoutItemMutation) SetAmountCxs(f float64) {
+	m.amount_cxs = &f
+	m.addamount_cxs = nil
+}
+
+// AmountCxs returns the value of the "amount_cxs" field in the mutation.
+func (m *QuotaNetPayoutItemMutation) AmountCxs() (r float64, exists bool) {
+	v := m.amount_cxs
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAmountCxs returns the old "amount_cxs" field's value of the QuotaNetPayoutItem entity.
+// If the QuotaNetPayoutItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutItemMutation) OldAmountCxs(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAmountCxs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAmountCxs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAmountCxs: %w", err)
+	}
+	return oldValue.AmountCxs, nil
+}
+
+// AddAmountCxs adds f to the "amount_cxs" field.
+func (m *QuotaNetPayoutItemMutation) AddAmountCxs(f float64) {
+	if m.addamount_cxs != nil {
+		*m.addamount_cxs += f
+	} else {
+		m.addamount_cxs = &f
+	}
+}
+
+// AddedAmountCxs returns the value that was added to the "amount_cxs" field in this mutation.
+func (m *QuotaNetPayoutItemMutation) AddedAmountCxs() (r float64, exists bool) {
+	v := m.addamount_cxs
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAmountCxs resets all changes to the "amount_cxs" field.
+func (m *QuotaNetPayoutItemMutation) ResetAmountCxs() {
+	m.amount_cxs = nil
+	m.addamount_cxs = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *QuotaNetPayoutItemMutation) SetStatus(s string) {
+	m.status = &s
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *QuotaNetPayoutItemMutation) Status() (r string, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the QuotaNetPayoutItem entity.
+// If the QuotaNetPayoutItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutItemMutation) OldStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *QuotaNetPayoutItemMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetTxHash sets the "tx_hash" field.
+func (m *QuotaNetPayoutItemMutation) SetTxHash(s string) {
+	m.tx_hash = &s
+}
+
+// TxHash returns the value of the "tx_hash" field in the mutation.
+func (m *QuotaNetPayoutItemMutation) TxHash() (r string, exists bool) {
+	v := m.tx_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTxHash returns the old "tx_hash" field's value of the QuotaNetPayoutItem entity.
+// If the QuotaNetPayoutItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutItemMutation) OldTxHash(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTxHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTxHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTxHash: %w", err)
+	}
+	return oldValue.TxHash, nil
+}
+
+// ClearTxHash clears the value of the "tx_hash" field.
+func (m *QuotaNetPayoutItemMutation) ClearTxHash() {
+	m.tx_hash = nil
+	m.clearedFields[quotanetpayoutitem.FieldTxHash] = struct{}{}
+}
+
+// TxHashCleared returns if the "tx_hash" field was cleared in this mutation.
+func (m *QuotaNetPayoutItemMutation) TxHashCleared() bool {
+	_, ok := m.clearedFields[quotanetpayoutitem.FieldTxHash]
+	return ok
+}
+
+// ResetTxHash resets all changes to the "tx_hash" field.
+func (m *QuotaNetPayoutItemMutation) ResetTxHash() {
+	m.tx_hash = nil
+	delete(m.clearedFields, quotanetpayoutitem.FieldTxHash)
+}
+
+// SetErrorMessage sets the "error_message" field.
+func (m *QuotaNetPayoutItemMutation) SetErrorMessage(s string) {
+	m.error_message = &s
+}
+
+// ErrorMessage returns the value of the "error_message" field in the mutation.
+func (m *QuotaNetPayoutItemMutation) ErrorMessage() (r string, exists bool) {
+	v := m.error_message
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldErrorMessage returns the old "error_message" field's value of the QuotaNetPayoutItem entity.
+// If the QuotaNetPayoutItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutItemMutation) OldErrorMessage(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldErrorMessage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldErrorMessage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldErrorMessage: %w", err)
+	}
+	return oldValue.ErrorMessage, nil
+}
+
+// ClearErrorMessage clears the value of the "error_message" field.
+func (m *QuotaNetPayoutItemMutation) ClearErrorMessage() {
+	m.error_message = nil
+	m.clearedFields[quotanetpayoutitem.FieldErrorMessage] = struct{}{}
+}
+
+// ErrorMessageCleared returns if the "error_message" field was cleared in this mutation.
+func (m *QuotaNetPayoutItemMutation) ErrorMessageCleared() bool {
+	_, ok := m.clearedFields[quotanetpayoutitem.FieldErrorMessage]
+	return ok
+}
+
+// ResetErrorMessage resets all changes to the "error_message" field.
+func (m *QuotaNetPayoutItemMutation) ResetErrorMessage() {
+	m.error_message = nil
+	delete(m.clearedFields, quotanetpayoutitem.FieldErrorMessage)
+}
+
+// SetFinalizedAt sets the "finalized_at" field.
+func (m *QuotaNetPayoutItemMutation) SetFinalizedAt(t time.Time) {
+	m.finalized_at = &t
+}
+
+// FinalizedAt returns the value of the "finalized_at" field in the mutation.
+func (m *QuotaNetPayoutItemMutation) FinalizedAt() (r time.Time, exists bool) {
+	v := m.finalized_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFinalizedAt returns the old "finalized_at" field's value of the QuotaNetPayoutItem entity.
+// If the QuotaNetPayoutItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutItemMutation) OldFinalizedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFinalizedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFinalizedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFinalizedAt: %w", err)
+	}
+	return oldValue.FinalizedAt, nil
+}
+
+// ClearFinalizedAt clears the value of the "finalized_at" field.
+func (m *QuotaNetPayoutItemMutation) ClearFinalizedAt() {
+	m.finalized_at = nil
+	m.clearedFields[quotanetpayoutitem.FieldFinalizedAt] = struct{}{}
+}
+
+// FinalizedAtCleared returns if the "finalized_at" field was cleared in this mutation.
+func (m *QuotaNetPayoutItemMutation) FinalizedAtCleared() bool {
+	_, ok := m.clearedFields[quotanetpayoutitem.FieldFinalizedAt]
+	return ok
+}
+
+// ResetFinalizedAt resets all changes to the "finalized_at" field.
+func (m *QuotaNetPayoutItemMutation) ResetFinalizedAt() {
+	m.finalized_at = nil
+	delete(m.clearedFields, quotanetpayoutitem.FieldFinalizedAt)
+}
+
+// Where appends a list predicates to the QuotaNetPayoutItemMutation builder.
+func (m *QuotaNetPayoutItemMutation) Where(ps ...predicate.QuotaNetPayoutItem) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the QuotaNetPayoutItemMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *QuotaNetPayoutItemMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.QuotaNetPayoutItem, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *QuotaNetPayoutItemMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *QuotaNetPayoutItemMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (QuotaNetPayoutItem).
+func (m *QuotaNetPayoutItemMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *QuotaNetPayoutItemMutation) Fields() []string {
+	fields := make([]string, 0, 12)
+	if m.created_at != nil {
+		fields = append(fields, quotanetpayoutitem.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, quotanetpayoutitem.FieldUpdatedAt)
+	}
+	if m.item_key != nil {
+		fields = append(fields, quotanetpayoutitem.FieldItemKey)
+	}
+	if m.batch_id != nil {
+		fields = append(fields, quotanetpayoutitem.FieldBatchID)
+	}
+	if m.node_id != nil {
+		fields = append(fields, quotanetpayoutitem.FieldNodeID)
+	}
+	if m.wallet_address != nil {
+		fields = append(fields, quotanetpayoutitem.FieldWalletAddress)
+	}
+	if m.token_flow != nil {
+		fields = append(fields, quotanetpayoutitem.FieldTokenFlow)
+	}
+	if m.amount_cxs != nil {
+		fields = append(fields, quotanetpayoutitem.FieldAmountCxs)
+	}
+	if m.status != nil {
+		fields = append(fields, quotanetpayoutitem.FieldStatus)
+	}
+	if m.tx_hash != nil {
+		fields = append(fields, quotanetpayoutitem.FieldTxHash)
+	}
+	if m.error_message != nil {
+		fields = append(fields, quotanetpayoutitem.FieldErrorMessage)
+	}
+	if m.finalized_at != nil {
+		fields = append(fields, quotanetpayoutitem.FieldFinalizedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *QuotaNetPayoutItemMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case quotanetpayoutitem.FieldCreatedAt:
+		return m.CreatedAt()
+	case quotanetpayoutitem.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case quotanetpayoutitem.FieldItemKey:
+		return m.ItemKey()
+	case quotanetpayoutitem.FieldBatchID:
+		return m.BatchID()
+	case quotanetpayoutitem.FieldNodeID:
+		return m.NodeID()
+	case quotanetpayoutitem.FieldWalletAddress:
+		return m.WalletAddress()
+	case quotanetpayoutitem.FieldTokenFlow:
+		return m.TokenFlow()
+	case quotanetpayoutitem.FieldAmountCxs:
+		return m.AmountCxs()
+	case quotanetpayoutitem.FieldStatus:
+		return m.Status()
+	case quotanetpayoutitem.FieldTxHash:
+		return m.TxHash()
+	case quotanetpayoutitem.FieldErrorMessage:
+		return m.ErrorMessage()
+	case quotanetpayoutitem.FieldFinalizedAt:
+		return m.FinalizedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *QuotaNetPayoutItemMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case quotanetpayoutitem.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case quotanetpayoutitem.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case quotanetpayoutitem.FieldItemKey:
+		return m.OldItemKey(ctx)
+	case quotanetpayoutitem.FieldBatchID:
+		return m.OldBatchID(ctx)
+	case quotanetpayoutitem.FieldNodeID:
+		return m.OldNodeID(ctx)
+	case quotanetpayoutitem.FieldWalletAddress:
+		return m.OldWalletAddress(ctx)
+	case quotanetpayoutitem.FieldTokenFlow:
+		return m.OldTokenFlow(ctx)
+	case quotanetpayoutitem.FieldAmountCxs:
+		return m.OldAmountCxs(ctx)
+	case quotanetpayoutitem.FieldStatus:
+		return m.OldStatus(ctx)
+	case quotanetpayoutitem.FieldTxHash:
+		return m.OldTxHash(ctx)
+	case quotanetpayoutitem.FieldErrorMessage:
+		return m.OldErrorMessage(ctx)
+	case quotanetpayoutitem.FieldFinalizedAt:
+		return m.OldFinalizedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown QuotaNetPayoutItem field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *QuotaNetPayoutItemMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case quotanetpayoutitem.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case quotanetpayoutitem.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case quotanetpayoutitem.FieldItemKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemKey(v)
+		return nil
+	case quotanetpayoutitem.FieldBatchID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBatchID(v)
+		return nil
+	case quotanetpayoutitem.FieldNodeID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNodeID(v)
+		return nil
+	case quotanetpayoutitem.FieldWalletAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWalletAddress(v)
+		return nil
+	case quotanetpayoutitem.FieldTokenFlow:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTokenFlow(v)
+		return nil
+	case quotanetpayoutitem.FieldAmountCxs:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAmountCxs(v)
+		return nil
+	case quotanetpayoutitem.FieldStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case quotanetpayoutitem.FieldTxHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTxHash(v)
+		return nil
+	case quotanetpayoutitem.FieldErrorMessage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetErrorMessage(v)
+		return nil
+	case quotanetpayoutitem.FieldFinalizedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFinalizedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetPayoutItem field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *QuotaNetPayoutItemMutation) AddedFields() []string {
+	var fields []string
+	if m.addbatch_id != nil {
+		fields = append(fields, quotanetpayoutitem.FieldBatchID)
+	}
+	if m.addnode_id != nil {
+		fields = append(fields, quotanetpayoutitem.FieldNodeID)
+	}
+	if m.addtoken_flow != nil {
+		fields = append(fields, quotanetpayoutitem.FieldTokenFlow)
+	}
+	if m.addamount_cxs != nil {
+		fields = append(fields, quotanetpayoutitem.FieldAmountCxs)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *QuotaNetPayoutItemMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case quotanetpayoutitem.FieldBatchID:
+		return m.AddedBatchID()
+	case quotanetpayoutitem.FieldNodeID:
+		return m.AddedNodeID()
+	case quotanetpayoutitem.FieldTokenFlow:
+		return m.AddedTokenFlow()
+	case quotanetpayoutitem.FieldAmountCxs:
+		return m.AddedAmountCxs()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *QuotaNetPayoutItemMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case quotanetpayoutitem.FieldBatchID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBatchID(v)
+		return nil
+	case quotanetpayoutitem.FieldNodeID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNodeID(v)
+		return nil
+	case quotanetpayoutitem.FieldTokenFlow:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTokenFlow(v)
+		return nil
+	case quotanetpayoutitem.FieldAmountCxs:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAmountCxs(v)
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetPayoutItem numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *QuotaNetPayoutItemMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(quotanetpayoutitem.FieldNodeID) {
+		fields = append(fields, quotanetpayoutitem.FieldNodeID)
+	}
+	if m.FieldCleared(quotanetpayoutitem.FieldTxHash) {
+		fields = append(fields, quotanetpayoutitem.FieldTxHash)
+	}
+	if m.FieldCleared(quotanetpayoutitem.FieldErrorMessage) {
+		fields = append(fields, quotanetpayoutitem.FieldErrorMessage)
+	}
+	if m.FieldCleared(quotanetpayoutitem.FieldFinalizedAt) {
+		fields = append(fields, quotanetpayoutitem.FieldFinalizedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *QuotaNetPayoutItemMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *QuotaNetPayoutItemMutation) ClearField(name string) error {
+	switch name {
+	case quotanetpayoutitem.FieldNodeID:
+		m.ClearNodeID()
+		return nil
+	case quotanetpayoutitem.FieldTxHash:
+		m.ClearTxHash()
+		return nil
+	case quotanetpayoutitem.FieldErrorMessage:
+		m.ClearErrorMessage()
+		return nil
+	case quotanetpayoutitem.FieldFinalizedAt:
+		m.ClearFinalizedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetPayoutItem nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *QuotaNetPayoutItemMutation) ResetField(name string) error {
+	switch name {
+	case quotanetpayoutitem.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case quotanetpayoutitem.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case quotanetpayoutitem.FieldItemKey:
+		m.ResetItemKey()
+		return nil
+	case quotanetpayoutitem.FieldBatchID:
+		m.ResetBatchID()
+		return nil
+	case quotanetpayoutitem.FieldNodeID:
+		m.ResetNodeID()
+		return nil
+	case quotanetpayoutitem.FieldWalletAddress:
+		m.ResetWalletAddress()
+		return nil
+	case quotanetpayoutitem.FieldTokenFlow:
+		m.ResetTokenFlow()
+		return nil
+	case quotanetpayoutitem.FieldAmountCxs:
+		m.ResetAmountCxs()
+		return nil
+	case quotanetpayoutitem.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case quotanetpayoutitem.FieldTxHash:
+		m.ResetTxHash()
+		return nil
+	case quotanetpayoutitem.FieldErrorMessage:
+		m.ResetErrorMessage()
+		return nil
+	case quotanetpayoutitem.FieldFinalizedAt:
+		m.ResetFinalizedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetPayoutItem field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *QuotaNetPayoutItemMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *QuotaNetPayoutItemMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *QuotaNetPayoutItemMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *QuotaNetPayoutItemMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *QuotaNetPayoutItemMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *QuotaNetPayoutItemMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *QuotaNetPayoutItemMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown QuotaNetPayoutItem unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *QuotaNetPayoutItemMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown QuotaNetPayoutItem edge %s", name)
+}
+
+// QuotaNetTaskMutation represents an operation that mutates the QuotaNetTask nodes in the graph.
+type QuotaNetTaskMutation struct {
+	config
+	op                   Op
+	typ                  string
+	id                   *int64
+	created_at           *time.Time
+	updated_at           *time.Time
+	task_id              *string
+	request_id           *string
+	user_id              *int64
+	adduser_id           *int64
+	api_key_id           *int64
+	addapi_key_id        *int64
+	group_id             *int64
+	addgroup_id          *int64
+	account_id           *int64
+	addaccount_id        *int64
+	node_id              *int64
+	addnode_id           *int64
+	session_id           *string
+	platform             *string
+	endpoint             *string
+	model                *string
+	stream               *bool
+	status               *string
+	error_code           *string
+	error_message        *string
+	prompt_tokens        *int
+	addprompt_tokens     *int
+	completion_tokens    *int
+	addcompletion_tokens *int
+	total_tokens         *int
+	addtotal_tokens      *int
+	first_token_ms       *int
+	addfirst_token_ms    *int
+	duration_ms          *int
+	addduration_ms       *int
+	dispatched_at        *time.Time
+	completed_at         *time.Time
+	clearedFields        map[string]struct{}
+	done                 bool
+	oldValue             func(context.Context) (*QuotaNetTask, error)
+	predicates           []predicate.QuotaNetTask
+}
+
+var _ ent.Mutation = (*QuotaNetTaskMutation)(nil)
+
+// quotanettaskOption allows management of the mutation configuration using functional options.
+type quotanettaskOption func(*QuotaNetTaskMutation)
+
+// newQuotaNetTaskMutation creates new mutation for the QuotaNetTask entity.
+func newQuotaNetTaskMutation(c config, op Op, opts ...quotanettaskOption) *QuotaNetTaskMutation {
+	m := &QuotaNetTaskMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeQuotaNetTask,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withQuotaNetTaskID sets the ID field of the mutation.
+func withQuotaNetTaskID(id int64) quotanettaskOption {
+	return func(m *QuotaNetTaskMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *QuotaNetTask
+		)
+		m.oldValue = func(ctx context.Context) (*QuotaNetTask, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().QuotaNetTask.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withQuotaNetTask sets the old QuotaNetTask of the mutation.
+func withQuotaNetTask(node *QuotaNetTask) quotanettaskOption {
+	return func(m *QuotaNetTaskMutation) {
+		m.oldValue = func(context.Context) (*QuotaNetTask, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m QuotaNetTaskMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m QuotaNetTaskMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *QuotaNetTaskMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *QuotaNetTaskMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().QuotaNetTask.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *QuotaNetTaskMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *QuotaNetTaskMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *QuotaNetTaskMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *QuotaNetTaskMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *QuotaNetTaskMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *QuotaNetTaskMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetTaskID sets the "task_id" field.
+func (m *QuotaNetTaskMutation) SetTaskID(s string) {
+	m.task_id = &s
+}
+
+// TaskID returns the value of the "task_id" field in the mutation.
+func (m *QuotaNetTaskMutation) TaskID() (r string, exists bool) {
+	v := m.task_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTaskID returns the old "task_id" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldTaskID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTaskID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTaskID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTaskID: %w", err)
+	}
+	return oldValue.TaskID, nil
+}
+
+// ResetTaskID resets all changes to the "task_id" field.
+func (m *QuotaNetTaskMutation) ResetTaskID() {
+	m.task_id = nil
+}
+
+// SetRequestID sets the "request_id" field.
+func (m *QuotaNetTaskMutation) SetRequestID(s string) {
+	m.request_id = &s
+}
+
+// RequestID returns the value of the "request_id" field in the mutation.
+func (m *QuotaNetTaskMutation) RequestID() (r string, exists bool) {
+	v := m.request_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequestID returns the old "request_id" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldRequestID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRequestID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRequestID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequestID: %w", err)
+	}
+	return oldValue.RequestID, nil
+}
+
+// ResetRequestID resets all changes to the "request_id" field.
+func (m *QuotaNetTaskMutation) ResetRequestID() {
+	m.request_id = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *QuotaNetTaskMutation) SetUserID(i int64) {
+	m.user_id = &i
+	m.adduser_id = nil
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *QuotaNetTaskMutation) UserID() (r int64, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldUserID(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// AddUserID adds i to the "user_id" field.
+func (m *QuotaNetTaskMutation) AddUserID(i int64) {
+	if m.adduser_id != nil {
+		*m.adduser_id += i
+	} else {
+		m.adduser_id = &i
+	}
+}
+
+// AddedUserID returns the value that was added to the "user_id" field in this mutation.
+func (m *QuotaNetTaskMutation) AddedUserID() (r int64, exists bool) {
+	v := m.adduser_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (m *QuotaNetTaskMutation) ClearUserID() {
+	m.user_id = nil
+	m.adduser_id = nil
+	m.clearedFields[quotanettask.FieldUserID] = struct{}{}
+}
+
+// UserIDCleared returns if the "user_id" field was cleared in this mutation.
+func (m *QuotaNetTaskMutation) UserIDCleared() bool {
+	_, ok := m.clearedFields[quotanettask.FieldUserID]
+	return ok
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *QuotaNetTaskMutation) ResetUserID() {
+	m.user_id = nil
+	m.adduser_id = nil
+	delete(m.clearedFields, quotanettask.FieldUserID)
+}
+
+// SetAPIKeyID sets the "api_key_id" field.
+func (m *QuotaNetTaskMutation) SetAPIKeyID(i int64) {
+	m.api_key_id = &i
+	m.addapi_key_id = nil
+}
+
+// APIKeyID returns the value of the "api_key_id" field in the mutation.
+func (m *QuotaNetTaskMutation) APIKeyID() (r int64, exists bool) {
+	v := m.api_key_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAPIKeyID returns the old "api_key_id" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldAPIKeyID(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAPIKeyID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAPIKeyID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAPIKeyID: %w", err)
+	}
+	return oldValue.APIKeyID, nil
+}
+
+// AddAPIKeyID adds i to the "api_key_id" field.
+func (m *QuotaNetTaskMutation) AddAPIKeyID(i int64) {
+	if m.addapi_key_id != nil {
+		*m.addapi_key_id += i
+	} else {
+		m.addapi_key_id = &i
+	}
+}
+
+// AddedAPIKeyID returns the value that was added to the "api_key_id" field in this mutation.
+func (m *QuotaNetTaskMutation) AddedAPIKeyID() (r int64, exists bool) {
+	v := m.addapi_key_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearAPIKeyID clears the value of the "api_key_id" field.
+func (m *QuotaNetTaskMutation) ClearAPIKeyID() {
+	m.api_key_id = nil
+	m.addapi_key_id = nil
+	m.clearedFields[quotanettask.FieldAPIKeyID] = struct{}{}
+}
+
+// APIKeyIDCleared returns if the "api_key_id" field was cleared in this mutation.
+func (m *QuotaNetTaskMutation) APIKeyIDCleared() bool {
+	_, ok := m.clearedFields[quotanettask.FieldAPIKeyID]
+	return ok
+}
+
+// ResetAPIKeyID resets all changes to the "api_key_id" field.
+func (m *QuotaNetTaskMutation) ResetAPIKeyID() {
+	m.api_key_id = nil
+	m.addapi_key_id = nil
+	delete(m.clearedFields, quotanettask.FieldAPIKeyID)
+}
+
+// SetGroupID sets the "group_id" field.
+func (m *QuotaNetTaskMutation) SetGroupID(i int64) {
+	m.group_id = &i
+	m.addgroup_id = nil
+}
+
+// GroupID returns the value of the "group_id" field in the mutation.
+func (m *QuotaNetTaskMutation) GroupID() (r int64, exists bool) {
+	v := m.group_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGroupID returns the old "group_id" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldGroupID(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGroupID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGroupID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGroupID: %w", err)
+	}
+	return oldValue.GroupID, nil
+}
+
+// AddGroupID adds i to the "group_id" field.
+func (m *QuotaNetTaskMutation) AddGroupID(i int64) {
+	if m.addgroup_id != nil {
+		*m.addgroup_id += i
+	} else {
+		m.addgroup_id = &i
+	}
+}
+
+// AddedGroupID returns the value that was added to the "group_id" field in this mutation.
+func (m *QuotaNetTaskMutation) AddedGroupID() (r int64, exists bool) {
+	v := m.addgroup_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGroupID clears the value of the "group_id" field.
+func (m *QuotaNetTaskMutation) ClearGroupID() {
+	m.group_id = nil
+	m.addgroup_id = nil
+	m.clearedFields[quotanettask.FieldGroupID] = struct{}{}
+}
+
+// GroupIDCleared returns if the "group_id" field was cleared in this mutation.
+func (m *QuotaNetTaskMutation) GroupIDCleared() bool {
+	_, ok := m.clearedFields[quotanettask.FieldGroupID]
+	return ok
+}
+
+// ResetGroupID resets all changes to the "group_id" field.
+func (m *QuotaNetTaskMutation) ResetGroupID() {
+	m.group_id = nil
+	m.addgroup_id = nil
+	delete(m.clearedFields, quotanettask.FieldGroupID)
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *QuotaNetTaskMutation) SetAccountID(i int64) {
+	m.account_id = &i
+	m.addaccount_id = nil
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *QuotaNetTaskMutation) AccountID() (r int64, exists bool) {
+	v := m.account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldAccountID(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// AddAccountID adds i to the "account_id" field.
+func (m *QuotaNetTaskMutation) AddAccountID(i int64) {
+	if m.addaccount_id != nil {
+		*m.addaccount_id += i
+	} else {
+		m.addaccount_id = &i
+	}
+}
+
+// AddedAccountID returns the value that was added to the "account_id" field in this mutation.
+func (m *QuotaNetTaskMutation) AddedAccountID() (r int64, exists bool) {
+	v := m.addaccount_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearAccountID clears the value of the "account_id" field.
+func (m *QuotaNetTaskMutation) ClearAccountID() {
+	m.account_id = nil
+	m.addaccount_id = nil
+	m.clearedFields[quotanettask.FieldAccountID] = struct{}{}
+}
+
+// AccountIDCleared returns if the "account_id" field was cleared in this mutation.
+func (m *QuotaNetTaskMutation) AccountIDCleared() bool {
+	_, ok := m.clearedFields[quotanettask.FieldAccountID]
+	return ok
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *QuotaNetTaskMutation) ResetAccountID() {
+	m.account_id = nil
+	m.addaccount_id = nil
+	delete(m.clearedFields, quotanettask.FieldAccountID)
+}
+
+// SetNodeID sets the "node_id" field.
+func (m *QuotaNetTaskMutation) SetNodeID(i int64) {
+	m.node_id = &i
+	m.addnode_id = nil
+}
+
+// NodeID returns the value of the "node_id" field in the mutation.
+func (m *QuotaNetTaskMutation) NodeID() (r int64, exists bool) {
+	v := m.node_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNodeID returns the old "node_id" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldNodeID(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNodeID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNodeID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNodeID: %w", err)
+	}
+	return oldValue.NodeID, nil
+}
+
+// AddNodeID adds i to the "node_id" field.
+func (m *QuotaNetTaskMutation) AddNodeID(i int64) {
+	if m.addnode_id != nil {
+		*m.addnode_id += i
+	} else {
+		m.addnode_id = &i
+	}
+}
+
+// AddedNodeID returns the value that was added to the "node_id" field in this mutation.
+func (m *QuotaNetTaskMutation) AddedNodeID() (r int64, exists bool) {
+	v := m.addnode_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearNodeID clears the value of the "node_id" field.
+func (m *QuotaNetTaskMutation) ClearNodeID() {
+	m.node_id = nil
+	m.addnode_id = nil
+	m.clearedFields[quotanettask.FieldNodeID] = struct{}{}
+}
+
+// NodeIDCleared returns if the "node_id" field was cleared in this mutation.
+func (m *QuotaNetTaskMutation) NodeIDCleared() bool {
+	_, ok := m.clearedFields[quotanettask.FieldNodeID]
+	return ok
+}
+
+// ResetNodeID resets all changes to the "node_id" field.
+func (m *QuotaNetTaskMutation) ResetNodeID() {
+	m.node_id = nil
+	m.addnode_id = nil
+	delete(m.clearedFields, quotanettask.FieldNodeID)
+}
+
+// SetSessionID sets the "session_id" field.
+func (m *QuotaNetTaskMutation) SetSessionID(s string) {
+	m.session_id = &s
+}
+
+// SessionID returns the value of the "session_id" field in the mutation.
+func (m *QuotaNetTaskMutation) SessionID() (r string, exists bool) {
+	v := m.session_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSessionID returns the old "session_id" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldSessionID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSessionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSessionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSessionID: %w", err)
+	}
+	return oldValue.SessionID, nil
+}
+
+// ClearSessionID clears the value of the "session_id" field.
+func (m *QuotaNetTaskMutation) ClearSessionID() {
+	m.session_id = nil
+	m.clearedFields[quotanettask.FieldSessionID] = struct{}{}
+}
+
+// SessionIDCleared returns if the "session_id" field was cleared in this mutation.
+func (m *QuotaNetTaskMutation) SessionIDCleared() bool {
+	_, ok := m.clearedFields[quotanettask.FieldSessionID]
+	return ok
+}
+
+// ResetSessionID resets all changes to the "session_id" field.
+func (m *QuotaNetTaskMutation) ResetSessionID() {
+	m.session_id = nil
+	delete(m.clearedFields, quotanettask.FieldSessionID)
+}
+
+// SetPlatform sets the "platform" field.
+func (m *QuotaNetTaskMutation) SetPlatform(s string) {
+	m.platform = &s
+}
+
+// Platform returns the value of the "platform" field in the mutation.
+func (m *QuotaNetTaskMutation) Platform() (r string, exists bool) {
+	v := m.platform
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlatform returns the old "platform" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldPlatform(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlatform is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlatform requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlatform: %w", err)
+	}
+	return oldValue.Platform, nil
+}
+
+// ResetPlatform resets all changes to the "platform" field.
+func (m *QuotaNetTaskMutation) ResetPlatform() {
+	m.platform = nil
+}
+
+// SetEndpoint sets the "endpoint" field.
+func (m *QuotaNetTaskMutation) SetEndpoint(s string) {
+	m.endpoint = &s
+}
+
+// Endpoint returns the value of the "endpoint" field in the mutation.
+func (m *QuotaNetTaskMutation) Endpoint() (r string, exists bool) {
+	v := m.endpoint
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEndpoint returns the old "endpoint" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldEndpoint(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEndpoint is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEndpoint requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEndpoint: %w", err)
+	}
+	return oldValue.Endpoint, nil
+}
+
+// ResetEndpoint resets all changes to the "endpoint" field.
+func (m *QuotaNetTaskMutation) ResetEndpoint() {
+	m.endpoint = nil
+}
+
+// SetModel sets the "model" field.
+func (m *QuotaNetTaskMutation) SetModel(s string) {
+	m.model = &s
+}
+
+// Model returns the value of the "model" field in the mutation.
+func (m *QuotaNetTaskMutation) Model() (r string, exists bool) {
+	v := m.model
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModel returns the old "model" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldModel(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModel: %w", err)
+	}
+	return oldValue.Model, nil
+}
+
+// ResetModel resets all changes to the "model" field.
+func (m *QuotaNetTaskMutation) ResetModel() {
+	m.model = nil
+}
+
+// SetStream sets the "stream" field.
+func (m *QuotaNetTaskMutation) SetStream(b bool) {
+	m.stream = &b
+}
+
+// Stream returns the value of the "stream" field in the mutation.
+func (m *QuotaNetTaskMutation) Stream() (r bool, exists bool) {
+	v := m.stream
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStream returns the old "stream" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldStream(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStream is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStream requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStream: %w", err)
+	}
+	return oldValue.Stream, nil
+}
+
+// ResetStream resets all changes to the "stream" field.
+func (m *QuotaNetTaskMutation) ResetStream() {
+	m.stream = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *QuotaNetTaskMutation) SetStatus(s string) {
+	m.status = &s
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *QuotaNetTaskMutation) Status() (r string, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *QuotaNetTaskMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetErrorCode sets the "error_code" field.
+func (m *QuotaNetTaskMutation) SetErrorCode(s string) {
+	m.error_code = &s
+}
+
+// ErrorCode returns the value of the "error_code" field in the mutation.
+func (m *QuotaNetTaskMutation) ErrorCode() (r string, exists bool) {
+	v := m.error_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldErrorCode returns the old "error_code" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldErrorCode(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldErrorCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldErrorCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldErrorCode: %w", err)
+	}
+	return oldValue.ErrorCode, nil
+}
+
+// ClearErrorCode clears the value of the "error_code" field.
+func (m *QuotaNetTaskMutation) ClearErrorCode() {
+	m.error_code = nil
+	m.clearedFields[quotanettask.FieldErrorCode] = struct{}{}
+}
+
+// ErrorCodeCleared returns if the "error_code" field was cleared in this mutation.
+func (m *QuotaNetTaskMutation) ErrorCodeCleared() bool {
+	_, ok := m.clearedFields[quotanettask.FieldErrorCode]
+	return ok
+}
+
+// ResetErrorCode resets all changes to the "error_code" field.
+func (m *QuotaNetTaskMutation) ResetErrorCode() {
+	m.error_code = nil
+	delete(m.clearedFields, quotanettask.FieldErrorCode)
+}
+
+// SetErrorMessage sets the "error_message" field.
+func (m *QuotaNetTaskMutation) SetErrorMessage(s string) {
+	m.error_message = &s
+}
+
+// ErrorMessage returns the value of the "error_message" field in the mutation.
+func (m *QuotaNetTaskMutation) ErrorMessage() (r string, exists bool) {
+	v := m.error_message
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldErrorMessage returns the old "error_message" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldErrorMessage(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldErrorMessage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldErrorMessage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldErrorMessage: %w", err)
+	}
+	return oldValue.ErrorMessage, nil
+}
+
+// ClearErrorMessage clears the value of the "error_message" field.
+func (m *QuotaNetTaskMutation) ClearErrorMessage() {
+	m.error_message = nil
+	m.clearedFields[quotanettask.FieldErrorMessage] = struct{}{}
+}
+
+// ErrorMessageCleared returns if the "error_message" field was cleared in this mutation.
+func (m *QuotaNetTaskMutation) ErrorMessageCleared() bool {
+	_, ok := m.clearedFields[quotanettask.FieldErrorMessage]
+	return ok
+}
+
+// ResetErrorMessage resets all changes to the "error_message" field.
+func (m *QuotaNetTaskMutation) ResetErrorMessage() {
+	m.error_message = nil
+	delete(m.clearedFields, quotanettask.FieldErrorMessage)
+}
+
+// SetPromptTokens sets the "prompt_tokens" field.
+func (m *QuotaNetTaskMutation) SetPromptTokens(i int) {
+	m.prompt_tokens = &i
+	m.addprompt_tokens = nil
+}
+
+// PromptTokens returns the value of the "prompt_tokens" field in the mutation.
+func (m *QuotaNetTaskMutation) PromptTokens() (r int, exists bool) {
+	v := m.prompt_tokens
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPromptTokens returns the old "prompt_tokens" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldPromptTokens(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPromptTokens is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPromptTokens requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPromptTokens: %w", err)
+	}
+	return oldValue.PromptTokens, nil
+}
+
+// AddPromptTokens adds i to the "prompt_tokens" field.
+func (m *QuotaNetTaskMutation) AddPromptTokens(i int) {
+	if m.addprompt_tokens != nil {
+		*m.addprompt_tokens += i
+	} else {
+		m.addprompt_tokens = &i
+	}
+}
+
+// AddedPromptTokens returns the value that was added to the "prompt_tokens" field in this mutation.
+func (m *QuotaNetTaskMutation) AddedPromptTokens() (r int, exists bool) {
+	v := m.addprompt_tokens
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPromptTokens resets all changes to the "prompt_tokens" field.
+func (m *QuotaNetTaskMutation) ResetPromptTokens() {
+	m.prompt_tokens = nil
+	m.addprompt_tokens = nil
+}
+
+// SetCompletionTokens sets the "completion_tokens" field.
+func (m *QuotaNetTaskMutation) SetCompletionTokens(i int) {
+	m.completion_tokens = &i
+	m.addcompletion_tokens = nil
+}
+
+// CompletionTokens returns the value of the "completion_tokens" field in the mutation.
+func (m *QuotaNetTaskMutation) CompletionTokens() (r int, exists bool) {
+	v := m.completion_tokens
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCompletionTokens returns the old "completion_tokens" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldCompletionTokens(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCompletionTokens is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCompletionTokens requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCompletionTokens: %w", err)
+	}
+	return oldValue.CompletionTokens, nil
+}
+
+// AddCompletionTokens adds i to the "completion_tokens" field.
+func (m *QuotaNetTaskMutation) AddCompletionTokens(i int) {
+	if m.addcompletion_tokens != nil {
+		*m.addcompletion_tokens += i
+	} else {
+		m.addcompletion_tokens = &i
+	}
+}
+
+// AddedCompletionTokens returns the value that was added to the "completion_tokens" field in this mutation.
+func (m *QuotaNetTaskMutation) AddedCompletionTokens() (r int, exists bool) {
+	v := m.addcompletion_tokens
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCompletionTokens resets all changes to the "completion_tokens" field.
+func (m *QuotaNetTaskMutation) ResetCompletionTokens() {
+	m.completion_tokens = nil
+	m.addcompletion_tokens = nil
+}
+
+// SetTotalTokens sets the "total_tokens" field.
+func (m *QuotaNetTaskMutation) SetTotalTokens(i int) {
+	m.total_tokens = &i
+	m.addtotal_tokens = nil
+}
+
+// TotalTokens returns the value of the "total_tokens" field in the mutation.
+func (m *QuotaNetTaskMutation) TotalTokens() (r int, exists bool) {
+	v := m.total_tokens
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTotalTokens returns the old "total_tokens" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldTotalTokens(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTotalTokens is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTotalTokens requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTotalTokens: %w", err)
+	}
+	return oldValue.TotalTokens, nil
+}
+
+// AddTotalTokens adds i to the "total_tokens" field.
+func (m *QuotaNetTaskMutation) AddTotalTokens(i int) {
+	if m.addtotal_tokens != nil {
+		*m.addtotal_tokens += i
+	} else {
+		m.addtotal_tokens = &i
+	}
+}
+
+// AddedTotalTokens returns the value that was added to the "total_tokens" field in this mutation.
+func (m *QuotaNetTaskMutation) AddedTotalTokens() (r int, exists bool) {
+	v := m.addtotal_tokens
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTotalTokens resets all changes to the "total_tokens" field.
+func (m *QuotaNetTaskMutation) ResetTotalTokens() {
+	m.total_tokens = nil
+	m.addtotal_tokens = nil
+}
+
+// SetFirstTokenMs sets the "first_token_ms" field.
+func (m *QuotaNetTaskMutation) SetFirstTokenMs(i int) {
+	m.first_token_ms = &i
+	m.addfirst_token_ms = nil
+}
+
+// FirstTokenMs returns the value of the "first_token_ms" field in the mutation.
+func (m *QuotaNetTaskMutation) FirstTokenMs() (r int, exists bool) {
+	v := m.first_token_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFirstTokenMs returns the old "first_token_ms" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldFirstTokenMs(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFirstTokenMs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFirstTokenMs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFirstTokenMs: %w", err)
+	}
+	return oldValue.FirstTokenMs, nil
+}
+
+// AddFirstTokenMs adds i to the "first_token_ms" field.
+func (m *QuotaNetTaskMutation) AddFirstTokenMs(i int) {
+	if m.addfirst_token_ms != nil {
+		*m.addfirst_token_ms += i
+	} else {
+		m.addfirst_token_ms = &i
+	}
+}
+
+// AddedFirstTokenMs returns the value that was added to the "first_token_ms" field in this mutation.
+func (m *QuotaNetTaskMutation) AddedFirstTokenMs() (r int, exists bool) {
+	v := m.addfirst_token_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearFirstTokenMs clears the value of the "first_token_ms" field.
+func (m *QuotaNetTaskMutation) ClearFirstTokenMs() {
+	m.first_token_ms = nil
+	m.addfirst_token_ms = nil
+	m.clearedFields[quotanettask.FieldFirstTokenMs] = struct{}{}
+}
+
+// FirstTokenMsCleared returns if the "first_token_ms" field was cleared in this mutation.
+func (m *QuotaNetTaskMutation) FirstTokenMsCleared() bool {
+	_, ok := m.clearedFields[quotanettask.FieldFirstTokenMs]
+	return ok
+}
+
+// ResetFirstTokenMs resets all changes to the "first_token_ms" field.
+func (m *QuotaNetTaskMutation) ResetFirstTokenMs() {
+	m.first_token_ms = nil
+	m.addfirst_token_ms = nil
+	delete(m.clearedFields, quotanettask.FieldFirstTokenMs)
+}
+
+// SetDurationMs sets the "duration_ms" field.
+func (m *QuotaNetTaskMutation) SetDurationMs(i int) {
+	m.duration_ms = &i
+	m.addduration_ms = nil
+}
+
+// DurationMs returns the value of the "duration_ms" field in the mutation.
+func (m *QuotaNetTaskMutation) DurationMs() (r int, exists bool) {
+	v := m.duration_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDurationMs returns the old "duration_ms" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldDurationMs(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDurationMs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDurationMs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDurationMs: %w", err)
+	}
+	return oldValue.DurationMs, nil
+}
+
+// AddDurationMs adds i to the "duration_ms" field.
+func (m *QuotaNetTaskMutation) AddDurationMs(i int) {
+	if m.addduration_ms != nil {
+		*m.addduration_ms += i
+	} else {
+		m.addduration_ms = &i
+	}
+}
+
+// AddedDurationMs returns the value that was added to the "duration_ms" field in this mutation.
+func (m *QuotaNetTaskMutation) AddedDurationMs() (r int, exists bool) {
+	v := m.addduration_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDurationMs clears the value of the "duration_ms" field.
+func (m *QuotaNetTaskMutation) ClearDurationMs() {
+	m.duration_ms = nil
+	m.addduration_ms = nil
+	m.clearedFields[quotanettask.FieldDurationMs] = struct{}{}
+}
+
+// DurationMsCleared returns if the "duration_ms" field was cleared in this mutation.
+func (m *QuotaNetTaskMutation) DurationMsCleared() bool {
+	_, ok := m.clearedFields[quotanettask.FieldDurationMs]
+	return ok
+}
+
+// ResetDurationMs resets all changes to the "duration_ms" field.
+func (m *QuotaNetTaskMutation) ResetDurationMs() {
+	m.duration_ms = nil
+	m.addduration_ms = nil
+	delete(m.clearedFields, quotanettask.FieldDurationMs)
+}
+
+// SetDispatchedAt sets the "dispatched_at" field.
+func (m *QuotaNetTaskMutation) SetDispatchedAt(t time.Time) {
+	m.dispatched_at = &t
+}
+
+// DispatchedAt returns the value of the "dispatched_at" field in the mutation.
+func (m *QuotaNetTaskMutation) DispatchedAt() (r time.Time, exists bool) {
+	v := m.dispatched_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDispatchedAt returns the old "dispatched_at" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldDispatchedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDispatchedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDispatchedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDispatchedAt: %w", err)
+	}
+	return oldValue.DispatchedAt, nil
+}
+
+// ClearDispatchedAt clears the value of the "dispatched_at" field.
+func (m *QuotaNetTaskMutation) ClearDispatchedAt() {
+	m.dispatched_at = nil
+	m.clearedFields[quotanettask.FieldDispatchedAt] = struct{}{}
+}
+
+// DispatchedAtCleared returns if the "dispatched_at" field was cleared in this mutation.
+func (m *QuotaNetTaskMutation) DispatchedAtCleared() bool {
+	_, ok := m.clearedFields[quotanettask.FieldDispatchedAt]
+	return ok
+}
+
+// ResetDispatchedAt resets all changes to the "dispatched_at" field.
+func (m *QuotaNetTaskMutation) ResetDispatchedAt() {
+	m.dispatched_at = nil
+	delete(m.clearedFields, quotanettask.FieldDispatchedAt)
+}
+
+// SetCompletedAt sets the "completed_at" field.
+func (m *QuotaNetTaskMutation) SetCompletedAt(t time.Time) {
+	m.completed_at = &t
+}
+
+// CompletedAt returns the value of the "completed_at" field in the mutation.
+func (m *QuotaNetTaskMutation) CompletedAt() (r time.Time, exists bool) {
+	v := m.completed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCompletedAt returns the old "completed_at" field's value of the QuotaNetTask entity.
+// If the QuotaNetTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskMutation) OldCompletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCompletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCompletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCompletedAt: %w", err)
+	}
+	return oldValue.CompletedAt, nil
+}
+
+// ClearCompletedAt clears the value of the "completed_at" field.
+func (m *QuotaNetTaskMutation) ClearCompletedAt() {
+	m.completed_at = nil
+	m.clearedFields[quotanettask.FieldCompletedAt] = struct{}{}
+}
+
+// CompletedAtCleared returns if the "completed_at" field was cleared in this mutation.
+func (m *QuotaNetTaskMutation) CompletedAtCleared() bool {
+	_, ok := m.clearedFields[quotanettask.FieldCompletedAt]
+	return ok
+}
+
+// ResetCompletedAt resets all changes to the "completed_at" field.
+func (m *QuotaNetTaskMutation) ResetCompletedAt() {
+	m.completed_at = nil
+	delete(m.clearedFields, quotanettask.FieldCompletedAt)
+}
+
+// Where appends a list predicates to the QuotaNetTaskMutation builder.
+func (m *QuotaNetTaskMutation) Where(ps ...predicate.QuotaNetTask) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the QuotaNetTaskMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *QuotaNetTaskMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.QuotaNetTask, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *QuotaNetTaskMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *QuotaNetTaskMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (QuotaNetTask).
+func (m *QuotaNetTaskMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *QuotaNetTaskMutation) Fields() []string {
+	fields := make([]string, 0, 24)
+	if m.created_at != nil {
+		fields = append(fields, quotanettask.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, quotanettask.FieldUpdatedAt)
+	}
+	if m.task_id != nil {
+		fields = append(fields, quotanettask.FieldTaskID)
+	}
+	if m.request_id != nil {
+		fields = append(fields, quotanettask.FieldRequestID)
+	}
+	if m.user_id != nil {
+		fields = append(fields, quotanettask.FieldUserID)
+	}
+	if m.api_key_id != nil {
+		fields = append(fields, quotanettask.FieldAPIKeyID)
+	}
+	if m.group_id != nil {
+		fields = append(fields, quotanettask.FieldGroupID)
+	}
+	if m.account_id != nil {
+		fields = append(fields, quotanettask.FieldAccountID)
+	}
+	if m.node_id != nil {
+		fields = append(fields, quotanettask.FieldNodeID)
+	}
+	if m.session_id != nil {
+		fields = append(fields, quotanettask.FieldSessionID)
+	}
+	if m.platform != nil {
+		fields = append(fields, quotanettask.FieldPlatform)
+	}
+	if m.endpoint != nil {
+		fields = append(fields, quotanettask.FieldEndpoint)
+	}
+	if m.model != nil {
+		fields = append(fields, quotanettask.FieldModel)
+	}
+	if m.stream != nil {
+		fields = append(fields, quotanettask.FieldStream)
+	}
+	if m.status != nil {
+		fields = append(fields, quotanettask.FieldStatus)
+	}
+	if m.error_code != nil {
+		fields = append(fields, quotanettask.FieldErrorCode)
+	}
+	if m.error_message != nil {
+		fields = append(fields, quotanettask.FieldErrorMessage)
+	}
+	if m.prompt_tokens != nil {
+		fields = append(fields, quotanettask.FieldPromptTokens)
+	}
+	if m.completion_tokens != nil {
+		fields = append(fields, quotanettask.FieldCompletionTokens)
+	}
+	if m.total_tokens != nil {
+		fields = append(fields, quotanettask.FieldTotalTokens)
+	}
+	if m.first_token_ms != nil {
+		fields = append(fields, quotanettask.FieldFirstTokenMs)
+	}
+	if m.duration_ms != nil {
+		fields = append(fields, quotanettask.FieldDurationMs)
+	}
+	if m.dispatched_at != nil {
+		fields = append(fields, quotanettask.FieldDispatchedAt)
+	}
+	if m.completed_at != nil {
+		fields = append(fields, quotanettask.FieldCompletedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *QuotaNetTaskMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case quotanettask.FieldCreatedAt:
+		return m.CreatedAt()
+	case quotanettask.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case quotanettask.FieldTaskID:
+		return m.TaskID()
+	case quotanettask.FieldRequestID:
+		return m.RequestID()
+	case quotanettask.FieldUserID:
+		return m.UserID()
+	case quotanettask.FieldAPIKeyID:
+		return m.APIKeyID()
+	case quotanettask.FieldGroupID:
+		return m.GroupID()
+	case quotanettask.FieldAccountID:
+		return m.AccountID()
+	case quotanettask.FieldNodeID:
+		return m.NodeID()
+	case quotanettask.FieldSessionID:
+		return m.SessionID()
+	case quotanettask.FieldPlatform:
+		return m.Platform()
+	case quotanettask.FieldEndpoint:
+		return m.Endpoint()
+	case quotanettask.FieldModel:
+		return m.Model()
+	case quotanettask.FieldStream:
+		return m.Stream()
+	case quotanettask.FieldStatus:
+		return m.Status()
+	case quotanettask.FieldErrorCode:
+		return m.ErrorCode()
+	case quotanettask.FieldErrorMessage:
+		return m.ErrorMessage()
+	case quotanettask.FieldPromptTokens:
+		return m.PromptTokens()
+	case quotanettask.FieldCompletionTokens:
+		return m.CompletionTokens()
+	case quotanettask.FieldTotalTokens:
+		return m.TotalTokens()
+	case quotanettask.FieldFirstTokenMs:
+		return m.FirstTokenMs()
+	case quotanettask.FieldDurationMs:
+		return m.DurationMs()
+	case quotanettask.FieldDispatchedAt:
+		return m.DispatchedAt()
+	case quotanettask.FieldCompletedAt:
+		return m.CompletedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *QuotaNetTaskMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case quotanettask.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case quotanettask.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case quotanettask.FieldTaskID:
+		return m.OldTaskID(ctx)
+	case quotanettask.FieldRequestID:
+		return m.OldRequestID(ctx)
+	case quotanettask.FieldUserID:
+		return m.OldUserID(ctx)
+	case quotanettask.FieldAPIKeyID:
+		return m.OldAPIKeyID(ctx)
+	case quotanettask.FieldGroupID:
+		return m.OldGroupID(ctx)
+	case quotanettask.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case quotanettask.FieldNodeID:
+		return m.OldNodeID(ctx)
+	case quotanettask.FieldSessionID:
+		return m.OldSessionID(ctx)
+	case quotanettask.FieldPlatform:
+		return m.OldPlatform(ctx)
+	case quotanettask.FieldEndpoint:
+		return m.OldEndpoint(ctx)
+	case quotanettask.FieldModel:
+		return m.OldModel(ctx)
+	case quotanettask.FieldStream:
+		return m.OldStream(ctx)
+	case quotanettask.FieldStatus:
+		return m.OldStatus(ctx)
+	case quotanettask.FieldErrorCode:
+		return m.OldErrorCode(ctx)
+	case quotanettask.FieldErrorMessage:
+		return m.OldErrorMessage(ctx)
+	case quotanettask.FieldPromptTokens:
+		return m.OldPromptTokens(ctx)
+	case quotanettask.FieldCompletionTokens:
+		return m.OldCompletionTokens(ctx)
+	case quotanettask.FieldTotalTokens:
+		return m.OldTotalTokens(ctx)
+	case quotanettask.FieldFirstTokenMs:
+		return m.OldFirstTokenMs(ctx)
+	case quotanettask.FieldDurationMs:
+		return m.OldDurationMs(ctx)
+	case quotanettask.FieldDispatchedAt:
+		return m.OldDispatchedAt(ctx)
+	case quotanettask.FieldCompletedAt:
+		return m.OldCompletedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown QuotaNetTask field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *QuotaNetTaskMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case quotanettask.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case quotanettask.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case quotanettask.FieldTaskID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTaskID(v)
+		return nil
+	case quotanettask.FieldRequestID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequestID(v)
+		return nil
+	case quotanettask.FieldUserID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case quotanettask.FieldAPIKeyID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAPIKeyID(v)
+		return nil
+	case quotanettask.FieldGroupID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGroupID(v)
+		return nil
+	case quotanettask.FieldAccountID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case quotanettask.FieldNodeID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNodeID(v)
+		return nil
+	case quotanettask.FieldSessionID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSessionID(v)
+		return nil
+	case quotanettask.FieldPlatform:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlatform(v)
+		return nil
+	case quotanettask.FieldEndpoint:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEndpoint(v)
+		return nil
+	case quotanettask.FieldModel:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModel(v)
+		return nil
+	case quotanettask.FieldStream:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStream(v)
+		return nil
+	case quotanettask.FieldStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case quotanettask.FieldErrorCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetErrorCode(v)
+		return nil
+	case quotanettask.FieldErrorMessage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetErrorMessage(v)
+		return nil
+	case quotanettask.FieldPromptTokens:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPromptTokens(v)
+		return nil
+	case quotanettask.FieldCompletionTokens:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCompletionTokens(v)
+		return nil
+	case quotanettask.FieldTotalTokens:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTotalTokens(v)
+		return nil
+	case quotanettask.FieldFirstTokenMs:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFirstTokenMs(v)
+		return nil
+	case quotanettask.FieldDurationMs:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDurationMs(v)
+		return nil
+	case quotanettask.FieldDispatchedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDispatchedAt(v)
+		return nil
+	case quotanettask.FieldCompletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCompletedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetTask field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *QuotaNetTaskMutation) AddedFields() []string {
+	var fields []string
+	if m.adduser_id != nil {
+		fields = append(fields, quotanettask.FieldUserID)
+	}
+	if m.addapi_key_id != nil {
+		fields = append(fields, quotanettask.FieldAPIKeyID)
+	}
+	if m.addgroup_id != nil {
+		fields = append(fields, quotanettask.FieldGroupID)
+	}
+	if m.addaccount_id != nil {
+		fields = append(fields, quotanettask.FieldAccountID)
+	}
+	if m.addnode_id != nil {
+		fields = append(fields, quotanettask.FieldNodeID)
+	}
+	if m.addprompt_tokens != nil {
+		fields = append(fields, quotanettask.FieldPromptTokens)
+	}
+	if m.addcompletion_tokens != nil {
+		fields = append(fields, quotanettask.FieldCompletionTokens)
+	}
+	if m.addtotal_tokens != nil {
+		fields = append(fields, quotanettask.FieldTotalTokens)
+	}
+	if m.addfirst_token_ms != nil {
+		fields = append(fields, quotanettask.FieldFirstTokenMs)
+	}
+	if m.addduration_ms != nil {
+		fields = append(fields, quotanettask.FieldDurationMs)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *QuotaNetTaskMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case quotanettask.FieldUserID:
+		return m.AddedUserID()
+	case quotanettask.FieldAPIKeyID:
+		return m.AddedAPIKeyID()
+	case quotanettask.FieldGroupID:
+		return m.AddedGroupID()
+	case quotanettask.FieldAccountID:
+		return m.AddedAccountID()
+	case quotanettask.FieldNodeID:
+		return m.AddedNodeID()
+	case quotanettask.FieldPromptTokens:
+		return m.AddedPromptTokens()
+	case quotanettask.FieldCompletionTokens:
+		return m.AddedCompletionTokens()
+	case quotanettask.FieldTotalTokens:
+		return m.AddedTotalTokens()
+	case quotanettask.FieldFirstTokenMs:
+		return m.AddedFirstTokenMs()
+	case quotanettask.FieldDurationMs:
+		return m.AddedDurationMs()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *QuotaNetTaskMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case quotanettask.FieldUserID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUserID(v)
+		return nil
+	case quotanettask.FieldAPIKeyID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAPIKeyID(v)
+		return nil
+	case quotanettask.FieldGroupID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGroupID(v)
+		return nil
+	case quotanettask.FieldAccountID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAccountID(v)
+		return nil
+	case quotanettask.FieldNodeID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNodeID(v)
+		return nil
+	case quotanettask.FieldPromptTokens:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPromptTokens(v)
+		return nil
+	case quotanettask.FieldCompletionTokens:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCompletionTokens(v)
+		return nil
+	case quotanettask.FieldTotalTokens:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTotalTokens(v)
+		return nil
+	case quotanettask.FieldFirstTokenMs:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFirstTokenMs(v)
+		return nil
+	case quotanettask.FieldDurationMs:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDurationMs(v)
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetTask numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *QuotaNetTaskMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(quotanettask.FieldUserID) {
+		fields = append(fields, quotanettask.FieldUserID)
+	}
+	if m.FieldCleared(quotanettask.FieldAPIKeyID) {
+		fields = append(fields, quotanettask.FieldAPIKeyID)
+	}
+	if m.FieldCleared(quotanettask.FieldGroupID) {
+		fields = append(fields, quotanettask.FieldGroupID)
+	}
+	if m.FieldCleared(quotanettask.FieldAccountID) {
+		fields = append(fields, quotanettask.FieldAccountID)
+	}
+	if m.FieldCleared(quotanettask.FieldNodeID) {
+		fields = append(fields, quotanettask.FieldNodeID)
+	}
+	if m.FieldCleared(quotanettask.FieldSessionID) {
+		fields = append(fields, quotanettask.FieldSessionID)
+	}
+	if m.FieldCleared(quotanettask.FieldErrorCode) {
+		fields = append(fields, quotanettask.FieldErrorCode)
+	}
+	if m.FieldCleared(quotanettask.FieldErrorMessage) {
+		fields = append(fields, quotanettask.FieldErrorMessage)
+	}
+	if m.FieldCleared(quotanettask.FieldFirstTokenMs) {
+		fields = append(fields, quotanettask.FieldFirstTokenMs)
+	}
+	if m.FieldCleared(quotanettask.FieldDurationMs) {
+		fields = append(fields, quotanettask.FieldDurationMs)
+	}
+	if m.FieldCleared(quotanettask.FieldDispatchedAt) {
+		fields = append(fields, quotanettask.FieldDispatchedAt)
+	}
+	if m.FieldCleared(quotanettask.FieldCompletedAt) {
+		fields = append(fields, quotanettask.FieldCompletedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *QuotaNetTaskMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *QuotaNetTaskMutation) ClearField(name string) error {
+	switch name {
+	case quotanettask.FieldUserID:
+		m.ClearUserID()
+		return nil
+	case quotanettask.FieldAPIKeyID:
+		m.ClearAPIKeyID()
+		return nil
+	case quotanettask.FieldGroupID:
+		m.ClearGroupID()
+		return nil
+	case quotanettask.FieldAccountID:
+		m.ClearAccountID()
+		return nil
+	case quotanettask.FieldNodeID:
+		m.ClearNodeID()
+		return nil
+	case quotanettask.FieldSessionID:
+		m.ClearSessionID()
+		return nil
+	case quotanettask.FieldErrorCode:
+		m.ClearErrorCode()
+		return nil
+	case quotanettask.FieldErrorMessage:
+		m.ClearErrorMessage()
+		return nil
+	case quotanettask.FieldFirstTokenMs:
+		m.ClearFirstTokenMs()
+		return nil
+	case quotanettask.FieldDurationMs:
+		m.ClearDurationMs()
+		return nil
+	case quotanettask.FieldDispatchedAt:
+		m.ClearDispatchedAt()
+		return nil
+	case quotanettask.FieldCompletedAt:
+		m.ClearCompletedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetTask nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *QuotaNetTaskMutation) ResetField(name string) error {
+	switch name {
+	case quotanettask.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case quotanettask.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case quotanettask.FieldTaskID:
+		m.ResetTaskID()
+		return nil
+	case quotanettask.FieldRequestID:
+		m.ResetRequestID()
+		return nil
+	case quotanettask.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case quotanettask.FieldAPIKeyID:
+		m.ResetAPIKeyID()
+		return nil
+	case quotanettask.FieldGroupID:
+		m.ResetGroupID()
+		return nil
+	case quotanettask.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case quotanettask.FieldNodeID:
+		m.ResetNodeID()
+		return nil
+	case quotanettask.FieldSessionID:
+		m.ResetSessionID()
+		return nil
+	case quotanettask.FieldPlatform:
+		m.ResetPlatform()
+		return nil
+	case quotanettask.FieldEndpoint:
+		m.ResetEndpoint()
+		return nil
+	case quotanettask.FieldModel:
+		m.ResetModel()
+		return nil
+	case quotanettask.FieldStream:
+		m.ResetStream()
+		return nil
+	case quotanettask.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case quotanettask.FieldErrorCode:
+		m.ResetErrorCode()
+		return nil
+	case quotanettask.FieldErrorMessage:
+		m.ResetErrorMessage()
+		return nil
+	case quotanettask.FieldPromptTokens:
+		m.ResetPromptTokens()
+		return nil
+	case quotanettask.FieldCompletionTokens:
+		m.ResetCompletionTokens()
+		return nil
+	case quotanettask.FieldTotalTokens:
+		m.ResetTotalTokens()
+		return nil
+	case quotanettask.FieldFirstTokenMs:
+		m.ResetFirstTokenMs()
+		return nil
+	case quotanettask.FieldDurationMs:
+		m.ResetDurationMs()
+		return nil
+	case quotanettask.FieldDispatchedAt:
+		m.ResetDispatchedAt()
+		return nil
+	case quotanettask.FieldCompletedAt:
+		m.ResetCompletedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetTask field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *QuotaNetTaskMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *QuotaNetTaskMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *QuotaNetTaskMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *QuotaNetTaskMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *QuotaNetTaskMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *QuotaNetTaskMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *QuotaNetTaskMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown QuotaNetTask unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *QuotaNetTaskMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown QuotaNetTask edge %s", name)
+}
+
+// QuotaNetTaskEventMutation represents an operation that mutates the QuotaNetTaskEvent nodes in the graph.
+type QuotaNetTaskEventMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int64
+	task_id       *string
+	event_type    *string
+	sequence      *int64
+	addsequence   *int64
+	payload       *map[string]interface{}
+	created_at    *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*QuotaNetTaskEvent, error)
+	predicates    []predicate.QuotaNetTaskEvent
+}
+
+var _ ent.Mutation = (*QuotaNetTaskEventMutation)(nil)
+
+// quotanettaskeventOption allows management of the mutation configuration using functional options.
+type quotanettaskeventOption func(*QuotaNetTaskEventMutation)
+
+// newQuotaNetTaskEventMutation creates new mutation for the QuotaNetTaskEvent entity.
+func newQuotaNetTaskEventMutation(c config, op Op, opts ...quotanettaskeventOption) *QuotaNetTaskEventMutation {
+	m := &QuotaNetTaskEventMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeQuotaNetTaskEvent,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withQuotaNetTaskEventID sets the ID field of the mutation.
+func withQuotaNetTaskEventID(id int64) quotanettaskeventOption {
+	return func(m *QuotaNetTaskEventMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *QuotaNetTaskEvent
+		)
+		m.oldValue = func(ctx context.Context) (*QuotaNetTaskEvent, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().QuotaNetTaskEvent.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withQuotaNetTaskEvent sets the old QuotaNetTaskEvent of the mutation.
+func withQuotaNetTaskEvent(node *QuotaNetTaskEvent) quotanettaskeventOption {
+	return func(m *QuotaNetTaskEventMutation) {
+		m.oldValue = func(context.Context) (*QuotaNetTaskEvent, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m QuotaNetTaskEventMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m QuotaNetTaskEventMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *QuotaNetTaskEventMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *QuotaNetTaskEventMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().QuotaNetTaskEvent.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetTaskID sets the "task_id" field.
+func (m *QuotaNetTaskEventMutation) SetTaskID(s string) {
+	m.task_id = &s
+}
+
+// TaskID returns the value of the "task_id" field in the mutation.
+func (m *QuotaNetTaskEventMutation) TaskID() (r string, exists bool) {
+	v := m.task_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTaskID returns the old "task_id" field's value of the QuotaNetTaskEvent entity.
+// If the QuotaNetTaskEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskEventMutation) OldTaskID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTaskID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTaskID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTaskID: %w", err)
+	}
+	return oldValue.TaskID, nil
+}
+
+// ResetTaskID resets all changes to the "task_id" field.
+func (m *QuotaNetTaskEventMutation) ResetTaskID() {
+	m.task_id = nil
+}
+
+// SetEventType sets the "event_type" field.
+func (m *QuotaNetTaskEventMutation) SetEventType(s string) {
+	m.event_type = &s
+}
+
+// EventType returns the value of the "event_type" field in the mutation.
+func (m *QuotaNetTaskEventMutation) EventType() (r string, exists bool) {
+	v := m.event_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEventType returns the old "event_type" field's value of the QuotaNetTaskEvent entity.
+// If the QuotaNetTaskEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskEventMutation) OldEventType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEventType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEventType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEventType: %w", err)
+	}
+	return oldValue.EventType, nil
+}
+
+// ResetEventType resets all changes to the "event_type" field.
+func (m *QuotaNetTaskEventMutation) ResetEventType() {
+	m.event_type = nil
+}
+
+// SetSequence sets the "sequence" field.
+func (m *QuotaNetTaskEventMutation) SetSequence(i int64) {
+	m.sequence = &i
+	m.addsequence = nil
+}
+
+// Sequence returns the value of the "sequence" field in the mutation.
+func (m *QuotaNetTaskEventMutation) Sequence() (r int64, exists bool) {
+	v := m.sequence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSequence returns the old "sequence" field's value of the QuotaNetTaskEvent entity.
+// If the QuotaNetTaskEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskEventMutation) OldSequence(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSequence is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSequence requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSequence: %w", err)
+	}
+	return oldValue.Sequence, nil
+}
+
+// AddSequence adds i to the "sequence" field.
+func (m *QuotaNetTaskEventMutation) AddSequence(i int64) {
+	if m.addsequence != nil {
+		*m.addsequence += i
+	} else {
+		m.addsequence = &i
+	}
+}
+
+// AddedSequence returns the value that was added to the "sequence" field in this mutation.
+func (m *QuotaNetTaskEventMutation) AddedSequence() (r int64, exists bool) {
+	v := m.addsequence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSequence resets all changes to the "sequence" field.
+func (m *QuotaNetTaskEventMutation) ResetSequence() {
+	m.sequence = nil
+	m.addsequence = nil
+}
+
+// SetPayload sets the "payload" field.
+func (m *QuotaNetTaskEventMutation) SetPayload(value map[string]interface{}) {
+	m.payload = &value
+}
+
+// Payload returns the value of the "payload" field in the mutation.
+func (m *QuotaNetTaskEventMutation) Payload() (r map[string]interface{}, exists bool) {
+	v := m.payload
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPayload returns the old "payload" field's value of the QuotaNetTaskEvent entity.
+// If the QuotaNetTaskEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskEventMutation) OldPayload(ctx context.Context) (v map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPayload is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPayload requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPayload: %w", err)
+	}
+	return oldValue.Payload, nil
+}
+
+// ResetPayload resets all changes to the "payload" field.
+func (m *QuotaNetTaskEventMutation) ResetPayload() {
+	m.payload = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *QuotaNetTaskEventMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *QuotaNetTaskEventMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the QuotaNetTaskEvent entity.
+// If the QuotaNetTaskEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetTaskEventMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *QuotaNetTaskEventMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// Where appends a list predicates to the QuotaNetTaskEventMutation builder.
+func (m *QuotaNetTaskEventMutation) Where(ps ...predicate.QuotaNetTaskEvent) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the QuotaNetTaskEventMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *QuotaNetTaskEventMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.QuotaNetTaskEvent, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *QuotaNetTaskEventMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *QuotaNetTaskEventMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (QuotaNetTaskEvent).
+func (m *QuotaNetTaskEventMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *QuotaNetTaskEventMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.task_id != nil {
+		fields = append(fields, quotanettaskevent.FieldTaskID)
+	}
+	if m.event_type != nil {
+		fields = append(fields, quotanettaskevent.FieldEventType)
+	}
+	if m.sequence != nil {
+		fields = append(fields, quotanettaskevent.FieldSequence)
+	}
+	if m.payload != nil {
+		fields = append(fields, quotanettaskevent.FieldPayload)
+	}
+	if m.created_at != nil {
+		fields = append(fields, quotanettaskevent.FieldCreatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *QuotaNetTaskEventMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case quotanettaskevent.FieldTaskID:
+		return m.TaskID()
+	case quotanettaskevent.FieldEventType:
+		return m.EventType()
+	case quotanettaskevent.FieldSequence:
+		return m.Sequence()
+	case quotanettaskevent.FieldPayload:
+		return m.Payload()
+	case quotanettaskevent.FieldCreatedAt:
+		return m.CreatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *QuotaNetTaskEventMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case quotanettaskevent.FieldTaskID:
+		return m.OldTaskID(ctx)
+	case quotanettaskevent.FieldEventType:
+		return m.OldEventType(ctx)
+	case quotanettaskevent.FieldSequence:
+		return m.OldSequence(ctx)
+	case quotanettaskevent.FieldPayload:
+		return m.OldPayload(ctx)
+	case quotanettaskevent.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown QuotaNetTaskEvent field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *QuotaNetTaskEventMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case quotanettaskevent.FieldTaskID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTaskID(v)
+		return nil
+	case quotanettaskevent.FieldEventType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEventType(v)
+		return nil
+	case quotanettaskevent.FieldSequence:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSequence(v)
+		return nil
+	case quotanettaskevent.FieldPayload:
+		v, ok := value.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPayload(v)
+		return nil
+	case quotanettaskevent.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetTaskEvent field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *QuotaNetTaskEventMutation) AddedFields() []string {
+	var fields []string
+	if m.addsequence != nil {
+		fields = append(fields, quotanettaskevent.FieldSequence)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *QuotaNetTaskEventMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case quotanettaskevent.FieldSequence:
+		return m.AddedSequence()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *QuotaNetTaskEventMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case quotanettaskevent.FieldSequence:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSequence(v)
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetTaskEvent numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *QuotaNetTaskEventMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *QuotaNetTaskEventMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *QuotaNetTaskEventMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown QuotaNetTaskEvent nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *QuotaNetTaskEventMutation) ResetField(name string) error {
+	switch name {
+	case quotanettaskevent.FieldTaskID:
+		m.ResetTaskID()
+		return nil
+	case quotanettaskevent.FieldEventType:
+		m.ResetEventType()
+		return nil
+	case quotanettaskevent.FieldSequence:
+		m.ResetSequence()
+		return nil
+	case quotanettaskevent.FieldPayload:
+		m.ResetPayload()
+		return nil
+	case quotanettaskevent.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown QuotaNetTaskEvent field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *QuotaNetTaskEventMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *QuotaNetTaskEventMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *QuotaNetTaskEventMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *QuotaNetTaskEventMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *QuotaNetTaskEventMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *QuotaNetTaskEventMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *QuotaNetTaskEventMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown QuotaNetTaskEvent unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *QuotaNetTaskEventMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown QuotaNetTaskEvent edge %s", name)
 }
 
 // RedeemCodeMutation represents an operation that mutates the RedeemCode nodes in the graph.

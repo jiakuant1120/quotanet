@@ -273,6 +273,90 @@ func (f ProxyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProxyMutation", m)
 }
 
+// The QuotaNetContributionLedgerFunc type is an adapter to allow the use of ordinary
+// function as QuotaNetContributionLedger mutator.
+type QuotaNetContributionLedgerFunc func(context.Context, *ent.QuotaNetContributionLedgerMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f QuotaNetContributionLedgerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.QuotaNetContributionLedgerMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.QuotaNetContributionLedgerMutation", m)
+}
+
+// The QuotaNetNodeFunc type is an adapter to allow the use of ordinary
+// function as QuotaNetNode mutator.
+type QuotaNetNodeFunc func(context.Context, *ent.QuotaNetNodeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f QuotaNetNodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.QuotaNetNodeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.QuotaNetNodeMutation", m)
+}
+
+// The QuotaNetNodeSessionFunc type is an adapter to allow the use of ordinary
+// function as QuotaNetNodeSession mutator.
+type QuotaNetNodeSessionFunc func(context.Context, *ent.QuotaNetNodeSessionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f QuotaNetNodeSessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.QuotaNetNodeSessionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.QuotaNetNodeSessionMutation", m)
+}
+
+// The QuotaNetPayoutBatchFunc type is an adapter to allow the use of ordinary
+// function as QuotaNetPayoutBatch mutator.
+type QuotaNetPayoutBatchFunc func(context.Context, *ent.QuotaNetPayoutBatchMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f QuotaNetPayoutBatchFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.QuotaNetPayoutBatchMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.QuotaNetPayoutBatchMutation", m)
+}
+
+// The QuotaNetPayoutItemFunc type is an adapter to allow the use of ordinary
+// function as QuotaNetPayoutItem mutator.
+type QuotaNetPayoutItemFunc func(context.Context, *ent.QuotaNetPayoutItemMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f QuotaNetPayoutItemFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.QuotaNetPayoutItemMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.QuotaNetPayoutItemMutation", m)
+}
+
+// The QuotaNetTaskFunc type is an adapter to allow the use of ordinary
+// function as QuotaNetTask mutator.
+type QuotaNetTaskFunc func(context.Context, *ent.QuotaNetTaskMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f QuotaNetTaskFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.QuotaNetTaskMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.QuotaNetTaskMutation", m)
+}
+
+// The QuotaNetTaskEventFunc type is an adapter to allow the use of ordinary
+// function as QuotaNetTaskEvent mutator.
+type QuotaNetTaskEventFunc func(context.Context, *ent.QuotaNetTaskEventMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f QuotaNetTaskEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.QuotaNetTaskEventMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.QuotaNetTaskEventMutation", m)
+}
+
 // The RedeemCodeFunc type is an adapter to allow the use of ordinary
 // function as RedeemCode mutator.
 type RedeemCodeFunc func(context.Context, *ent.RedeemCodeMutation) (ent.Value, error)

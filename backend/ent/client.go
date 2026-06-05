@@ -37,6 +37,13 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/promocode"
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetcontributionledger"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetnode"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetnodesession"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetpayoutbatch"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetpayoutitem"
+	"github.com/Wei-Shaw/sub2api/ent/quotanettask"
+	"github.com/Wei-Shaw/sub2api/ent/quotanettaskevent"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
 	"github.com/Wei-Shaw/sub2api/ent/securitysecret"
 	"github.com/Wei-Shaw/sub2api/ent/setting"
@@ -103,6 +110,20 @@ type Client struct {
 	PromoCodeUsage *PromoCodeUsageClient
 	// Proxy is the client for interacting with the Proxy builders.
 	Proxy *ProxyClient
+	// QuotaNetContributionLedger is the client for interacting with the QuotaNetContributionLedger builders.
+	QuotaNetContributionLedger *QuotaNetContributionLedgerClient
+	// QuotaNetNode is the client for interacting with the QuotaNetNode builders.
+	QuotaNetNode *QuotaNetNodeClient
+	// QuotaNetNodeSession is the client for interacting with the QuotaNetNodeSession builders.
+	QuotaNetNodeSession *QuotaNetNodeSessionClient
+	// QuotaNetPayoutBatch is the client for interacting with the QuotaNetPayoutBatch builders.
+	QuotaNetPayoutBatch *QuotaNetPayoutBatchClient
+	// QuotaNetPayoutItem is the client for interacting with the QuotaNetPayoutItem builders.
+	QuotaNetPayoutItem *QuotaNetPayoutItemClient
+	// QuotaNetTask is the client for interacting with the QuotaNetTask builders.
+	QuotaNetTask *QuotaNetTaskClient
+	// QuotaNetTaskEvent is the client for interacting with the QuotaNetTaskEvent builders.
+	QuotaNetTaskEvent *QuotaNetTaskEventClient
 	// RedeemCode is the client for interacting with the RedeemCode builders.
 	RedeemCode *RedeemCodeClient
 	// SecuritySecret is the client for interacting with the SecuritySecret builders.
@@ -162,6 +183,13 @@ func (c *Client) init() {
 	c.PromoCode = NewPromoCodeClient(c.config)
 	c.PromoCodeUsage = NewPromoCodeUsageClient(c.config)
 	c.Proxy = NewProxyClient(c.config)
+	c.QuotaNetContributionLedger = NewQuotaNetContributionLedgerClient(c.config)
+	c.QuotaNetNode = NewQuotaNetNodeClient(c.config)
+	c.QuotaNetNodeSession = NewQuotaNetNodeSessionClient(c.config)
+	c.QuotaNetPayoutBatch = NewQuotaNetPayoutBatchClient(c.config)
+	c.QuotaNetPayoutItem = NewQuotaNetPayoutItemClient(c.config)
+	c.QuotaNetTask = NewQuotaNetTaskClient(c.config)
+	c.QuotaNetTaskEvent = NewQuotaNetTaskEventClient(c.config)
 	c.RedeemCode = NewRedeemCodeClient(c.config)
 	c.SecuritySecret = NewSecuritySecretClient(c.config)
 	c.Setting = NewSettingClient(c.config)
@@ -289,6 +317,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PromoCode:                     NewPromoCodeClient(cfg),
 		PromoCodeUsage:                NewPromoCodeUsageClient(cfg),
 		Proxy:                         NewProxyClient(cfg),
+		QuotaNetContributionLedger:    NewQuotaNetContributionLedgerClient(cfg),
+		QuotaNetNode:                  NewQuotaNetNodeClient(cfg),
+		QuotaNetNodeSession:           NewQuotaNetNodeSessionClient(cfg),
+		QuotaNetPayoutBatch:           NewQuotaNetPayoutBatchClient(cfg),
+		QuotaNetPayoutItem:            NewQuotaNetPayoutItemClient(cfg),
+		QuotaNetTask:                  NewQuotaNetTaskClient(cfg),
+		QuotaNetTaskEvent:             NewQuotaNetTaskEventClient(cfg),
 		RedeemCode:                    NewRedeemCodeClient(cfg),
 		SecuritySecret:                NewSecuritySecretClient(cfg),
 		Setting:                       NewSettingClient(cfg),
@@ -343,6 +378,13 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PromoCode:                     NewPromoCodeClient(cfg),
 		PromoCodeUsage:                NewPromoCodeUsageClient(cfg),
 		Proxy:                         NewProxyClient(cfg),
+		QuotaNetContributionLedger:    NewQuotaNetContributionLedgerClient(cfg),
+		QuotaNetNode:                  NewQuotaNetNodeClient(cfg),
+		QuotaNetNodeSession:           NewQuotaNetNodeSessionClient(cfg),
+		QuotaNetPayoutBatch:           NewQuotaNetPayoutBatchClient(cfg),
+		QuotaNetPayoutItem:            NewQuotaNetPayoutItemClient(cfg),
+		QuotaNetTask:                  NewQuotaNetTaskClient(cfg),
+		QuotaNetTaskEvent:             NewQuotaNetTaskEventClient(cfg),
 		RedeemCode:                    NewRedeemCodeClient(cfg),
 		SecuritySecret:                NewSecuritySecretClient(cfg),
 		Setting:                       NewSettingClient(cfg),
@@ -391,7 +433,9 @@ func (c *Client) Use(hooks ...Hook) {
 		c.ChannelMonitorRequestTemplate, c.ErrorPassthroughRule, c.Group,
 		c.IdempotencyRecord, c.IdentityAdoptionDecision, c.PaymentAuditLog,
 		c.PaymentOrder, c.PaymentProviderInstance, c.PendingAuthSession, c.PromoCode,
-		c.PromoCodeUsage, c.Proxy, c.RedeemCode, c.SecuritySecret, c.Setting,
+		c.PromoCodeUsage, c.Proxy, c.QuotaNetContributionLedger, c.QuotaNetNode,
+		c.QuotaNetNodeSession, c.QuotaNetPayoutBatch, c.QuotaNetPayoutItem,
+		c.QuotaNetTask, c.QuotaNetTaskEvent, c.RedeemCode, c.SecuritySecret, c.Setting,
 		c.SubscriptionPlan, c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog,
 		c.User, c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
 		c.UserPlatformQuota, c.UserSubscription,
@@ -410,7 +454,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.ChannelMonitorRequestTemplate, c.ErrorPassthroughRule, c.Group,
 		c.IdempotencyRecord, c.IdentityAdoptionDecision, c.PaymentAuditLog,
 		c.PaymentOrder, c.PaymentProviderInstance, c.PendingAuthSession, c.PromoCode,
-		c.PromoCodeUsage, c.Proxy, c.RedeemCode, c.SecuritySecret, c.Setting,
+		c.PromoCodeUsage, c.Proxy, c.QuotaNetContributionLedger, c.QuotaNetNode,
+		c.QuotaNetNodeSession, c.QuotaNetPayoutBatch, c.QuotaNetPayoutItem,
+		c.QuotaNetTask, c.QuotaNetTaskEvent, c.RedeemCode, c.SecuritySecret, c.Setting,
 		c.SubscriptionPlan, c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog,
 		c.User, c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
 		c.UserPlatformQuota, c.UserSubscription,
@@ -466,6 +512,20 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PromoCodeUsage.mutate(ctx, m)
 	case *ProxyMutation:
 		return c.Proxy.mutate(ctx, m)
+	case *QuotaNetContributionLedgerMutation:
+		return c.QuotaNetContributionLedger.mutate(ctx, m)
+	case *QuotaNetNodeMutation:
+		return c.QuotaNetNode.mutate(ctx, m)
+	case *QuotaNetNodeSessionMutation:
+		return c.QuotaNetNodeSession.mutate(ctx, m)
+	case *QuotaNetPayoutBatchMutation:
+		return c.QuotaNetPayoutBatch.mutate(ctx, m)
+	case *QuotaNetPayoutItemMutation:
+		return c.QuotaNetPayoutItem.mutate(ctx, m)
+	case *QuotaNetTaskMutation:
+		return c.QuotaNetTask.mutate(ctx, m)
+	case *QuotaNetTaskEventMutation:
+		return c.QuotaNetTaskEvent.mutate(ctx, m)
 	case *RedeemCodeMutation:
 		return c.RedeemCode.mutate(ctx, m)
 	case *SecuritySecretMutation:
@@ -4006,6 +4066,939 @@ func (c *ProxyClient) mutate(ctx context.Context, m *ProxyMutation) (Value, erro
 	}
 }
 
+// QuotaNetContributionLedgerClient is a client for the QuotaNetContributionLedger schema.
+type QuotaNetContributionLedgerClient struct {
+	config
+}
+
+// NewQuotaNetContributionLedgerClient returns a client for the QuotaNetContributionLedger from the given config.
+func NewQuotaNetContributionLedgerClient(c config) *QuotaNetContributionLedgerClient {
+	return &QuotaNetContributionLedgerClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `quotanetcontributionledger.Hooks(f(g(h())))`.
+func (c *QuotaNetContributionLedgerClient) Use(hooks ...Hook) {
+	c.hooks.QuotaNetContributionLedger = append(c.hooks.QuotaNetContributionLedger, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `quotanetcontributionledger.Intercept(f(g(h())))`.
+func (c *QuotaNetContributionLedgerClient) Intercept(interceptors ...Interceptor) {
+	c.inters.QuotaNetContributionLedger = append(c.inters.QuotaNetContributionLedger, interceptors...)
+}
+
+// Create returns a builder for creating a QuotaNetContributionLedger entity.
+func (c *QuotaNetContributionLedgerClient) Create() *QuotaNetContributionLedgerCreate {
+	mutation := newQuotaNetContributionLedgerMutation(c.config, OpCreate)
+	return &QuotaNetContributionLedgerCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of QuotaNetContributionLedger entities.
+func (c *QuotaNetContributionLedgerClient) CreateBulk(builders ...*QuotaNetContributionLedgerCreate) *QuotaNetContributionLedgerCreateBulk {
+	return &QuotaNetContributionLedgerCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *QuotaNetContributionLedgerClient) MapCreateBulk(slice any, setFunc func(*QuotaNetContributionLedgerCreate, int)) *QuotaNetContributionLedgerCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &QuotaNetContributionLedgerCreateBulk{err: fmt.Errorf("calling to QuotaNetContributionLedgerClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*QuotaNetContributionLedgerCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &QuotaNetContributionLedgerCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for QuotaNetContributionLedger.
+func (c *QuotaNetContributionLedgerClient) Update() *QuotaNetContributionLedgerUpdate {
+	mutation := newQuotaNetContributionLedgerMutation(c.config, OpUpdate)
+	return &QuotaNetContributionLedgerUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *QuotaNetContributionLedgerClient) UpdateOne(_m *QuotaNetContributionLedger) *QuotaNetContributionLedgerUpdateOne {
+	mutation := newQuotaNetContributionLedgerMutation(c.config, OpUpdateOne, withQuotaNetContributionLedger(_m))
+	return &QuotaNetContributionLedgerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *QuotaNetContributionLedgerClient) UpdateOneID(id int64) *QuotaNetContributionLedgerUpdateOne {
+	mutation := newQuotaNetContributionLedgerMutation(c.config, OpUpdateOne, withQuotaNetContributionLedgerID(id))
+	return &QuotaNetContributionLedgerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for QuotaNetContributionLedger.
+func (c *QuotaNetContributionLedgerClient) Delete() *QuotaNetContributionLedgerDelete {
+	mutation := newQuotaNetContributionLedgerMutation(c.config, OpDelete)
+	return &QuotaNetContributionLedgerDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *QuotaNetContributionLedgerClient) DeleteOne(_m *QuotaNetContributionLedger) *QuotaNetContributionLedgerDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *QuotaNetContributionLedgerClient) DeleteOneID(id int64) *QuotaNetContributionLedgerDeleteOne {
+	builder := c.Delete().Where(quotanetcontributionledger.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &QuotaNetContributionLedgerDeleteOne{builder}
+}
+
+// Query returns a query builder for QuotaNetContributionLedger.
+func (c *QuotaNetContributionLedgerClient) Query() *QuotaNetContributionLedgerQuery {
+	return &QuotaNetContributionLedgerQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeQuotaNetContributionLedger},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a QuotaNetContributionLedger entity by its id.
+func (c *QuotaNetContributionLedgerClient) Get(ctx context.Context, id int64) (*QuotaNetContributionLedger, error) {
+	return c.Query().Where(quotanetcontributionledger.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *QuotaNetContributionLedgerClient) GetX(ctx context.Context, id int64) *QuotaNetContributionLedger {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *QuotaNetContributionLedgerClient) Hooks() []Hook {
+	return c.hooks.QuotaNetContributionLedger
+}
+
+// Interceptors returns the client interceptors.
+func (c *QuotaNetContributionLedgerClient) Interceptors() []Interceptor {
+	return c.inters.QuotaNetContributionLedger
+}
+
+func (c *QuotaNetContributionLedgerClient) mutate(ctx context.Context, m *QuotaNetContributionLedgerMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&QuotaNetContributionLedgerCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&QuotaNetContributionLedgerUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&QuotaNetContributionLedgerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&QuotaNetContributionLedgerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown QuotaNetContributionLedger mutation op: %q", m.Op())
+	}
+}
+
+// QuotaNetNodeClient is a client for the QuotaNetNode schema.
+type QuotaNetNodeClient struct {
+	config
+}
+
+// NewQuotaNetNodeClient returns a client for the QuotaNetNode from the given config.
+func NewQuotaNetNodeClient(c config) *QuotaNetNodeClient {
+	return &QuotaNetNodeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `quotanetnode.Hooks(f(g(h())))`.
+func (c *QuotaNetNodeClient) Use(hooks ...Hook) {
+	c.hooks.QuotaNetNode = append(c.hooks.QuotaNetNode, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `quotanetnode.Intercept(f(g(h())))`.
+func (c *QuotaNetNodeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.QuotaNetNode = append(c.inters.QuotaNetNode, interceptors...)
+}
+
+// Create returns a builder for creating a QuotaNetNode entity.
+func (c *QuotaNetNodeClient) Create() *QuotaNetNodeCreate {
+	mutation := newQuotaNetNodeMutation(c.config, OpCreate)
+	return &QuotaNetNodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of QuotaNetNode entities.
+func (c *QuotaNetNodeClient) CreateBulk(builders ...*QuotaNetNodeCreate) *QuotaNetNodeCreateBulk {
+	return &QuotaNetNodeCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *QuotaNetNodeClient) MapCreateBulk(slice any, setFunc func(*QuotaNetNodeCreate, int)) *QuotaNetNodeCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &QuotaNetNodeCreateBulk{err: fmt.Errorf("calling to QuotaNetNodeClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*QuotaNetNodeCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &QuotaNetNodeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for QuotaNetNode.
+func (c *QuotaNetNodeClient) Update() *QuotaNetNodeUpdate {
+	mutation := newQuotaNetNodeMutation(c.config, OpUpdate)
+	return &QuotaNetNodeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *QuotaNetNodeClient) UpdateOne(_m *QuotaNetNode) *QuotaNetNodeUpdateOne {
+	mutation := newQuotaNetNodeMutation(c.config, OpUpdateOne, withQuotaNetNode(_m))
+	return &QuotaNetNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *QuotaNetNodeClient) UpdateOneID(id int64) *QuotaNetNodeUpdateOne {
+	mutation := newQuotaNetNodeMutation(c.config, OpUpdateOne, withQuotaNetNodeID(id))
+	return &QuotaNetNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for QuotaNetNode.
+func (c *QuotaNetNodeClient) Delete() *QuotaNetNodeDelete {
+	mutation := newQuotaNetNodeMutation(c.config, OpDelete)
+	return &QuotaNetNodeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *QuotaNetNodeClient) DeleteOne(_m *QuotaNetNode) *QuotaNetNodeDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *QuotaNetNodeClient) DeleteOneID(id int64) *QuotaNetNodeDeleteOne {
+	builder := c.Delete().Where(quotanetnode.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &QuotaNetNodeDeleteOne{builder}
+}
+
+// Query returns a query builder for QuotaNetNode.
+func (c *QuotaNetNodeClient) Query() *QuotaNetNodeQuery {
+	return &QuotaNetNodeQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeQuotaNetNode},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a QuotaNetNode entity by its id.
+func (c *QuotaNetNodeClient) Get(ctx context.Context, id int64) (*QuotaNetNode, error) {
+	return c.Query().Where(quotanetnode.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *QuotaNetNodeClient) GetX(ctx context.Context, id int64) *QuotaNetNode {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *QuotaNetNodeClient) Hooks() []Hook {
+	hooks := c.hooks.QuotaNetNode
+	return append(hooks[:len(hooks):len(hooks)], quotanetnode.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *QuotaNetNodeClient) Interceptors() []Interceptor {
+	inters := c.inters.QuotaNetNode
+	return append(inters[:len(inters):len(inters)], quotanetnode.Interceptors[:]...)
+}
+
+func (c *QuotaNetNodeClient) mutate(ctx context.Context, m *QuotaNetNodeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&QuotaNetNodeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&QuotaNetNodeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&QuotaNetNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&QuotaNetNodeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown QuotaNetNode mutation op: %q", m.Op())
+	}
+}
+
+// QuotaNetNodeSessionClient is a client for the QuotaNetNodeSession schema.
+type QuotaNetNodeSessionClient struct {
+	config
+}
+
+// NewQuotaNetNodeSessionClient returns a client for the QuotaNetNodeSession from the given config.
+func NewQuotaNetNodeSessionClient(c config) *QuotaNetNodeSessionClient {
+	return &QuotaNetNodeSessionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `quotanetnodesession.Hooks(f(g(h())))`.
+func (c *QuotaNetNodeSessionClient) Use(hooks ...Hook) {
+	c.hooks.QuotaNetNodeSession = append(c.hooks.QuotaNetNodeSession, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `quotanetnodesession.Intercept(f(g(h())))`.
+func (c *QuotaNetNodeSessionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.QuotaNetNodeSession = append(c.inters.QuotaNetNodeSession, interceptors...)
+}
+
+// Create returns a builder for creating a QuotaNetNodeSession entity.
+func (c *QuotaNetNodeSessionClient) Create() *QuotaNetNodeSessionCreate {
+	mutation := newQuotaNetNodeSessionMutation(c.config, OpCreate)
+	return &QuotaNetNodeSessionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of QuotaNetNodeSession entities.
+func (c *QuotaNetNodeSessionClient) CreateBulk(builders ...*QuotaNetNodeSessionCreate) *QuotaNetNodeSessionCreateBulk {
+	return &QuotaNetNodeSessionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *QuotaNetNodeSessionClient) MapCreateBulk(slice any, setFunc func(*QuotaNetNodeSessionCreate, int)) *QuotaNetNodeSessionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &QuotaNetNodeSessionCreateBulk{err: fmt.Errorf("calling to QuotaNetNodeSessionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*QuotaNetNodeSessionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &QuotaNetNodeSessionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for QuotaNetNodeSession.
+func (c *QuotaNetNodeSessionClient) Update() *QuotaNetNodeSessionUpdate {
+	mutation := newQuotaNetNodeSessionMutation(c.config, OpUpdate)
+	return &QuotaNetNodeSessionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *QuotaNetNodeSessionClient) UpdateOne(_m *QuotaNetNodeSession) *QuotaNetNodeSessionUpdateOne {
+	mutation := newQuotaNetNodeSessionMutation(c.config, OpUpdateOne, withQuotaNetNodeSession(_m))
+	return &QuotaNetNodeSessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *QuotaNetNodeSessionClient) UpdateOneID(id int64) *QuotaNetNodeSessionUpdateOne {
+	mutation := newQuotaNetNodeSessionMutation(c.config, OpUpdateOne, withQuotaNetNodeSessionID(id))
+	return &QuotaNetNodeSessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for QuotaNetNodeSession.
+func (c *QuotaNetNodeSessionClient) Delete() *QuotaNetNodeSessionDelete {
+	mutation := newQuotaNetNodeSessionMutation(c.config, OpDelete)
+	return &QuotaNetNodeSessionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *QuotaNetNodeSessionClient) DeleteOne(_m *QuotaNetNodeSession) *QuotaNetNodeSessionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *QuotaNetNodeSessionClient) DeleteOneID(id int64) *QuotaNetNodeSessionDeleteOne {
+	builder := c.Delete().Where(quotanetnodesession.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &QuotaNetNodeSessionDeleteOne{builder}
+}
+
+// Query returns a query builder for QuotaNetNodeSession.
+func (c *QuotaNetNodeSessionClient) Query() *QuotaNetNodeSessionQuery {
+	return &QuotaNetNodeSessionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeQuotaNetNodeSession},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a QuotaNetNodeSession entity by its id.
+func (c *QuotaNetNodeSessionClient) Get(ctx context.Context, id int64) (*QuotaNetNodeSession, error) {
+	return c.Query().Where(quotanetnodesession.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *QuotaNetNodeSessionClient) GetX(ctx context.Context, id int64) *QuotaNetNodeSession {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *QuotaNetNodeSessionClient) Hooks() []Hook {
+	return c.hooks.QuotaNetNodeSession
+}
+
+// Interceptors returns the client interceptors.
+func (c *QuotaNetNodeSessionClient) Interceptors() []Interceptor {
+	return c.inters.QuotaNetNodeSession
+}
+
+func (c *QuotaNetNodeSessionClient) mutate(ctx context.Context, m *QuotaNetNodeSessionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&QuotaNetNodeSessionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&QuotaNetNodeSessionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&QuotaNetNodeSessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&QuotaNetNodeSessionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown QuotaNetNodeSession mutation op: %q", m.Op())
+	}
+}
+
+// QuotaNetPayoutBatchClient is a client for the QuotaNetPayoutBatch schema.
+type QuotaNetPayoutBatchClient struct {
+	config
+}
+
+// NewQuotaNetPayoutBatchClient returns a client for the QuotaNetPayoutBatch from the given config.
+func NewQuotaNetPayoutBatchClient(c config) *QuotaNetPayoutBatchClient {
+	return &QuotaNetPayoutBatchClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `quotanetpayoutbatch.Hooks(f(g(h())))`.
+func (c *QuotaNetPayoutBatchClient) Use(hooks ...Hook) {
+	c.hooks.QuotaNetPayoutBatch = append(c.hooks.QuotaNetPayoutBatch, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `quotanetpayoutbatch.Intercept(f(g(h())))`.
+func (c *QuotaNetPayoutBatchClient) Intercept(interceptors ...Interceptor) {
+	c.inters.QuotaNetPayoutBatch = append(c.inters.QuotaNetPayoutBatch, interceptors...)
+}
+
+// Create returns a builder for creating a QuotaNetPayoutBatch entity.
+func (c *QuotaNetPayoutBatchClient) Create() *QuotaNetPayoutBatchCreate {
+	mutation := newQuotaNetPayoutBatchMutation(c.config, OpCreate)
+	return &QuotaNetPayoutBatchCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of QuotaNetPayoutBatch entities.
+func (c *QuotaNetPayoutBatchClient) CreateBulk(builders ...*QuotaNetPayoutBatchCreate) *QuotaNetPayoutBatchCreateBulk {
+	return &QuotaNetPayoutBatchCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *QuotaNetPayoutBatchClient) MapCreateBulk(slice any, setFunc func(*QuotaNetPayoutBatchCreate, int)) *QuotaNetPayoutBatchCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &QuotaNetPayoutBatchCreateBulk{err: fmt.Errorf("calling to QuotaNetPayoutBatchClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*QuotaNetPayoutBatchCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &QuotaNetPayoutBatchCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for QuotaNetPayoutBatch.
+func (c *QuotaNetPayoutBatchClient) Update() *QuotaNetPayoutBatchUpdate {
+	mutation := newQuotaNetPayoutBatchMutation(c.config, OpUpdate)
+	return &QuotaNetPayoutBatchUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *QuotaNetPayoutBatchClient) UpdateOne(_m *QuotaNetPayoutBatch) *QuotaNetPayoutBatchUpdateOne {
+	mutation := newQuotaNetPayoutBatchMutation(c.config, OpUpdateOne, withQuotaNetPayoutBatch(_m))
+	return &QuotaNetPayoutBatchUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *QuotaNetPayoutBatchClient) UpdateOneID(id int64) *QuotaNetPayoutBatchUpdateOne {
+	mutation := newQuotaNetPayoutBatchMutation(c.config, OpUpdateOne, withQuotaNetPayoutBatchID(id))
+	return &QuotaNetPayoutBatchUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for QuotaNetPayoutBatch.
+func (c *QuotaNetPayoutBatchClient) Delete() *QuotaNetPayoutBatchDelete {
+	mutation := newQuotaNetPayoutBatchMutation(c.config, OpDelete)
+	return &QuotaNetPayoutBatchDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *QuotaNetPayoutBatchClient) DeleteOne(_m *QuotaNetPayoutBatch) *QuotaNetPayoutBatchDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *QuotaNetPayoutBatchClient) DeleteOneID(id int64) *QuotaNetPayoutBatchDeleteOne {
+	builder := c.Delete().Where(quotanetpayoutbatch.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &QuotaNetPayoutBatchDeleteOne{builder}
+}
+
+// Query returns a query builder for QuotaNetPayoutBatch.
+func (c *QuotaNetPayoutBatchClient) Query() *QuotaNetPayoutBatchQuery {
+	return &QuotaNetPayoutBatchQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeQuotaNetPayoutBatch},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a QuotaNetPayoutBatch entity by its id.
+func (c *QuotaNetPayoutBatchClient) Get(ctx context.Context, id int64) (*QuotaNetPayoutBatch, error) {
+	return c.Query().Where(quotanetpayoutbatch.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *QuotaNetPayoutBatchClient) GetX(ctx context.Context, id int64) *QuotaNetPayoutBatch {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *QuotaNetPayoutBatchClient) Hooks() []Hook {
+	return c.hooks.QuotaNetPayoutBatch
+}
+
+// Interceptors returns the client interceptors.
+func (c *QuotaNetPayoutBatchClient) Interceptors() []Interceptor {
+	return c.inters.QuotaNetPayoutBatch
+}
+
+func (c *QuotaNetPayoutBatchClient) mutate(ctx context.Context, m *QuotaNetPayoutBatchMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&QuotaNetPayoutBatchCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&QuotaNetPayoutBatchUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&QuotaNetPayoutBatchUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&QuotaNetPayoutBatchDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown QuotaNetPayoutBatch mutation op: %q", m.Op())
+	}
+}
+
+// QuotaNetPayoutItemClient is a client for the QuotaNetPayoutItem schema.
+type QuotaNetPayoutItemClient struct {
+	config
+}
+
+// NewQuotaNetPayoutItemClient returns a client for the QuotaNetPayoutItem from the given config.
+func NewQuotaNetPayoutItemClient(c config) *QuotaNetPayoutItemClient {
+	return &QuotaNetPayoutItemClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `quotanetpayoutitem.Hooks(f(g(h())))`.
+func (c *QuotaNetPayoutItemClient) Use(hooks ...Hook) {
+	c.hooks.QuotaNetPayoutItem = append(c.hooks.QuotaNetPayoutItem, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `quotanetpayoutitem.Intercept(f(g(h())))`.
+func (c *QuotaNetPayoutItemClient) Intercept(interceptors ...Interceptor) {
+	c.inters.QuotaNetPayoutItem = append(c.inters.QuotaNetPayoutItem, interceptors...)
+}
+
+// Create returns a builder for creating a QuotaNetPayoutItem entity.
+func (c *QuotaNetPayoutItemClient) Create() *QuotaNetPayoutItemCreate {
+	mutation := newQuotaNetPayoutItemMutation(c.config, OpCreate)
+	return &QuotaNetPayoutItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of QuotaNetPayoutItem entities.
+func (c *QuotaNetPayoutItemClient) CreateBulk(builders ...*QuotaNetPayoutItemCreate) *QuotaNetPayoutItemCreateBulk {
+	return &QuotaNetPayoutItemCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *QuotaNetPayoutItemClient) MapCreateBulk(slice any, setFunc func(*QuotaNetPayoutItemCreate, int)) *QuotaNetPayoutItemCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &QuotaNetPayoutItemCreateBulk{err: fmt.Errorf("calling to QuotaNetPayoutItemClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*QuotaNetPayoutItemCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &QuotaNetPayoutItemCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for QuotaNetPayoutItem.
+func (c *QuotaNetPayoutItemClient) Update() *QuotaNetPayoutItemUpdate {
+	mutation := newQuotaNetPayoutItemMutation(c.config, OpUpdate)
+	return &QuotaNetPayoutItemUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *QuotaNetPayoutItemClient) UpdateOne(_m *QuotaNetPayoutItem) *QuotaNetPayoutItemUpdateOne {
+	mutation := newQuotaNetPayoutItemMutation(c.config, OpUpdateOne, withQuotaNetPayoutItem(_m))
+	return &QuotaNetPayoutItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *QuotaNetPayoutItemClient) UpdateOneID(id int64) *QuotaNetPayoutItemUpdateOne {
+	mutation := newQuotaNetPayoutItemMutation(c.config, OpUpdateOne, withQuotaNetPayoutItemID(id))
+	return &QuotaNetPayoutItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for QuotaNetPayoutItem.
+func (c *QuotaNetPayoutItemClient) Delete() *QuotaNetPayoutItemDelete {
+	mutation := newQuotaNetPayoutItemMutation(c.config, OpDelete)
+	return &QuotaNetPayoutItemDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *QuotaNetPayoutItemClient) DeleteOne(_m *QuotaNetPayoutItem) *QuotaNetPayoutItemDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *QuotaNetPayoutItemClient) DeleteOneID(id int64) *QuotaNetPayoutItemDeleteOne {
+	builder := c.Delete().Where(quotanetpayoutitem.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &QuotaNetPayoutItemDeleteOne{builder}
+}
+
+// Query returns a query builder for QuotaNetPayoutItem.
+func (c *QuotaNetPayoutItemClient) Query() *QuotaNetPayoutItemQuery {
+	return &QuotaNetPayoutItemQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeQuotaNetPayoutItem},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a QuotaNetPayoutItem entity by its id.
+func (c *QuotaNetPayoutItemClient) Get(ctx context.Context, id int64) (*QuotaNetPayoutItem, error) {
+	return c.Query().Where(quotanetpayoutitem.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *QuotaNetPayoutItemClient) GetX(ctx context.Context, id int64) *QuotaNetPayoutItem {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *QuotaNetPayoutItemClient) Hooks() []Hook {
+	return c.hooks.QuotaNetPayoutItem
+}
+
+// Interceptors returns the client interceptors.
+func (c *QuotaNetPayoutItemClient) Interceptors() []Interceptor {
+	return c.inters.QuotaNetPayoutItem
+}
+
+func (c *QuotaNetPayoutItemClient) mutate(ctx context.Context, m *QuotaNetPayoutItemMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&QuotaNetPayoutItemCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&QuotaNetPayoutItemUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&QuotaNetPayoutItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&QuotaNetPayoutItemDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown QuotaNetPayoutItem mutation op: %q", m.Op())
+	}
+}
+
+// QuotaNetTaskClient is a client for the QuotaNetTask schema.
+type QuotaNetTaskClient struct {
+	config
+}
+
+// NewQuotaNetTaskClient returns a client for the QuotaNetTask from the given config.
+func NewQuotaNetTaskClient(c config) *QuotaNetTaskClient {
+	return &QuotaNetTaskClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `quotanettask.Hooks(f(g(h())))`.
+func (c *QuotaNetTaskClient) Use(hooks ...Hook) {
+	c.hooks.QuotaNetTask = append(c.hooks.QuotaNetTask, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `quotanettask.Intercept(f(g(h())))`.
+func (c *QuotaNetTaskClient) Intercept(interceptors ...Interceptor) {
+	c.inters.QuotaNetTask = append(c.inters.QuotaNetTask, interceptors...)
+}
+
+// Create returns a builder for creating a QuotaNetTask entity.
+func (c *QuotaNetTaskClient) Create() *QuotaNetTaskCreate {
+	mutation := newQuotaNetTaskMutation(c.config, OpCreate)
+	return &QuotaNetTaskCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of QuotaNetTask entities.
+func (c *QuotaNetTaskClient) CreateBulk(builders ...*QuotaNetTaskCreate) *QuotaNetTaskCreateBulk {
+	return &QuotaNetTaskCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *QuotaNetTaskClient) MapCreateBulk(slice any, setFunc func(*QuotaNetTaskCreate, int)) *QuotaNetTaskCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &QuotaNetTaskCreateBulk{err: fmt.Errorf("calling to QuotaNetTaskClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*QuotaNetTaskCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &QuotaNetTaskCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for QuotaNetTask.
+func (c *QuotaNetTaskClient) Update() *QuotaNetTaskUpdate {
+	mutation := newQuotaNetTaskMutation(c.config, OpUpdate)
+	return &QuotaNetTaskUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *QuotaNetTaskClient) UpdateOne(_m *QuotaNetTask) *QuotaNetTaskUpdateOne {
+	mutation := newQuotaNetTaskMutation(c.config, OpUpdateOne, withQuotaNetTask(_m))
+	return &QuotaNetTaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *QuotaNetTaskClient) UpdateOneID(id int64) *QuotaNetTaskUpdateOne {
+	mutation := newQuotaNetTaskMutation(c.config, OpUpdateOne, withQuotaNetTaskID(id))
+	return &QuotaNetTaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for QuotaNetTask.
+func (c *QuotaNetTaskClient) Delete() *QuotaNetTaskDelete {
+	mutation := newQuotaNetTaskMutation(c.config, OpDelete)
+	return &QuotaNetTaskDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *QuotaNetTaskClient) DeleteOne(_m *QuotaNetTask) *QuotaNetTaskDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *QuotaNetTaskClient) DeleteOneID(id int64) *QuotaNetTaskDeleteOne {
+	builder := c.Delete().Where(quotanettask.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &QuotaNetTaskDeleteOne{builder}
+}
+
+// Query returns a query builder for QuotaNetTask.
+func (c *QuotaNetTaskClient) Query() *QuotaNetTaskQuery {
+	return &QuotaNetTaskQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeQuotaNetTask},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a QuotaNetTask entity by its id.
+func (c *QuotaNetTaskClient) Get(ctx context.Context, id int64) (*QuotaNetTask, error) {
+	return c.Query().Where(quotanettask.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *QuotaNetTaskClient) GetX(ctx context.Context, id int64) *QuotaNetTask {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *QuotaNetTaskClient) Hooks() []Hook {
+	return c.hooks.QuotaNetTask
+}
+
+// Interceptors returns the client interceptors.
+func (c *QuotaNetTaskClient) Interceptors() []Interceptor {
+	return c.inters.QuotaNetTask
+}
+
+func (c *QuotaNetTaskClient) mutate(ctx context.Context, m *QuotaNetTaskMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&QuotaNetTaskCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&QuotaNetTaskUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&QuotaNetTaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&QuotaNetTaskDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown QuotaNetTask mutation op: %q", m.Op())
+	}
+}
+
+// QuotaNetTaskEventClient is a client for the QuotaNetTaskEvent schema.
+type QuotaNetTaskEventClient struct {
+	config
+}
+
+// NewQuotaNetTaskEventClient returns a client for the QuotaNetTaskEvent from the given config.
+func NewQuotaNetTaskEventClient(c config) *QuotaNetTaskEventClient {
+	return &QuotaNetTaskEventClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `quotanettaskevent.Hooks(f(g(h())))`.
+func (c *QuotaNetTaskEventClient) Use(hooks ...Hook) {
+	c.hooks.QuotaNetTaskEvent = append(c.hooks.QuotaNetTaskEvent, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `quotanettaskevent.Intercept(f(g(h())))`.
+func (c *QuotaNetTaskEventClient) Intercept(interceptors ...Interceptor) {
+	c.inters.QuotaNetTaskEvent = append(c.inters.QuotaNetTaskEvent, interceptors...)
+}
+
+// Create returns a builder for creating a QuotaNetTaskEvent entity.
+func (c *QuotaNetTaskEventClient) Create() *QuotaNetTaskEventCreate {
+	mutation := newQuotaNetTaskEventMutation(c.config, OpCreate)
+	return &QuotaNetTaskEventCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of QuotaNetTaskEvent entities.
+func (c *QuotaNetTaskEventClient) CreateBulk(builders ...*QuotaNetTaskEventCreate) *QuotaNetTaskEventCreateBulk {
+	return &QuotaNetTaskEventCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *QuotaNetTaskEventClient) MapCreateBulk(slice any, setFunc func(*QuotaNetTaskEventCreate, int)) *QuotaNetTaskEventCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &QuotaNetTaskEventCreateBulk{err: fmt.Errorf("calling to QuotaNetTaskEventClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*QuotaNetTaskEventCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &QuotaNetTaskEventCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for QuotaNetTaskEvent.
+func (c *QuotaNetTaskEventClient) Update() *QuotaNetTaskEventUpdate {
+	mutation := newQuotaNetTaskEventMutation(c.config, OpUpdate)
+	return &QuotaNetTaskEventUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *QuotaNetTaskEventClient) UpdateOne(_m *QuotaNetTaskEvent) *QuotaNetTaskEventUpdateOne {
+	mutation := newQuotaNetTaskEventMutation(c.config, OpUpdateOne, withQuotaNetTaskEvent(_m))
+	return &QuotaNetTaskEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *QuotaNetTaskEventClient) UpdateOneID(id int64) *QuotaNetTaskEventUpdateOne {
+	mutation := newQuotaNetTaskEventMutation(c.config, OpUpdateOne, withQuotaNetTaskEventID(id))
+	return &QuotaNetTaskEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for QuotaNetTaskEvent.
+func (c *QuotaNetTaskEventClient) Delete() *QuotaNetTaskEventDelete {
+	mutation := newQuotaNetTaskEventMutation(c.config, OpDelete)
+	return &QuotaNetTaskEventDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *QuotaNetTaskEventClient) DeleteOne(_m *QuotaNetTaskEvent) *QuotaNetTaskEventDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *QuotaNetTaskEventClient) DeleteOneID(id int64) *QuotaNetTaskEventDeleteOne {
+	builder := c.Delete().Where(quotanettaskevent.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &QuotaNetTaskEventDeleteOne{builder}
+}
+
+// Query returns a query builder for QuotaNetTaskEvent.
+func (c *QuotaNetTaskEventClient) Query() *QuotaNetTaskEventQuery {
+	return &QuotaNetTaskEventQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeQuotaNetTaskEvent},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a QuotaNetTaskEvent entity by its id.
+func (c *QuotaNetTaskEventClient) Get(ctx context.Context, id int64) (*QuotaNetTaskEvent, error) {
+	return c.Query().Where(quotanettaskevent.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *QuotaNetTaskEventClient) GetX(ctx context.Context, id int64) *QuotaNetTaskEvent {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *QuotaNetTaskEventClient) Hooks() []Hook {
+	return c.hooks.QuotaNetTaskEvent
+}
+
+// Interceptors returns the client interceptors.
+func (c *QuotaNetTaskEventClient) Interceptors() []Interceptor {
+	return c.inters.QuotaNetTaskEvent
+}
+
+func (c *QuotaNetTaskEventClient) mutate(ctx context.Context, m *QuotaNetTaskEventMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&QuotaNetTaskEventCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&QuotaNetTaskEventUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&QuotaNetTaskEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&QuotaNetTaskEventDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown QuotaNetTaskEvent mutation op: %q", m.Op())
+	}
+}
+
 // RedeemCodeClient is a client for the RedeemCode schema.
 type RedeemCodeClient struct {
 	config
@@ -6198,7 +7191,9 @@ type (
 		ChannelMonitorHistory, ChannelMonitorRequestTemplate, ErrorPassthroughRule,
 		Group, IdempotencyRecord, IdentityAdoptionDecision, PaymentAuditLog,
 		PaymentOrder, PaymentProviderInstance, PendingAuthSession, PromoCode,
-		PromoCodeUsage, Proxy, RedeemCode, SecuritySecret, Setting, SubscriptionPlan,
+		PromoCodeUsage, Proxy, QuotaNetContributionLedger, QuotaNetNode,
+		QuotaNetNodeSession, QuotaNetPayoutBatch, QuotaNetPayoutItem, QuotaNetTask,
+		QuotaNetTaskEvent, RedeemCode, SecuritySecret, Setting, SubscriptionPlan,
 		TLSFingerprintProfile, UsageCleanupTask, UsageLog, User, UserAllowedGroup,
 		UserAttributeDefinition, UserAttributeValue, UserPlatformQuota,
 		UserSubscription []ent.Hook
@@ -6209,7 +7204,9 @@ type (
 		ChannelMonitorHistory, ChannelMonitorRequestTemplate, ErrorPassthroughRule,
 		Group, IdempotencyRecord, IdentityAdoptionDecision, PaymentAuditLog,
 		PaymentOrder, PaymentProviderInstance, PendingAuthSession, PromoCode,
-		PromoCodeUsage, Proxy, RedeemCode, SecuritySecret, Setting, SubscriptionPlan,
+		PromoCodeUsage, Proxy, QuotaNetContributionLedger, QuotaNetNode,
+		QuotaNetNodeSession, QuotaNetPayoutBatch, QuotaNetPayoutItem, QuotaNetTask,
+		QuotaNetTaskEvent, RedeemCode, SecuritySecret, Setting, SubscriptionPlan,
 		TLSFingerprintProfile, UsageCleanupTask, UsageLog, User, UserAllowedGroup,
 		UserAttributeDefinition, UserAttributeValue, UserPlatformQuota,
 		UserSubscription []ent.Interceptor
