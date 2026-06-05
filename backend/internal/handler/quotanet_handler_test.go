@@ -10,6 +10,8 @@ import (
 
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/tasks"
+	"github.com/Wei-Shaw/sub2api/internal/server/middleware"
+	"github.com/Wei-Shaw/sub2api/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -61,6 +63,43 @@ func TestQuotaNetOpenAIChatCompletionsReturnsPayload(t *testing.T) {
 	}
 	if got := w.Body.String(); !bytes.Contains([]byte(got), []byte(`"chatcmpl-1"`)) {
 		t.Fatalf("body = %s", got)
+	}
+}
+
+func TestQuotaNetOpenAIChatCompletionsPropagatesCallerContext(t *testing.T) {
+	w := httptest.NewRecorder()
+	c := newQuotaNetTestContext(w, `{"model":"gpt-4.1","messages":[]}`)
+	groupID := int64(7)
+	c.Set(string(middleware.ContextKeyAPIKey), &service.APIKey{
+		ID:      11,
+		UserID:  22,
+		GroupID: &groupID,
+	})
+	c.Set(string(middleware.ContextKeyUser), middleware.AuthSubject{UserID: 33})
+	h := &QuotaNetHandler{taskService: &stubQuotaNetTaskService{
+		result: &tasks.DispatchResult{
+			Response: protocol.TaskResponse{
+				TaskID:  "task-1",
+				Status:  protocol.TaskStatusSuccess,
+				Payload: map[string]any{"id": "chatcmpl-1"},
+			},
+		},
+	}}
+
+	h.OpenAIChatCompletions(c)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200, body=%s", w.Code, w.Body.String())
+	}
+	input := h.taskService.(*stubQuotaNetTaskService).input
+	if input.APIKeyID == nil || *input.APIKeyID != 11 {
+		t.Fatalf("api_key_id = %v, want 11", input.APIKeyID)
+	}
+	if input.UserID == nil || *input.UserID != 33 {
+		t.Fatalf("user_id = %v, want authenticated subject user 33", input.UserID)
+	}
+	if input.GroupID == nil || *input.GroupID != 7 {
+		t.Fatalf("group_id = %v, want 7", input.GroupID)
 	}
 }
 

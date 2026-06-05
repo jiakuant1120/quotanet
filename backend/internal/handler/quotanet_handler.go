@@ -11,6 +11,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/tasks"
 	qws "github.com/Wei-Shaw/sub2api/internal/quotanet/ws"
+	"github.com/Wei-Shaw/sub2api/internal/server/middleware"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -78,6 +79,7 @@ func (h *QuotaNetHandler) OpenAIChatCompletions(c *gin.Context) {
 		TimeoutSeconds: quotanetTimeoutSeconds(payload),
 		Payload:        payload,
 	}
+	applyQuotaNetCallerContext(c, &input)
 	result, err := h.taskService.DispatchAndWait(c.Request.Context(), input)
 	if err != nil {
 		quotanetOpenAIError(c, err)
@@ -98,6 +100,22 @@ func (h *QuotaNetHandler) OpenAIChatCompletions(c *gin.Context) {
 		result.Response.Payload = map[string]any{}
 	}
 	c.JSON(http.StatusOK, result.Response.Payload)
+}
+
+func applyQuotaNetCallerContext(c *gin.Context, input *tasks.CreateTaskInput) {
+	if c == nil || input == nil {
+		return
+	}
+	if apiKey, ok := middleware.GetAPIKeyFromContext(c); ok && apiKey != nil {
+		input.APIKeyID = &apiKey.ID
+		if apiKey.UserID > 0 {
+			input.UserID = &apiKey.UserID
+		}
+		input.GroupID = apiKey.GroupID
+	}
+	if subject, ok := middleware.GetAuthSubjectFromContext(c); ok && subject.UserID > 0 {
+		input.UserID = &subject.UserID
+	}
 }
 
 func (h *QuotaNetHandler) NodeWebSocket(c *gin.Context) {
