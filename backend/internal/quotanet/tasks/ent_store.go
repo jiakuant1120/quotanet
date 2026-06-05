@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/Wei-Shaw/sub2api/ent"
 	"github.com/Wei-Shaw/sub2api/ent/quotanettask"
 	"github.com/Wei-Shaw/sub2api/ent/quotanettaskevent"
@@ -21,6 +22,66 @@ type EntStore struct {
 
 func NewEntStore(client *ent.Client) *EntStore {
 	return &EntStore{client: client}
+}
+
+func (s *EntStore) List(ctx context.Context, params ListParams) ([]*Task, int64, error) {
+	if s == nil || s.client == nil {
+		return nil, 0, ErrTaskNotFound
+	}
+	params = normalizeListParams(params)
+	query := s.client.QuotaNetTask.Query()
+	query = applyTaskFilters(query, params)
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	rows, err := query.
+		Order(quotanettask.ByCreatedAt(sql.OrderDesc())).
+		Limit(params.PageSize).
+		Offset((params.Page - 1) * params.PageSize).
+		All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	out := make([]*Task, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, taskFromEnt(row))
+	}
+	return out, int64(total), nil
+}
+
+func (s *EntStore) Get(ctx context.Context, taskID string) (*Task, error) {
+	if s == nil || s.client == nil {
+		return nil, ErrTaskNotFound
+	}
+	row, err := s.client.QuotaNetTask.Query().
+		Where(quotanettask.TaskIDEQ(strings.TrimSpace(taskID))).
+		Only(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, ErrTaskNotFound
+		}
+		return nil, err
+	}
+	return taskFromEnt(row), nil
+}
+
+func (s *EntStore) Events(ctx context.Context, taskID string) ([]*TaskEvent, error) {
+	if s == nil || s.client == nil {
+		return nil, ErrTaskNotFound
+	}
+	rows, err := s.client.QuotaNetTaskEvent.Query().
+		Where(quotanettaskevent.TaskIDEQ(strings.TrimSpace(taskID))).
+		Order(quotanettaskevent.BySequence(sql.OrderAsc())).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*TaskEvent, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, taskEventFromEnt(row))
+	}
+	return out, nil
 }
 
 func (s *EntStore) CreateQueued(ctx context.Context, input CreateTaskInput, taskID string) (*Task, error) {
@@ -195,15 +256,87 @@ func taskFromEnt(row *ent.QuotaNetTask) *Task {
 		return nil
 	}
 	return &Task{
+		ID:               row.ID,
+		TaskID:           row.TaskID,
+		RequestID:        row.RequestID,
+		UserID:           row.UserID,
+		APIKeyID:         row.APIKeyID,
+		GroupID:          row.GroupID,
+		AccountID:        row.AccountID,
+		NodeID:           row.NodeID,
+		SessionID:        row.SessionID,
+		Platform:         row.Platform,
+		Endpoint:         row.Endpoint,
+		Model:            row.Model,
+		Stream:           row.Stream,
+		Status:           row.Status,
+		ErrorCode:        row.ErrorCode,
+		ErrorMessage:     row.ErrorMessage,
+		PromptTokens:     row.PromptTokens,
+		CompletionTokens: row.CompletionTokens,
+		TotalTokens:      row.TotalTokens,
+		FirstTokenMS:     row.FirstTokenMs,
+		DurationMS:       row.DurationMs,
+		CreatedAt:        row.CreatedAt,
+		UpdatedAt:        row.UpdatedAt,
+		DispatchedAt:     row.DispatchedAt,
+		CompletedAt:      row.CompletedAt,
+	}
+}
+
+func taskEventFromEnt(row *ent.QuotaNetTaskEvent) *TaskEvent {
+	if row == nil {
+		return nil
+	}
+	return &TaskEvent{
 		ID:        row.ID,
 		TaskID:    row.TaskID,
-		RequestID: row.RequestID,
-		NodeID:    row.NodeID,
-		SessionID: row.SessionID,
-		Platform:  row.Platform,
-		Endpoint:  row.Endpoint,
-		Model:     row.Model,
-		Stream:    row.Stream,
-		Status:    row.Status,
+		EventType: row.EventType,
+		Sequence:  row.Sequence,
+		Payload:   row.Payload,
+		CreatedAt: row.CreatedAt,
 	}
+}
+
+func normalizeListParams(params ListParams) ListParams {
+	if params.Page <= 0 {
+		params.Page = 1
+	}
+	if params.PageSize <= 0 {
+		params.PageSize = 20
+	}
+	if params.PageSize > 100 {
+		params.PageSize = 100
+	}
+	params.Status = strings.TrimSpace(params.Status)
+	params.Platform = strings.TrimSpace(params.Platform)
+	params.Search = strings.TrimSpace(params.Search)
+	return params
+}
+
+func applyTaskFilters(query *ent.QuotaNetTaskQuery, params ListParams) *ent.QuotaNetTaskQuery {
+	if params.Status != "" {
+		query = query.Where(quotanettask.StatusEQ(params.Status))
+	}
+	if params.Platform != "" {
+		query = query.Where(quotanettask.PlatformEQ(params.Platform))
+	}
+	if params.NodeID != nil {
+		query = query.Where(quotanettask.NodeIDEQ(*params.NodeID))
+	}
+	if params.AccountID != nil {
+		query = query.Where(quotanettask.AccountIDEQ(*params.AccountID))
+	}
+	if params.UserID != nil {
+		query = query.Where(quotanettask.UserIDEQ(*params.UserID))
+	}
+	if params.Search != "" {
+		query = query.Where(quotanettask.Or(
+			quotanettask.TaskIDContainsFold(params.Search),
+			quotanettask.RequestIDContainsFold(params.Search),
+			quotanettask.ModelContainsFold(params.Search),
+			quotanettask.ErrorCodeContainsFold(params.Search),
+		))
+	}
+	return query
 }

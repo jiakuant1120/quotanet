@@ -44,6 +44,7 @@ func ProvideAdminHandlers(
 	paymentHandler *admin.PaymentHandler,
 	affiliateHandler *admin.AffiliateHandler,
 	quotaNetNodeHandler *admin.QuotaNetNodeHandler,
+	quotaNetTaskHandler *admin.QuotaNetTaskHandler,
 ) *AdminHandlers {
 	return &AdminHandlers{
 		Dashboard:              dashboardHandler,
@@ -77,6 +78,7 @@ func ProvideAdminHandlers(
 		Payment:                paymentHandler,
 		Affiliate:              affiliateHandler,
 		QuotaNetNode:           quotaNetNodeHandler,
+		QuotaNetTask:           quotaNetTaskHandler,
 	}
 }
 
@@ -204,6 +206,7 @@ var ProviderSet = wire.NewSet(
 	admin.NewPaymentHandler,
 	admin.NewAffiliateHandler,
 	admin.NewQuotaNetNodeHandler,
+	admin.NewQuotaNetTaskHandler,
 
 	// AdminHandlers and Handlers constructors
 	ProvideAdminHandlers,

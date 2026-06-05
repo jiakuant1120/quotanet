@@ -100,6 +100,9 @@ func RegisterAdminRoutes(
 
 		// QuotaNet 节点管理
 		registerQuotaNetNodeRoutes(admin, h)
+
+		// QuotaNet 任务管理
+		registerQuotaNetTaskRoutes(admin, h)
 	}
 }
 
@@ -111,6 +114,15 @@ func registerQuotaNetNodeRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 		nodes.GET("/:id", h.Admin.QuotaNetNode.Get)
 		nodes.PUT("/:id/status", h.Admin.QuotaNetNode.UpdateStatus)
 		nodes.POST("/:id/reset-token", h.Admin.QuotaNetNode.ResetToken)
+	}
+}
+
+func registerQuotaNetTaskRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+	tasks := admin.Group("/quotanet/tasks")
+	{
+		tasks.GET("", h.Admin.QuotaNetTask.List)
+		tasks.GET("/:task_id/events", h.Admin.QuotaNetTask.Events)
+		tasks.GET("/:task_id", h.Admin.QuotaNetTask.Get)
 	}
 }
 

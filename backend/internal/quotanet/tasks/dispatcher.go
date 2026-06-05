@@ -32,16 +32,51 @@ type CreateTaskInput struct {
 }
 
 type Task struct {
+	ID               int64
+	TaskID           string
+	RequestID        string
+	UserID           *int64
+	APIKeyID         *int64
+	GroupID          *int64
+	AccountID        *int64
+	NodeID           *int64
+	SessionID        *string
+	Platform         string
+	Endpoint         string
+	Model            string
+	Stream           bool
+	Status           string
+	ErrorCode        *string
+	ErrorMessage     *string
+	PromptTokens     int
+	CompletionTokens int
+	TotalTokens      int
+	FirstTokenMS     *int
+	DurationMS       *int
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+	DispatchedAt     *time.Time
+	CompletedAt      *time.Time
+}
+
+type TaskEvent struct {
 	ID        int64
 	TaskID    string
-	RequestID string
-	NodeID    *int64
-	SessionID *string
-	Platform  string
-	Endpoint  string
-	Model     string
-	Stream    bool
+	EventType string
+	Sequence  int64
+	Payload   map[string]any
+	CreatedAt time.Time
+}
+
+type ListParams struct {
+	Page      int
+	PageSize  int
 	Status    string
+	Platform  string
+	NodeID    *int64
+	AccountID *int64
+	UserID    *int64
+	Search    string
 }
 
 type Store interface {
