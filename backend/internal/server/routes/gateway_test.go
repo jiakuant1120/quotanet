@@ -146,3 +146,37 @@ func TestQuotaNetOpenAIRouteUsesAuthenticatedOpenAIGroup(t *testing.T) {
 		t.Fatalf("body=%s should contain quotanet handler error", w.Body.String())
 	}
 }
+
+func TestQuotaNetOpenAIModelsRouteUsesAuthenticatedOpenAIGroup(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	v1 := router.Group("/api/v1")
+
+	RegisterQuotaNetGatewayRoutes(
+		v1,
+		&handler.Handlers{QuotaNet: handler.NewQuotaNetHandler(nil, nil)},
+		servermiddleware.APIKeyAuthMiddleware(func(c *gin.Context) {
+			groupID := int64(1)
+			c.Set(string(servermiddleware.ContextKeyAPIKey), &service.APIKey{
+				GroupID: &groupID,
+				Group:   &service.Group{Platform: service.PlatformOpenAI},
+			})
+			c.Next()
+		}),
+		nil,
+		nil,
+		&config.Config{Gateway: config.GatewayConfig{MaxBodySize: 1 << 20}},
+	)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/quotanet/openai/v1/models", nil)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusServiceUnavailable {
+		t.Fatalf("status=%d want %d body=%s", w.Code, http.StatusServiceUnavailable, w.Body.String())
+	}
+	if !strings.Contains(w.Body.String(), "quotanet registry is not initialized") {
+		t.Fatalf("body=%s should contain registry unavailable message", w.Body.String())
+	}
+}

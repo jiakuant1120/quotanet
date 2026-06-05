@@ -62,6 +62,13 @@ func NewSessionManager(authenticator NodeAuthenticator, reg *registry.Registry) 
 	}
 }
 
+func (m *SessionManager) Registry() *registry.Registry {
+	if m == nil {
+		return nil
+	}
+	return m.registry
+}
+
 func (m *SessionManager) WithSessionStore(store SessionStore) *SessionManager {
 	m.sessionStore = store
 	return m
@@ -188,10 +195,6 @@ func (m *SessionManager) Disconnect(ctx context.Context, sessionID, reason strin
 	if m.sessionStore != nil {
 		_ = m.sessionStore.SessionDisconnected(ctx, sessionID, reason, m.currentTime())
 	}
-}
-
-func (m *SessionManager) Registry() *registry.Registry {
-	return m.registry
 }
 
 func (m *SessionManager) okAck(msgID, message string) (protocol.Envelope, error) {

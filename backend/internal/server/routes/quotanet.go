@@ -47,6 +47,19 @@ func RegisterQuotaNetGatewayRoutes(
 	quotanetOpenAI.Use(gin.HandlerFunc(apiKeyAuth))
 	quotanetOpenAI.Use(requireGroupAnthropic)
 	{
+		quotanetOpenAI.GET("/models", func(c *gin.Context) {
+			if getGroupPlatform(c) != service.PlatformOpenAI {
+				service.MarkOpsClientBusinessLimited(c, service.OpsClientBusinessLimitedReasonLocalFeatureGate)
+				c.JSON(http.StatusNotFound, gin.H{
+					"error": gin.H{
+						"type":    "not_found_error",
+						"message": "QuotaNet OpenAI models requires an OpenAI group",
+					},
+				})
+				return
+			}
+			h.QuotaNet.OpenAIModels(c)
+		})
 		quotanetOpenAI.POST("/chat/completions", func(c *gin.Context) {
 			if getGroupPlatform(c) != service.PlatformOpenAI {
 				service.MarkOpsClientBusinessLimited(c, service.OpsClientBusinessLimitedReasonLocalFeatureGate)

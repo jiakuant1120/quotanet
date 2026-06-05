@@ -121,6 +121,45 @@ func TestRegistryCandidatesRequireModelMatch(t *testing.T) {
 	}
 }
 
+func TestRegistryAvailableModels(t *testing.T) {
+	reg := New()
+	now := time.Date(2026, 6, 5, 10, 0, 0, 0, time.UTC)
+	reg.now = func() time.Time { return now }
+
+	first := validSession("first", 1, 3)
+	first.Capabilities = []protocol.Capability{
+		{Provider: "openai", Models: []string{"gpt-4.1", "gpt-4o-mini"}},
+		{Provider: "gemini", Models: []string{"gemini-2.5-pro"}},
+	}
+	second := validSession("second", 2, 2)
+	second.Capabilities = []protocol.Capability{
+		{Provider: "openai", Models: []string{"GPT-4.1", "gpt-5"}},
+	}
+	full := validSession("full", 3, 1)
+	full.CurrentConcurrency = 1
+	full.Capabilities = []protocol.Capability{{Provider: "openai", Models: []string{"hidden-model"}}}
+	stale := validSession("stale", 4, 3)
+	stale.LastHeartbeatAt = now.Add(-2 * time.Minute)
+	stale.Capabilities = []protocol.Capability{{Provider: "openai", Models: []string{"stale-model"}}}
+
+	for _, session := range []Session{first, second, full, stale} {
+		if err := reg.Register(session); err != nil {
+			t.Fatalf("Register(%s) error = %v", session.SessionID, err)
+		}
+	}
+
+	models := reg.AvailableModels("openai", 30*time.Second)
+	want := []string{"gpt-4.1", "gpt-4o-mini", "gpt-5"}
+	if len(models) != len(want) {
+		t.Fatalf("models = %+v, want %+v", models, want)
+	}
+	for i := range want {
+		if models[i] != want[i] {
+			t.Fatalf("models = %+v, want %+v", models, want)
+		}
+	}
+}
+
 func TestRegistryInvalidInputs(t *testing.T) {
 	reg := New()
 	if err := reg.Register(Session{}); !errors.Is(err, ErrInvalidSession) {

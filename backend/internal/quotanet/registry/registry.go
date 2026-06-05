@@ -250,6 +250,48 @@ func (r *Registry) Candidates(provider, model string, staleAfter time.Duration) 
 	return out
 }
 
+func (r *Registry) AvailableModels(provider string, staleAfter time.Duration) []string {
+	provider = strings.TrimSpace(provider)
+	now := r.currentTime()
+
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	seen := make(map[string]struct{})
+	out := make([]string, 0)
+	for _, session := range r.sessions {
+		if !sessionReady(session, now, staleAfter) {
+			continue
+		}
+		available := session.MaxConcurrency - session.CurrentConcurrency
+		if available <= 0 {
+			continue
+		}
+		if session.MaxQueueSize > 0 && session.QueueSize >= session.MaxQueueSize {
+			continue
+		}
+		for _, cap := range session.Capabilities {
+			if provider != "" && !strings.EqualFold(strings.TrimSpace(cap.Provider), provider) {
+				continue
+			}
+			for _, model := range cap.Models {
+				model = strings.TrimSpace(model)
+				if model == "" {
+					continue
+				}
+				key := strings.ToLower(model)
+				if _, ok := seen[key]; ok {
+					continue
+				}
+				seen[key] = struct{}{}
+				out = append(out, model)
+			}
+		}
+	}
+	sortStrings(out)
+	return out
+}
+
 func sessionReady(session *Session, now time.Time, staleAfter time.Duration) bool {
 	if session == nil || session.DisconnectedAt != nil {
 		return false
@@ -263,6 +305,17 @@ func sessionReady(session *Session, now time.Time, staleAfter time.Duration) boo
 		return false
 	}
 	return true
+}
+
+func sortStrings(values []string) {
+	for i := 1; i < len(values); i++ {
+		current := values[i]
+		j := i - 1
+		for ; j >= 0 && strings.ToLower(current) < strings.ToLower(values[j]); j-- {
+			values[j+1] = values[j]
+		}
+		values[j+1] = current
+	}
 }
 
 func capabilityMatches(cap protocol.Capability, provider, model string) bool {

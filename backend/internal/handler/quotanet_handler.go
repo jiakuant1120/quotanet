@@ -9,6 +9,7 @@ import (
 
 	"github.com/Wei-Shaw/sub2api/internal/pkg/ip"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/registry"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/tasks"
 	qws "github.com/Wei-Shaw/sub2api/internal/quotanet/ws"
 	"github.com/Wei-Shaw/sub2api/internal/server/middleware"
@@ -19,12 +20,14 @@ import (
 )
 
 const (
-	quotanetWriteTimeout = 10 * time.Second
+	quotanetWriteTimeout    = 10 * time.Second
+	quotanetModelStaleAfter = 60 * time.Second
 )
 
 type QuotaNetHandler struct {
 	sessionManager *qws.SessionManager
 	taskService    quotaNetTaskService
+	registry       *registry.Registry
 	upgrader       websocket.Upgrader
 }
 
@@ -33,15 +36,44 @@ type quotaNetTaskService interface {
 }
 
 func NewQuotaNetHandler(sessionManager *qws.SessionManager, taskService *tasks.Service) *QuotaNetHandler {
+	var reg *registry.Registry
+	if sessionManager != nil {
+		reg = sessionManager.Registry()
+	}
 	return &QuotaNetHandler{
 		sessionManager: sessionManager,
 		taskService:    taskService,
+		registry:       reg,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(*http.Request) bool {
 				return true
 			},
 		},
 	}
+}
+
+func (h *QuotaNetHandler) OpenAIModels(c *gin.Context) {
+	if h == nil || h.registry == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": gin.H{
+			"type":    "api_error",
+			"message": "quotanet registry is not initialized",
+		}})
+		return
+	}
+	modelIDs := h.registry.AvailableModels("openai", quotanetModelStaleAfter)
+	models := make([]gin.H, 0, len(modelIDs))
+	for _, modelID := range modelIDs {
+		models = append(models, gin.H{
+			"id":       modelID,
+			"object":   "model",
+			"created":  0,
+			"owned_by": "quotanet",
+		})
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"object": "list",
+		"data":   models,
+	})
 }
 
 func (h *QuotaNetHandler) OpenAIChatCompletions(c *gin.Context) {
