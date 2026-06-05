@@ -152,10 +152,18 @@ func ProvideQuotaNetDispatcher(taskStore *tasks.EntStore, reg *registry.Registry
 	return tasks.NewDispatcher(taskStore, reg)
 }
 
-func ProvideQuotaNetSessionManager(nodeStore *nodes.EntStore, taskStore *tasks.EntStore, reg *registry.Registry) *qws.SessionManager {
+func ProvideQuotaNetResponseWaiter() *tasks.ResponseWaiter {
+	return tasks.NewResponseWaiter()
+}
+
+func ProvideQuotaNetResponseRecorder(taskStore *tasks.EntStore, waiter *tasks.ResponseWaiter) *tasks.ResponseRecorder {
+	return tasks.NewResponseRecorder(taskStore, waiter)
+}
+
+func ProvideQuotaNetSessionManager(nodeStore *nodes.EntStore, responseRecorder *tasks.ResponseRecorder, reg *registry.Registry) *qws.SessionManager {
 	return qws.NewSessionManager(nodes.NewAuthenticator(nodeStore), reg).
 		WithSessionStore(nodeStore).
-		WithTaskStore(taskStore)
+		WithTaskStore(responseRecorder)
 }
 
 // ProviderSet is the Wire provider set for all handlers
@@ -181,6 +189,8 @@ var ProviderSet = wire.NewSet(
 	nodes.NewManager,
 	ProvideQuotaNetRegistry,
 	ProvideQuotaNetDispatcher,
+	ProvideQuotaNetResponseWaiter,
+	ProvideQuotaNetResponseRecorder,
 	ProvideQuotaNetSessionManager,
 	NewQuotaNetHandler,
 
