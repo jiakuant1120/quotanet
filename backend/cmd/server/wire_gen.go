@@ -256,7 +256,7 @@ func initializeApplication(buildInfo handler.BuildInfo) (*Application, error) {
 	handlerPaymentHandler := handler.NewPaymentHandler(paymentService, paymentConfigService, channelService)
 	paymentWebhookHandler := handler.NewPaymentWebhookHandler(paymentService, registry)
 	availableChannelHandler := handler.NewAvailableChannelHandler(channelService, apiKeyService, settingService)
-	sessionManager := quotanetws.NewSessionManager(nodes.NewAuthenticator(entStore), quotanetregistry.New())
+	sessionManager := quotanetws.NewSessionManager(nodes.NewAuthenticator(entStore), quotanetregistry.New()).WithSessionStore(entStore)
 	quotaNetHandler := handler.NewQuotaNetHandler(sessionManager)
 	idempotencyCoordinator := service.ProvideIdempotencyCoordinator(idempotencyRepository, configConfig)
 	idempotencyCleanupService := service.ProvideIdempotencyCleanupService(idempotencyRepository, configConfig)

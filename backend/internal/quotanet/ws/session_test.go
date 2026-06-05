@@ -34,7 +34,7 @@ func TestSessionManagerHandleHelloRegistersSession(t *testing.T) {
 		},
 	})
 
-	ack, session, err := manager.HandleHello(context.Background(), "sess-1", "inst-1", "token", envelope)
+	ack, session, err := manager.HandleHello(context.Background(), "sess-1", "inst-1", "token", "127.0.0.1", envelope)
 	if err != nil {
 		t.Fatalf("HandleHello() error = %v", err)
 	}
@@ -63,7 +63,7 @@ func TestSessionManagerHandleHelloRejectsUnsupportedVersion(t *testing.T) {
 		ProtocolVersion: "old",
 	})
 
-	ack, _, err := manager.HandleHello(context.Background(), "sess-1", "inst-1", "token", envelope)
+	ack, _, err := manager.HandleHello(context.Background(), "sess-1", "inst-1", "token", "", envelope)
 	if !errors.Is(err, protocol.ErrUnsupportedVersion) {
 		t.Fatalf("HandleHello() error = %v, want ErrUnsupportedVersion", err)
 	}
@@ -82,7 +82,7 @@ func TestSessionManagerHandleHelloRejectsUnexpectedEvent(t *testing.T) {
 		t.Fatalf("NewEnvelope() error = %v", err)
 	}
 
-	ack, _, err := manager.HandleHello(context.Background(), "sess-1", "inst-1", "token", envelope)
+	ack, _, err := manager.HandleHello(context.Background(), "sess-1", "inst-1", "token", "", envelope)
 	if !errors.Is(err, ErrUnexpectedEvent) {
 		t.Fatalf("HandleHello() error = %v, want ErrUnexpectedEvent", err)
 	}
@@ -97,7 +97,7 @@ func TestSessionManagerHandleHelloRejectsAuthenticatorError(t *testing.T) {
 		ProtocolVersion: protocol.Version,
 	})
 
-	ack, _, err := manager.HandleHello(context.Background(), "sess-1", "inst-1", "token", envelope)
+	ack, _, err := manager.HandleHello(context.Background(), "sess-1", "inst-1", "token", "", envelope)
 	if !errors.Is(err, ErrNodeRejected) {
 		t.Fatalf("HandleHello() error = %v, want ErrNodeRejected", err)
 	}
@@ -114,7 +114,7 @@ func TestSessionManagerHandleHelloRejectsWalletMismatch(t *testing.T) {
 		ProtocolVersion: protocol.Version,
 	})
 
-	ack, _, err := manager.HandleHello(context.Background(), "sess-1", "inst-1", "token", envelope)
+	ack, _, err := manager.HandleHello(context.Background(), "sess-1", "inst-1", "token", "", envelope)
 	if !errors.Is(err, ErrNodeRejected) {
 		t.Fatalf("HandleHello() error = %v, want ErrNodeRejected", err)
 	}
@@ -157,9 +157,63 @@ func TestSessionManagerHandleHeartbeatUpdatesRegistry(t *testing.T) {
 	}
 }
 
+func TestSessionManagerPersistsLifecycle(t *testing.T) {
+	reg := registry.New()
+	store := &stubSessionStore{}
+	manager := NewSessionManager(&stubAuthenticator{
+		node: AuthenticatedNode{
+			NodeID:        42,
+			NodeKey:       "node-42",
+			WalletAddress: "wallet-42",
+		},
+	}, reg).WithSessionStore(store)
+	envelope := helloEnvelope(t, protocol.ClientHello{
+		ClientID:        "node-42",
+		WalletAddress:   "wallet-42",
+		ProtocolVersion: protocol.Version,
+	})
+
+	_, _, err := manager.HandleHello(context.Background(), "sess-1", "inst-1", "token", "10.0.0.1", envelope)
+	if err != nil {
+		t.Fatalf("HandleHello() error = %v", err)
+	}
+	if store.connected.SessionID != "sess-1" || store.remoteAddr != "10.0.0.1" {
+		t.Fatalf("connected session=%+v remote=%q", store.connected, store.remoteAddr)
+	}
+
+	heartbeat := heartbeatEnvelope(t)
+	if _, err := manager.HandleHeartbeat("sess-1", heartbeat); err != nil {
+		t.Fatalf("HandleHeartbeat() error = %v", err)
+	}
+	if store.heartbeatSessionID != "sess-1" || store.heartbeat.Status != protocol.NodeStatusBusy {
+		t.Fatalf("heartbeat session=%q payload=%+v", store.heartbeatSessionID, store.heartbeat)
+	}
+
+	manager.Disconnect(context.Background(), "sess-1", "closed")
+	if store.disconnectedSessionID != "sess-1" || store.disconnectReason != "closed" {
+		t.Fatalf("disconnect session=%q reason=%q", store.disconnectedSessionID, store.disconnectReason)
+	}
+}
+
 func helloEnvelope(t *testing.T, hello protocol.ClientHello) protocol.Envelope {
 	t.Helper()
 	envelope, err := protocol.NewEnvelope(protocol.EventClientHello, "msg-1", hello)
+	if err != nil {
+		t.Fatalf("NewEnvelope() error = %v", err)
+	}
+	return envelope
+}
+
+func heartbeatEnvelope(t *testing.T) protocol.Envelope {
+	t.Helper()
+	envelope, err := protocol.NewEnvelope(protocol.EventClientHeartbeat, "msg-heartbeat", protocol.ClientHeartbeat{
+		WalletAddress:      "wallet-42",
+		Status:             protocol.NodeStatusBusy,
+		CurrentConcurrency: 1,
+		MaxConcurrency:     2,
+		QueueSize:          3,
+		MaxQueueSize:       5,
+	})
 	if err != nil {
 		t.Fatalf("NewEnvelope() error = %v", err)
 	}
@@ -193,4 +247,31 @@ func (s *stubAuthenticator) AuthenticateNode(_ context.Context, _ string, _ prot
 		return AuthenticatedNode{NodeID: 1, NodeKey: "node-1", WalletAddress: "wallet-1"}, nil
 	}
 	return s.node, nil
+}
+
+type stubSessionStore struct {
+	connected             registry.Session
+	remoteAddr            string
+	heartbeatSessionID    string
+	heartbeat             protocol.ClientHeartbeat
+	disconnectedSessionID string
+	disconnectReason      string
+}
+
+func (s *stubSessionStore) SessionConnected(_ context.Context, session registry.Session, remoteAddr string) error {
+	s.connected = session
+	s.remoteAddr = remoteAddr
+	return nil
+}
+
+func (s *stubSessionStore) SessionHeartbeat(_ context.Context, sessionID string, heartbeat protocol.ClientHeartbeat, _ time.Time) error {
+	s.heartbeatSessionID = sessionID
+	s.heartbeat = heartbeat
+	return nil
+}
+
+func (s *stubSessionStore) SessionDisconnected(_ context.Context, sessionID, reason string, _ time.Time) error {
+	s.disconnectedSessionID = sessionID
+	s.disconnectReason = reason
+	return nil
 }

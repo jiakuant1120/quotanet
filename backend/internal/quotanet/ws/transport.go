@@ -24,6 +24,7 @@ type ServeOptions struct {
 	SessionID   string
 	InstanceID  string
 	Token       string
+	RemoteAddr  string
 	CloseReason string
 }
 
@@ -37,7 +38,7 @@ func (m *SessionManager) Serve(ctx context.Context, conn Conn, opts ServeOptions
 	if err := conn.ReadJSON(&helloEnvelope); err != nil {
 		return fmt.Errorf("read quotanet hello: %w", err)
 	}
-	ack, session, err := m.HandleHello(ctx, opts.SessionID, opts.InstanceID, opts.Token, helloEnvelope)
+	ack, session, err := m.HandleHello(ctx, opts.SessionID, opts.InstanceID, opts.Token, opts.RemoteAddr, helloEnvelope)
 	if writeErr := conn.WriteJSON(ack); writeErr != nil {
 		return fmt.Errorf("write quotanet hello ack: %w", writeErr)
 	}
@@ -50,7 +51,7 @@ func (m *SessionManager) Serve(ctx context.Context, conn Conn, opts ServeOptions
 		closeReason = defaultDisconnectReason
 	}
 	defer func() {
-		_ = m.registry.Unregister(session.SessionID, closeReason)
+		m.Disconnect(context.Background(), session.SessionID, closeReason)
 	}()
 
 	for {

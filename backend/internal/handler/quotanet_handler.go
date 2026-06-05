@@ -59,6 +59,7 @@ func (h *QuotaNetHandler) NodeWebSocket(c *gin.Context) {
 		SessionID:   sessionID,
 		InstanceID:  instanceID,
 		Token:       token,
+		RemoteAddr:  ip.GetClientIP(c),
 		CloseReason: reason,
 	}); err != nil {
 		return

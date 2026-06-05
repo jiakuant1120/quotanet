@@ -142,7 +142,7 @@ func ProvideHandlers(
 }
 
 func ProvideQuotaNetSessionManager(store *nodes.EntStore) *qws.SessionManager {
-	return qws.NewSessionManager(nodes.NewAuthenticator(store), registry.New())
+	return qws.NewSessionManager(nodes.NewAuthenticator(store), registry.New()).WithSessionStore(store)
 }
 
 // ProviderSet is the Wire provider set for all handlers

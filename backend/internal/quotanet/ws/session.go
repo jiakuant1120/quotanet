@@ -36,7 +36,14 @@ type AuthenticatedNode struct {
 type SessionManager struct {
 	authenticator NodeAuthenticator
 	registry      *registry.Registry
+	sessionStore  SessionStore
 	now           func() time.Time
+}
+
+type SessionStore interface {
+	SessionConnected(ctx context.Context, session registry.Session, remoteAddr string) error
+	SessionHeartbeat(ctx context.Context, sessionID string, heartbeat protocol.ClientHeartbeat, at time.Time) error
+	SessionDisconnected(ctx context.Context, sessionID, reason string, at time.Time) error
 }
 
 func NewSessionManager(authenticator NodeAuthenticator, reg *registry.Registry) *SessionManager {
@@ -50,7 +57,12 @@ func NewSessionManager(authenticator NodeAuthenticator, reg *registry.Registry) 
 	}
 }
 
-func (m *SessionManager) HandleHello(ctx context.Context, sessionID, instanceID, token string, envelope protocol.Envelope) (protocol.Envelope, registry.Session, error) {
+func (m *SessionManager) WithSessionStore(store SessionStore) *SessionManager {
+	m.sessionStore = store
+	return m
+}
+
+func (m *SessionManager) HandleHello(ctx context.Context, sessionID, instanceID, token, remoteAddr string, envelope protocol.Envelope) (protocol.Envelope, registry.Session, error) {
 	if strings.TrimSpace(sessionID) == "" || strings.TrimSpace(instanceID) == "" {
 		return protocol.Envelope{}, registry.Session{}, registry.ErrInvalidSession
 	}
@@ -103,6 +115,12 @@ func (m *SessionManager) HandleHello(ctx context.Context, sessionID, instanceID,
 	if err := m.registry.Register(session); err != nil {
 		return m.errorAck(envelope.MsgID, err.Error()), registry.Session{}, err
 	}
+	if m.sessionStore != nil {
+		if err := m.sessionStore.SessionConnected(ctx, session, strings.TrimSpace(remoteAddr)); err != nil {
+			_ = m.registry.Unregister(session.SessionID, "session_store_connect_failed")
+			return m.errorAck(envelope.MsgID, "failed to persist node session"), registry.Session{}, err
+		}
+	}
 
 	ack, err := m.okAck(envelope.MsgID, "node connected")
 	if err != nil {
@@ -122,7 +140,24 @@ func (m *SessionManager) HandleHeartbeat(sessionID string, envelope protocol.Env
 	if err := m.registry.UpdateHeartbeat(sessionID, heartbeat); err != nil {
 		return m.errorAck(envelope.MsgID, err.Error()), err
 	}
+	if m.sessionStore != nil {
+		if err := m.sessionStore.SessionHeartbeat(context.Background(), strings.TrimSpace(sessionID), heartbeat, m.currentTime()); err != nil {
+			return m.errorAck(envelope.MsgID, "failed to persist heartbeat"), err
+		}
+	}
 	return m.okAck(envelope.MsgID, "heartbeat accepted")
+}
+
+func (m *SessionManager) Disconnect(ctx context.Context, sessionID, reason string) {
+	sessionID = strings.TrimSpace(sessionID)
+	reason = strings.TrimSpace(reason)
+	if reason == "" {
+		reason = defaultDisconnectReason
+	}
+	_ = m.registry.Unregister(sessionID, reason)
+	if m.sessionStore != nil {
+		_ = m.sessionStore.SessionDisconnected(ctx, sessionID, reason, m.currentTime())
+	}
 }
 
 func (m *SessionManager) Registry() *registry.Registry {
