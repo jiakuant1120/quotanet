@@ -3,6 +3,7 @@ package ws
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -68,6 +69,10 @@ func TestSessionManagerHandleHelloRejectsUnsupportedVersion(t *testing.T) {
 		t.Fatalf("HandleHello() error = %v, want ErrUnsupportedVersion", err)
 	}
 	assertAck(t, ack, AckStatusError)
+	message := ackMessage(t, ack)
+	if !strings.Contains(message, "client=old") || !strings.Contains(message, "server="+protocol.Version) {
+		t.Fatalf("ack message = %q, want explicit client/server protocol versions", message)
+	}
 }
 
 func TestSessionManagerHandleHelloRejectsUnexpectedEvent(t *testing.T) {
@@ -274,6 +279,15 @@ func assertAck(t *testing.T, envelope protocol.Envelope, status string) {
 	if ack.Status != status {
 		t.Fatalf("ack status = %q, want %q, message=%q", ack.Status, status, ack.Message)
 	}
+}
+
+func ackMessage(t *testing.T, envelope protocol.Envelope) string {
+	t.Helper()
+	var ack protocol.Ack
+	if err := envelope.DecodeData(&ack); err != nil {
+		t.Fatalf("DecodeData() error = %v", err)
+	}
+	return ack.Message
 }
 
 type stubAuthenticator struct {

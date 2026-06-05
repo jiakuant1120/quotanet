@@ -89,10 +89,10 @@ func (m *SessionManager) HandleHello(ctx context.Context, sessionID, instanceID,
 
 	var hello protocol.ClientHello
 	if err := envelope.DecodeData(&hello); err != nil {
-		return m.errorAck(envelope.MsgID, err.Error()), registry.Session{}, err
+		return m.errorAck(envelope.MsgID, helloErrorMessage(hello, err)), registry.Session{}, err
 	}
 	if err := hello.Validate(); err != nil {
-		return m.errorAck(envelope.MsgID, err.Error()), registry.Session{}, err
+		return m.errorAck(envelope.MsgID, helloErrorMessage(hello, err)), registry.Session{}, err
 	}
 	if m.authenticator == nil {
 		return m.errorAck(envelope.MsgID, "node authenticator is not configured"), registry.Session{}, ErrNodeRejected
@@ -144,6 +144,20 @@ func (m *SessionManager) HandleHello(ctx context.Context, sessionID, instanceID,
 		return protocol.Envelope{}, registry.Session{}, err
 	}
 	return ack, session, nil
+}
+
+func helloErrorMessage(hello protocol.ClientHello, err error) string {
+	if errors.Is(err, protocol.ErrUnsupportedVersion) {
+		clientVersion := strings.TrimSpace(hello.ProtocolVersion)
+		if clientVersion == "" {
+			clientVersion = "unknown"
+		}
+		return fmt.Sprintf("unsupported protocol version: client=%s server=%s", clientVersion, protocol.Version)
+	}
+	if err != nil {
+		return err.Error()
+	}
+	return ""
 }
 
 func (m *SessionManager) HandleHeartbeat(sessionID string, envelope protocol.Envelope) (protocol.Envelope, error) {
