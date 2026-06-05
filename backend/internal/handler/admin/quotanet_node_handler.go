@@ -9,16 +9,19 @@ import (
 
 	"github.com/Wei-Shaw/sub2api/internal/pkg/response"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/nodes"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/registry"
 
 	"github.com/gin-gonic/gin"
 )
 
 type QuotaNetNodeHandler struct {
 	manager *nodes.Manager
+	reg     *registry.Registry
 }
 
-func NewQuotaNetNodeHandler(manager *nodes.Manager) *QuotaNetNodeHandler {
-	return &QuotaNetNodeHandler{manager: manager}
+func NewQuotaNetNodeHandler(manager *nodes.Manager, reg *registry.Registry) *QuotaNetNodeHandler {
+	return &QuotaNetNodeHandler{manager: manager, reg: reg}
 }
 
 type quotaNetNodeCreateRequest struct {
@@ -49,6 +52,26 @@ type quotaNetNodeCreateResponse struct {
 	Token string                `json:"token"`
 }
 
+type quotaNetNodeSessionResponse struct {
+	SessionID          string                `json:"session_id"`
+	NodeID             int64                 `json:"node_id"`
+	NodeKey            string                `json:"node_key"`
+	InstanceID         string                `json:"instance_id"`
+	WalletAddress      string                `json:"wallet_address"`
+	ClientVersion      string                `json:"client_version,omitempty"`
+	ProtocolVersion    string                `json:"protocol_version,omitempty"`
+	Capabilities       []protocol.Capability `json:"capabilities"`
+	Status             string                `json:"status"`
+	CurrentConcurrency int                   `json:"current_concurrency"`
+	MaxConcurrency     int                   `json:"max_concurrency"`
+	QueueSize          int                   `json:"queue_size"`
+	MaxQueueSize       int                   `json:"max_queue_size"`
+	ConnectedAt        string                `json:"connected_at,omitempty"`
+	LastHeartbeatAt    string                `json:"last_heartbeat_at,omitempty"`
+	DisconnectedAt     *string               `json:"disconnected_at,omitempty"`
+	CloseReason        string                `json:"close_reason,omitempty"`
+}
+
 func (h *QuotaNetNodeHandler) List(c *gin.Context) {
 	page, pageSize := response.ParsePagination(c)
 	items, total, err := h.manager.List(c.Request.Context(), nodes.ListParams{
@@ -66,6 +89,19 @@ func (h *QuotaNetNodeHandler) List(c *gin.Context) {
 		out = append(out, quotaNetNodeToResponse(item))
 	}
 	response.Paginated(c, out, total, page, pageSize)
+}
+
+func (h *QuotaNetNodeHandler) Sessions(c *gin.Context) {
+	if h == nil || h.reg == nil {
+		response.Error(c, http.StatusServiceUnavailable, "quotanet registry is not initialized")
+		return
+	}
+	sessions := h.reg.Snapshot()
+	out := make([]*quotaNetNodeSessionResponse, 0, len(sessions))
+	for _, session := range sessions {
+		out = append(out, quotaNetSessionToResponse(session))
+	}
+	response.Success(c, gin.H{"items": out})
 }
 
 func (h *QuotaNetNodeHandler) Get(c *gin.Context) {
@@ -178,6 +214,32 @@ func quotaNetNodeToResponse(node *nodes.Node) *quotaNetNodeResponse {
 	if node.LastSeenAt != nil {
 		v := formatQuotaNetTime(*node.LastSeenAt)
 		resp.LastSeenAt = &v
+	}
+	return resp
+}
+
+func quotaNetSessionToResponse(session registry.Session) *quotaNetNodeSessionResponse {
+	resp := &quotaNetNodeSessionResponse{
+		SessionID:          session.SessionID,
+		NodeID:             session.NodeID,
+		NodeKey:            session.NodeKey,
+		InstanceID:         session.InstanceID,
+		WalletAddress:      session.WalletAddress,
+		ClientVersion:      session.ClientVersion,
+		ProtocolVersion:    session.ProtocolVersion,
+		Capabilities:       session.Capabilities,
+		Status:             session.Status,
+		CurrentConcurrency: session.CurrentConcurrency,
+		MaxConcurrency:     session.MaxConcurrency,
+		QueueSize:          session.QueueSize,
+		MaxQueueSize:       session.MaxQueueSize,
+		ConnectedAt:        formatQuotaNetTime(session.ConnectedAt),
+		LastHeartbeatAt:    formatQuotaNetTime(session.LastHeartbeatAt),
+		CloseReason:        session.CloseReason,
+	}
+	if session.DisconnectedAt != nil {
+		v := formatQuotaNetTime(*session.DisconnectedAt)
+		resp.DisconnectedAt = &v
 	}
 	return resp
 }

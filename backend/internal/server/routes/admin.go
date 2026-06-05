@@ -111,6 +111,7 @@ func registerQuotaNetNodeRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 	{
 		nodes.GET("", h.Admin.QuotaNetNode.List)
 		nodes.POST("", h.Admin.QuotaNetNode.Create)
+		nodes.GET("/sessions", h.Admin.QuotaNetNode.Sessions)
 		nodes.GET("/:id", h.Admin.QuotaNetNode.Get)
 		nodes.PUT("/:id/status", h.Admin.QuotaNetNode.UpdateStatus)
 		nodes.POST("/:id/reset-token", h.Admin.QuotaNetNode.ResetToken)
