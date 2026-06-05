@@ -107,14 +107,21 @@ func NewDispatcher(store Store, reg *registry.Registry) *Dispatcher {
 }
 
 func (d *Dispatcher) Dispatch(ctx context.Context, input CreateTaskInput) (*Task, error) {
+	return d.DispatchWithTaskID(ctx, input, d.newTaskID())
+}
+
+func (d *Dispatcher) DispatchWithTaskID(ctx context.Context, input CreateTaskInput, taskID string) (*Task, error) {
 	if err := validateCreateInput(input); err != nil {
 		return nil, err
 	}
 	if d == nil || d.store == nil || d.registry == nil {
 		return nil, ErrInvalidTaskInput
 	}
+	taskID = strings.TrimSpace(taskID)
+	if taskID == "" {
+		return nil, fmt.Errorf("%w: task_id is required", ErrInvalidTaskInput)
+	}
 
-	taskID := d.newTaskID()
 	task, err := d.store.CreateQueued(ctx, input, taskID)
 	if err != nil {
 		return nil, err

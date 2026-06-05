@@ -42,6 +42,28 @@ func TestDispatcherDispatch(t *testing.T) {
 	}
 }
 
+func TestDispatcherDispatchWithTaskID(t *testing.T) {
+	reg := registry.New()
+	if err := reg.Register(validSession("sess-1", 10)); err != nil {
+		t.Fatalf("Register() error = %v", err)
+	}
+	sender := &stubSender{}
+	if err := reg.AttachSender("sess-1", sender); err != nil {
+		t.Fatalf("AttachSender() error = %v", err)
+	}
+	store := &stubStore{}
+	dispatcher := NewDispatcher(store, reg)
+	dispatcher.newTaskID = func() string { return "unused-task" }
+
+	task, err := dispatcher.DispatchWithTaskID(context.Background(), validInput(), "pre-registered-task")
+	if err != nil {
+		t.Fatalf("DispatchWithTaskID() error = %v", err)
+	}
+	if task.TaskID != "pre-registered-task" || store.dispatchedTaskID != "pre-registered-task" {
+		t.Fatalf("task=%+v dispatched=%q", task, store.dispatchedTaskID)
+	}
+}
+
 func TestDispatcherNoNodeAvailable(t *testing.T) {
 	store := &stubStore{}
 	dispatcher := NewDispatcher(store, registry.New())
@@ -81,6 +103,9 @@ func TestDispatcherRejectsInvalidInput(t *testing.T) {
 	dispatcher := NewDispatcher(&stubStore{}, registry.New())
 	if _, err := dispatcher.Dispatch(context.Background(), CreateTaskInput{}); !errors.Is(err, ErrInvalidTaskInput) {
 		t.Fatalf("Dispatch(empty) error = %v, want ErrInvalidTaskInput", err)
+	}
+	if _, err := dispatcher.DispatchWithTaskID(context.Background(), validInput(), " "); !errors.Is(err, ErrInvalidTaskInput) {
+		t.Fatalf("DispatchWithTaskID(empty task id) error = %v, want ErrInvalidTaskInput", err)
 	}
 }
 
