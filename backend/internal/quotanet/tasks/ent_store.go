@@ -2,11 +2,13 @@ package tasks
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/Wei-Shaw/sub2api/ent"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetcontributionledger"
 	"github.com/Wei-Shaw/sub2api/ent/quotanettask"
 	"github.com/Wei-Shaw/sub2api/ent/quotanettaskevent"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
@@ -224,6 +226,12 @@ func (s *EntStore) TaskResponseReceived(ctx context.Context, sessionID string, r
 		return ErrTaskNotFound
 	}
 
+	if response.Status == protocol.TaskStatusSuccess {
+		if err := s.recordSuccessfulContributionLedger(ctx, tx, taskID, response); err != nil {
+			return err
+		}
+	}
+
 	count, err := tx.QuotaNetTaskEvent.Query().
 		Where(quotanettaskevent.TaskIDEQ(taskID)).
 		Count(ctx)
@@ -244,6 +252,36 @@ func (s *EntStore) TaskResponseReceived(ctx context.Context, sessionID string, r
 		return err
 	}
 	return nil
+}
+
+func (s *EntStore) recordSuccessfulContributionLedger(ctx context.Context, tx *ent.Tx, taskID string, response protocol.TaskResponse) error {
+	row, err := tx.QuotaNetTask.Query().
+		Where(quotanettask.TaskIDEQ(taskID)).
+		Only(ctx)
+	if err != nil {
+		return err
+	}
+	if row.NodeID == nil {
+		return fmt.Errorf("quotanet task %s has no node_id for contribution ledger", taskID)
+	}
+	node, err := tx.QuotaNetNode.Get(ctx, *row.NodeID)
+	if err != nil {
+		return err
+	}
+	return tx.QuotaNetContributionLedger.Create().
+		SetTaskID(taskID).
+		SetNodeID(*row.NodeID).
+		SetWalletAddress(node.WalletAddress).
+		SetNillableAccountID(row.AccountID).
+		SetPlatform(row.Platform).
+		SetModel(row.Model).
+		SetTokenFlow(int64(response.Usage.TotalTokens)).
+		SetAmountCxs(0).
+		SetRate(0).
+		SetStatus(protocol.SettlementStatusPending).
+		OnConflictColumns(quotanetcontributionledger.FieldTaskID).
+		DoNothing().
+		Exec(ctx)
 }
 
 func taskResponseEventPayload(sessionID string, response protocol.TaskResponse) map[string]any {
