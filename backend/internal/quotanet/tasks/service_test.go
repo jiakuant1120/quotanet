@@ -67,7 +67,8 @@ func TestServiceDispatchAndWaitTimeout(t *testing.T) {
 	if err := reg.AttachSender("sess-1", &stubSender{}); err != nil {
 		t.Fatalf("AttachSender() error = %v", err)
 	}
-	dispatcher := NewDispatcher(&stubStore{}, reg)
+	store := &stubStore{}
+	dispatcher := NewDispatcher(store, reg)
 	svc := NewService(dispatcher, NewResponseWaiter())
 	svc.newTaskID = func() string { return "task-1" }
 	input := validInput()
@@ -78,5 +79,8 @@ func TestServiceDispatchAndWaitTimeout(t *testing.T) {
 	_, err := svc.DispatchAndWait(ctx, input)
 	if !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatalf("DispatchAndWait() error = %v, want context deadline", err)
+	}
+	if store.failedCode != "TIMEOUT" {
+		t.Fatalf("failed code = %q, want TIMEOUT", store.failedCode)
 	}
 }

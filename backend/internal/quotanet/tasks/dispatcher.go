@@ -171,6 +171,17 @@ func (d *Dispatcher) DispatchWithTaskID(ctx context.Context, input CreateTaskInp
 	return task, nil
 }
 
+func (d *Dispatcher) MarkTimedOut(ctx context.Context, taskID string) error {
+	if d == nil || d.store == nil {
+		return ErrInvalidTaskInput
+	}
+	taskID = strings.TrimSpace(taskID)
+	if taskID == "" {
+		return fmt.Errorf("%w: task_id is required", ErrInvalidTaskInput)
+	}
+	return d.store.MarkFailed(ctx, taskID, "TIMEOUT", "quotanet task timed out", d.now())
+}
+
 func validateCreateInput(input CreateTaskInput) error {
 	if strings.TrimSpace(input.RequestID) == "" {
 		return fmt.Errorf("%w: request_id is required", ErrInvalidTaskInput)

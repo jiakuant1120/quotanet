@@ -50,6 +50,9 @@ func (s *Service) DispatchAndWait(ctx context.Context, input CreateTaskInput) (*
 	}
 	response, err := subscription.Await(waitCtx)
 	if err != nil {
+		if waitCtx.Err() != nil {
+			_ = s.dispatcher.MarkTimedOut(context.Background(), taskID)
+		}
 		return nil, err
 	}
 	return &DispatchResult{Task: task, Response: response}, nil
