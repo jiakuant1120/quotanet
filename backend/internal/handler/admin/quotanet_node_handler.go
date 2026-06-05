@@ -159,6 +159,36 @@ func (h *QuotaNetNodeHandler) Overview(c *gin.Context) {
 	response.Success(c, quotaNetNodeOverview(sessions, taskStatuses))
 }
 
+func (h *QuotaNetNodeHandler) Tasks(c *gin.Context) {
+	if h == nil || h.taskStore == nil {
+		response.Error(c, http.StatusServiceUnavailable, "quotanet task service is not initialized")
+		return
+	}
+	nodeID, ok := quotaNetNodeID(c)
+	if !ok {
+		return
+	}
+	page, pageSize := response.ParsePagination(c)
+	params := tasks.ListParams{
+		Page:     page,
+		PageSize: pageSize,
+		NodeID:   &nodeID,
+		Status:   strings.TrimSpace(c.Query("status")),
+		Platform: strings.TrimSpace(c.Query("platform")),
+		Search:   strings.TrimSpace(c.Query("search")),
+	}
+	items, total, err := h.taskStore.List(c.Request.Context(), params)
+	if err != nil {
+		quotaNetTaskError(c, err)
+		return
+	}
+	out := make([]*quotaNetTaskResponse, 0, len(items))
+	for _, item := range items {
+		out = append(out, quotaNetTaskToResponse(item))
+	}
+	response.Paginated(c, out, total, page, pageSize)
+}
+
 func (h *QuotaNetNodeHandler) Get(c *gin.Context) {
 	id, ok := quotaNetNodeID(c)
 	if !ok {
