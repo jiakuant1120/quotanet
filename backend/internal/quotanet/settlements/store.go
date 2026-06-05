@@ -11,6 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/Wei-Shaw/sub2api/ent"
 	"github.com/Wei-Shaw/sub2api/ent/quotanetcontributionledger"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetpayoutbatch"
+	"github.com/Wei-Shaw/sub2api/ent/quotanetpayoutitem"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
 	"github.com/google/uuid"
 )
@@ -118,6 +120,20 @@ type ListParams struct {
 	PayoutBatchID *int64
 }
 
+type BatchListParams struct {
+	Page     int
+	PageSize int
+	Status   string
+}
+
+type ItemListParams struct {
+	Page          int
+	PageSize      int
+	BatchID       int64
+	Status        string
+	WalletAddress string
+}
+
 func (s *Store) List(ctx context.Context, params ListParams) ([]*Ledger, int64, error) {
 	if s == nil || s.client == nil {
 		return nil, 0, nil
@@ -139,6 +155,66 @@ func (s *Store) List(ctx context.Context, params ListParams) ([]*Ledger, int64, 
 	out := make([]*Ledger, 0, len(rows))
 	for _, row := range rows {
 		out = append(out, ledgerFromEnt(row))
+	}
+	return out, int64(total), nil
+}
+
+func (s *Store) ListBatches(ctx context.Context, params BatchListParams) ([]*PayoutBatch, int64, error) {
+	if s == nil || s.client == nil {
+		return nil, 0, nil
+	}
+	params = normalizeBatchListParams(params)
+	query := s.client.QuotaNetPayoutBatch.Query()
+	if params.Status != "" {
+		query = query.Where(quotanetpayoutbatch.StatusEQ(params.Status))
+	}
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	rows, err := query.
+		Order(quotanetpayoutbatch.ByCreatedAt(sql.OrderDesc())).
+		Limit(params.PageSize).
+		Offset((params.Page - 1) * params.PageSize).
+		All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	out := make([]*PayoutBatch, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, payoutBatchFromEnt(row))
+	}
+	return out, int64(total), nil
+}
+
+func (s *Store) ListItems(ctx context.Context, params ItemListParams) ([]*PayoutItem, int64, error) {
+	if s == nil || s.client == nil {
+		return nil, 0, nil
+	}
+	params = normalizeItemListParams(params)
+	query := s.client.QuotaNetPayoutItem.Query().
+		Where(quotanetpayoutitem.BatchIDEQ(params.BatchID))
+	if params.Status != "" {
+		query = query.Where(quotanetpayoutitem.StatusEQ(params.Status))
+	}
+	if params.WalletAddress != "" {
+		query = query.Where(quotanetpayoutitem.WalletAddressEQ(params.WalletAddress))
+	}
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	rows, err := query.
+		Order(quotanetpayoutitem.ByCreatedAt(sql.OrderAsc())).
+		Limit(params.PageSize).
+		Offset((params.Page - 1) * params.PageSize).
+		All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	out := make([]*PayoutItem, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, payoutItemFromEnt(row))
 	}
 	return out, int64(total), nil
 }
@@ -303,6 +379,35 @@ func (s *Store) CreateBatch(ctx context.Context, input CreateBatchInput) (*Creat
 }
 
 func normalizeListParams(params ListParams) ListParams {
+	if params.Page <= 0 {
+		params.Page = 1
+	}
+	if params.PageSize <= 0 {
+		params.PageSize = 20
+	}
+	if params.PageSize > 100 {
+		params.PageSize = 100
+	}
+	params.Status = strings.TrimSpace(params.Status)
+	params.WalletAddress = strings.TrimSpace(params.WalletAddress)
+	return params
+}
+
+func normalizeBatchListParams(params BatchListParams) BatchListParams {
+	if params.Page <= 0 {
+		params.Page = 1
+	}
+	if params.PageSize <= 0 {
+		params.PageSize = 20
+	}
+	if params.PageSize > 100 {
+		params.PageSize = 100
+	}
+	params.Status = strings.TrimSpace(params.Status)
+	return params
+}
+
+func normalizeItemListParams(params ItemListParams) ItemListParams {
 	if params.Page <= 0 {
 		params.Page = 1
 	}

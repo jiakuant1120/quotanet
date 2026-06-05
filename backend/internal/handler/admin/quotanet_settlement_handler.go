@@ -3,6 +3,7 @@ package admin
 import (
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -143,6 +144,56 @@ func (h *QuotaNetSettlementHandler) WalletSummaries(c *gin.Context) {
 	response.Success(c, gin.H{"items": items})
 }
 
+func (h *QuotaNetSettlementHandler) Batches(c *gin.Context) {
+	if h == nil || h.store == nil {
+		response.Error(c, http.StatusServiceUnavailable, "quotanet settlement service is not initialized")
+		return
+	}
+	page, pageSize := response.ParsePagination(c)
+	items, total, err := h.store.ListBatches(c.Request.Context(), settlements.BatchListParams{
+		Page:     page,
+		PageSize: pageSize,
+		Status:   strings.TrimSpace(c.Query("status")),
+	})
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "quotanet settlement operation failed")
+		return
+	}
+	out := make([]*quotaNetPayoutBatchResponse, 0, len(items))
+	for _, item := range items {
+		out = append(out, quotaNetPayoutBatchToResponse(item))
+	}
+	response.Paginated(c, out, total, page, pageSize)
+}
+
+func (h *QuotaNetSettlementHandler) BatchItems(c *gin.Context) {
+	if h == nil || h.store == nil {
+		response.Error(c, http.StatusServiceUnavailable, "quotanet settlement service is not initialized")
+		return
+	}
+	batchID, ok := requiredPositiveInt64(c, c.Param("id"), "batch id")
+	if !ok {
+		return
+	}
+	page, pageSize := response.ParsePagination(c)
+	items, total, err := h.store.ListItems(c.Request.Context(), settlements.ItemListParams{
+		Page:          page,
+		PageSize:      pageSize,
+		BatchID:       batchID,
+		Status:        strings.TrimSpace(c.Query("status")),
+		WalletAddress: strings.TrimSpace(c.Query("wallet_address")),
+	})
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "quotanet settlement operation failed")
+		return
+	}
+	out := make([]*quotaNetPayoutItemResponse, 0, len(items))
+	for _, item := range items {
+		out = append(out, quotaNetPayoutItemToResponse(item))
+	}
+	response.Paginated(c, out, total, page, pageSize)
+}
+
 func (h *QuotaNetSettlementHandler) CreateBatch(c *gin.Context) {
 	if h == nil || h.store == nil {
 		response.Error(c, http.StatusServiceUnavailable, "quotanet settlement service is not initialized")
@@ -186,6 +237,16 @@ func quotaNetSettlementListParams(c *gin.Context, page, pageSize int) (settlemen
 		return settlements.ListParams{}, false
 	}
 	return params, true
+}
+
+func requiredPositiveInt64(c *gin.Context, value, field string) (int64, bool) {
+	value = strings.TrimSpace(value)
+	id, err := strconv.ParseInt(value, 10, 64)
+	if err != nil || id <= 0 {
+		response.BadRequest(c, "invalid "+field)
+		return 0, false
+	}
+	return id, true
 }
 
 func quotaNetPayoutBatchCreateInput(c *gin.Context) (settlements.CreateBatchInput, bool) {
