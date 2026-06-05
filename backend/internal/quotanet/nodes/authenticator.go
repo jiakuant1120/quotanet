@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/auth"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
@@ -29,9 +30,14 @@ var (
 type Node struct {
 	ID            int64
 	NodeKey       string
+	Name          string
+	OwnerUserID   *int64
 	WalletAddress string
 	TokenHash     string
 	Status        string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	LastSeenAt    *time.Time
 }
 
 type NodeStore interface {
