@@ -76,12 +76,14 @@ type quotaNetPayoutItemResponse struct {
 	ID            int64   `json:"id"`
 	ItemKey       string  `json:"item_key"`
 	BatchID       int64   `json:"batch_id"`
+	Network       string  `json:"network,omitempty"`
 	NodeID        *int64  `json:"node_id,omitempty"`
 	WalletAddress string  `json:"wallet_address"`
 	TokenFlow     int64   `json:"token_flow"`
 	AmountCxs     float64 `json:"amount_cxs"`
 	Status        string  `json:"status"`
 	TxHash        *string `json:"tx_hash,omitempty"`
+	TxURL         string  `json:"tx_url,omitempty"`
 	ErrorMessage  *string `json:"error_message,omitempty"`
 	FinalizedAt   *string `json:"finalized_at,omitempty"`
 	CreatedAt     string  `json:"created_at,omitempty"`
@@ -384,15 +386,24 @@ func quotaNetPayoutItemToResponse(item *settlements.PayoutItem) *quotaNetPayoutI
 		ID:            item.ID,
 		ItemKey:       item.ItemKey,
 		BatchID:       item.BatchID,
+		Network:       item.Network,
 		NodeID:        item.NodeID,
 		WalletAddress: item.WalletAddress,
 		TokenFlow:     item.TokenFlow,
 		AmountCxs:     item.AmountCxs,
 		Status:        item.Status,
 		TxHash:        item.TxHash,
+		TxURL:         quotaNetPayoutItemTxURL(item),
 		ErrorMessage:  item.ErrorMessage,
 		FinalizedAt:   quotaNetOptionalTime(item.FinalizedAt),
 		CreatedAt:     formatQuotaNetTime(item.CreatedAt),
 		UpdatedAt:     formatQuotaNetTime(item.UpdatedAt),
 	}
+}
+
+func quotaNetPayoutItemTxURL(item *settlements.PayoutItem) string {
+	if item == nil || item.TxHash == nil {
+		return ""
+	}
+	return settlements.ExplorerTxURL(item.Network, *item.TxHash)
 }

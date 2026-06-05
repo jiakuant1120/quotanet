@@ -98,3 +98,46 @@ func TestValidateUpdateItemStatusInput(t *testing.T) {
 		})
 	}
 }
+
+func TestExplorerTxURL(t *testing.T) {
+	tests := []struct {
+		name    string
+		network string
+		txHash  string
+		want    string
+	}{
+		{
+			name:    "devnet default",
+			network: "solana-devnet",
+			txHash:  "tx-1",
+			want:    "https://explorer.solana.com/tx/tx-1?cluster=devnet",
+		},
+		{
+			name:    "testnet",
+			network: "solana-testnet",
+			txHash:  "tx-1",
+			want:    "https://explorer.solana.com/tx/tx-1?cluster=testnet",
+		},
+		{
+			name:    "mainnet",
+			network: "solana-mainnet",
+			txHash:  "tx-1",
+			want:    "https://explorer.solana.com/tx/tx-1",
+		},
+		{
+			name:    "empty tx",
+			network: "solana-devnet",
+			txHash:  " ",
+			want:    "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := ExplorerTxURL(tt.network, tt.txHash)
+			if got != tt.want {
+				t.Fatalf("ExplorerTxURL() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}

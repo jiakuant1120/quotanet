@@ -82,6 +82,7 @@ type PayoutItem struct {
 	ID            int64
 	ItemKey       string
 	BatchID       int64
+	Network       string
 	NodeID        *int64
 	WalletAddress string
 	TokenFlow     int64
@@ -222,6 +223,9 @@ func (s *Store) ListItems(ctx context.Context, params ItemListParams) ([]*Payout
 	for _, row := range rows {
 		out = append(out, payoutItemFromEnt(row))
 	}
+	if err := s.attachItemNetworks(ctx, out); err != nil {
+		return nil, 0, err
+	}
 	return out, int64(total), nil
 }
 
@@ -286,7 +290,11 @@ func (s *Store) UpdateItemStatus(ctx context.Context, id int64, input UpdateItem
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
-	return payoutItemFromEnt(row), nil
+	out := payoutItemFromEnt(row)
+	if out != nil {
+		out.Network = s.payoutNetwork(ctx, out.BatchID)
+	}
+	return out, nil
 }
 
 func (s *Store) Summary(ctx context.Context, params ListParams) (*Summary, error) {
@@ -439,13 +447,81 @@ func (s *Store) CreateBatch(ctx context.Context, input CreateBatchInput) (*Creat
 
 	items := make([]*PayoutItem, 0, len(itemRows))
 	for _, row := range itemRows {
-		items = append(items, payoutItemFromEnt(row))
+		item := payoutItemFromEnt(row)
+		if item != nil {
+			item.Network = batchRow.Network
+		}
+		items = append(items, item)
 	}
 	return &CreateBatchResult{
 		Batch:       payoutBatchFromEnt(batchRow),
 		Items:       items,
 		LedgerCount: len(ledgers),
 	}, nil
+}
+
+func (s *Store) attachItemNetworks(ctx context.Context, items []*PayoutItem) error {
+	if len(items) == 0 {
+		return nil
+	}
+	batchIDs := make([]int64, 0, len(items))
+	seen := make(map[int64]struct{})
+	for _, item := range items {
+		if item == nil {
+			continue
+		}
+		if _, ok := seen[item.BatchID]; ok {
+			continue
+		}
+		seen[item.BatchID] = struct{}{}
+		batchIDs = append(batchIDs, item.BatchID)
+	}
+	if len(batchIDs) == 0 {
+		return nil
+	}
+	rows, err := s.client.QuotaNetPayoutBatch.Query().
+		Where(quotanetpayoutbatch.IDIn(batchIDs...)).
+		All(ctx)
+	if err != nil {
+		return err
+	}
+	networks := make(map[int64]string, len(rows))
+	for _, row := range rows {
+		networks[row.ID] = row.Network
+	}
+	for _, item := range items {
+		if item == nil {
+			continue
+		}
+		item.Network = networks[item.BatchID]
+	}
+	return nil
+}
+
+func (s *Store) payoutNetwork(ctx context.Context, batchID int64) string {
+	if s == nil || s.client == nil || batchID <= 0 {
+		return ""
+	}
+	row, err := s.client.QuotaNetPayoutBatch.Get(ctx, batchID)
+	if err != nil {
+		return ""
+	}
+	return row.Network
+}
+
+func ExplorerTxURL(network, txHash string) string {
+	txHash = strings.TrimSpace(txHash)
+	if txHash == "" {
+		return ""
+	}
+	switch strings.ToLower(strings.TrimSpace(network)) {
+	case "solana-mainnet", "mainnet", "solana":
+		return "https://explorer.solana.com/tx/" + txHash
+	case "solana-testnet", "testnet":
+		return "https://explorer.solana.com/tx/" + txHash + "?cluster=testnet"
+	default:
+		return "https://explorer.solana.com/tx/" + txHash + "?cluster=devnet"
+	}
 }
 
 func normalizeListParams(params ListParams) ListParams {
