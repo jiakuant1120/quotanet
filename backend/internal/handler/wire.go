@@ -2,6 +2,9 @@ package handler
 
 import (
 	"github.com/Wei-Shaw/sub2api/internal/handler/admin"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/nodes"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/registry"
+	qws "github.com/Wei-Shaw/sub2api/internal/quotanet/ws"
 	"github.com/Wei-Shaw/sub2api/internal/service"
 
 	"github.com/google/wire"
@@ -111,6 +114,7 @@ func ProvideHandlers(
 	paymentHandler *PaymentHandler,
 	paymentWebhookHandler *PaymentWebhookHandler,
 	availableChannelHandler *AvailableChannelHandler,
+	quotaNetHandler *QuotaNetHandler,
 	_ *service.IdempotencyCoordinator,
 	_ *service.IdempotencyCleanupService,
 ) *Handlers {
@@ -131,7 +135,12 @@ func ProvideHandlers(
 		Payment:          paymentHandler,
 		PaymentWebhook:   paymentWebhookHandler,
 		AvailableChannel: availableChannelHandler,
+		QuotaNet:         quotaNetHandler,
 	}
+}
+
+func ProvideQuotaNetSessionManager(store *nodes.EntStore) *qws.SessionManager {
+	return qws.NewSessionManager(nodes.NewAuthenticator(store), registry.New())
 }
 
 // ProviderSet is the Wire provider set for all handlers
@@ -152,6 +161,9 @@ var ProviderSet = wire.NewSet(
 	NewPaymentHandler,
 	NewPaymentWebhookHandler,
 	NewAvailableChannelHandler,
+	nodes.NewEntStore,
+	ProvideQuotaNetSessionManager,
+	NewQuotaNetHandler,
 
 	// Admin handlers
 	admin.NewDashboardHandler,
