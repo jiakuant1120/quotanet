@@ -11,7 +11,6 @@ import (
 	servermiddleware "github.com/Wei-Shaw/sub2api/internal/server/middleware"
 	"github.com/Wei-Shaw/sub2api/internal/service"
 	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/require"
 )
 
 func newGatewayRoutesTestRouter() *gin.Engine {
@@ -36,7 +35,7 @@ func newGatewayRoutesTestRouter() *gin.Engine {
 		nil,
 		nil,
 		nil,
-		&config.Config{},
+		&config.Config{Gateway: config.GatewayConfig{MaxBodySize: 1 << 20}},
 	)
 
 	return router
@@ -56,7 +55,9 @@ func TestGatewayRoutesOpenAIResponsesCompactPathIsRegistered(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
-		require.NotEqual(t, http.StatusNotFound, w.Code, "path=%s should hit OpenAI responses handler", path)
+		if w.Code == http.StatusNotFound {
+			t.Fatalf("path=%s should hit OpenAI responses handler", path)
+		}
 	}
 }
 
@@ -74,6 +75,74 @@ func TestGatewayRoutesOpenAIImagesPathsAreRegistered(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
-		require.NotEqual(t, http.StatusNotFound, w.Code, "path=%s should hit OpenAI images handler", path)
+		if w.Code == http.StatusNotFound {
+			t.Fatalf("path=%s should hit OpenAI images handler", path)
+		}
+	}
+}
+
+func TestQuotaNetOpenAIRouteRequiresAPIKey(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	v1 := router.Group("/api/v1")
+
+	RegisterQuotaNetGatewayRoutes(
+		v1,
+		&handler.Handlers{QuotaNet: handler.NewQuotaNetHandler(nil, nil)},
+		servermiddleware.APIKeyAuthMiddleware(func(c *gin.Context) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "api key required"})
+			c.Abort()
+		}),
+		nil,
+		nil,
+		&config.Config{Gateway: config.GatewayConfig{MaxBodySize: 1 << 20}},
+	)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/quotanet/openai/v1/chat/completions", strings.NewReader(`{"model":"gpt-4.1"}`))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status=%d want %d body=%s", w.Code, http.StatusUnauthorized, w.Body.String())
+	}
+	if !strings.Contains(w.Body.String(), "api key required") {
+		t.Fatalf("body=%s should contain api key required", w.Body.String())
+	}
+}
+
+func TestQuotaNetOpenAIRouteUsesAuthenticatedOpenAIGroup(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	v1 := router.Group("/api/v1")
+
+	RegisterQuotaNetGatewayRoutes(
+		v1,
+		&handler.Handlers{QuotaNet: handler.NewQuotaNetHandler(nil, nil)},
+		servermiddleware.APIKeyAuthMiddleware(func(c *gin.Context) {
+			groupID := int64(1)
+			c.Set(string(servermiddleware.ContextKeyAPIKey), &service.APIKey{
+				GroupID: &groupID,
+				Group:   &service.Group{Platform: service.PlatformOpenAI},
+			})
+			c.Next()
+		}),
+		nil,
+		nil,
+		&config.Config{Gateway: config.GatewayConfig{MaxBodySize: 1 << 20}},
+	)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/quotanet/openai/v1/chat/completions", strings.NewReader(`{"model":"gpt-4.1"}`))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("status=%d want %d body=%s", w.Code, http.StatusBadRequest, w.Body.String())
+	}
+	if !strings.Contains(w.Body.String(), "invalid quotanet task input") {
+		t.Fatalf("body=%s should contain quotanet handler error", w.Body.String())
 	}
 }
