@@ -4,6 +4,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/internal/handler/admin"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/nodes"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/registry"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/tasks"
 	qws "github.com/Wei-Shaw/sub2api/internal/quotanet/ws"
 	"github.com/Wei-Shaw/sub2api/internal/service"
 
@@ -141,8 +142,10 @@ func ProvideHandlers(
 	}
 }
 
-func ProvideQuotaNetSessionManager(store *nodes.EntStore) *qws.SessionManager {
-	return qws.NewSessionManager(nodes.NewAuthenticator(store), registry.New()).WithSessionStore(store)
+func ProvideQuotaNetSessionManager(nodeStore *nodes.EntStore, taskStore *tasks.EntStore) *qws.SessionManager {
+	return qws.NewSessionManager(nodes.NewAuthenticator(nodeStore), registry.New()).
+		WithSessionStore(nodeStore).
+		WithTaskStore(taskStore)
 }
 
 // ProviderSet is the Wire provider set for all handlers
@@ -164,6 +167,7 @@ var ProviderSet = wire.NewSet(
 	NewPaymentWebhookHandler,
 	NewAvailableChannelHandler,
 	nodes.NewEntStore,
+	tasks.NewEntStore,
 	nodes.NewManager,
 	ProvideQuotaNetSessionManager,
 	NewQuotaNetHandler,

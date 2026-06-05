@@ -15,6 +15,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/internal/payment"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/nodes"
 	quotanetregistry "github.com/Wei-Shaw/sub2api/internal/quotanet/registry"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/tasks"
 	quotanetws "github.com/Wei-Shaw/sub2api/internal/quotanet/ws"
 	"github.com/Wei-Shaw/sub2api/internal/repository"
 	"github.com/Wei-Shaw/sub2api/internal/server"
@@ -256,7 +257,8 @@ func initializeApplication(buildInfo handler.BuildInfo) (*Application, error) {
 	handlerPaymentHandler := handler.NewPaymentHandler(paymentService, paymentConfigService, channelService)
 	paymentWebhookHandler := handler.NewPaymentWebhookHandler(paymentService, registry)
 	availableChannelHandler := handler.NewAvailableChannelHandler(channelService, apiKeyService, settingService)
-	sessionManager := quotanetws.NewSessionManager(nodes.NewAuthenticator(entStore), quotanetregistry.New()).WithSessionStore(entStore)
+	quotaNetTaskStore := tasks.NewEntStore(client)
+	sessionManager := quotanetws.NewSessionManager(nodes.NewAuthenticator(entStore), quotanetregistry.New()).WithSessionStore(entStore).WithTaskStore(quotaNetTaskStore)
 	quotaNetHandler := handler.NewQuotaNetHandler(sessionManager)
 	idempotencyCoordinator := service.ProvideIdempotencyCoordinator(idempotencyRepository, configConfig)
 	idempotencyCleanupService := service.ProvideIdempotencyCleanupService(idempotencyRepository, configConfig)
