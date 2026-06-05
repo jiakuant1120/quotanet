@@ -11,17 +11,19 @@ import (
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/nodes"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/registry"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/tasks"
 
 	"github.com/gin-gonic/gin"
 )
 
 type QuotaNetNodeHandler struct {
-	manager *nodes.Manager
-	reg     *registry.Registry
+	manager   *nodes.Manager
+	reg       *registry.Registry
+	taskStore *tasks.EntStore
 }
 
-func NewQuotaNetNodeHandler(manager *nodes.Manager, reg *registry.Registry) *QuotaNetNodeHandler {
-	return &QuotaNetNodeHandler{manager: manager, reg: reg}
+func NewQuotaNetNodeHandler(manager *nodes.Manager, reg *registry.Registry, taskStore *tasks.EntStore) *QuotaNetNodeHandler {
+	return &QuotaNetNodeHandler{manager: manager, reg: reg, taskStore: taskStore}
 }
 
 type quotaNetNodeCreateRequest struct {
@@ -73,6 +75,38 @@ type quotaNetNodeSessionResponse struct {
 	CloseReason        string                      `json:"close_reason,omitempty"`
 }
 
+type quotaNetNodeOverviewResponse struct {
+	Sessions       quotaNetSessionOverview        `json:"sessions"`
+	Capacity       quotaNetCapacityOverview       `json:"capacity"`
+	Providers      []quotaNetProviderOverview     `json:"providers"`
+	TaskStatuses   map[string]int64               `json:"task_statuses"`
+	RecentSessions []*quotaNetNodeSessionResponse `json:"recent_sessions"`
+}
+
+type quotaNetSessionOverview struct {
+	Total      int64            `json:"total"`
+	Connected  int64            `json:"connected"`
+	ByStatus   map[string]int64 `json:"by_status"`
+	Ready      int64            `json:"ready"`
+	Busy       int64            `json:"busy"`
+	Offline    int64            `json:"offline"`
+	Stale      int64            `json:"stale"`
+	StaleAfter string           `json:"stale_after"`
+}
+
+type quotaNetCapacityOverview struct {
+	CurrentConcurrency int64 `json:"current_concurrency"`
+	MaxConcurrency     int64 `json:"max_concurrency"`
+	Available          int64 `json:"available"`
+	QueueSize          int64 `json:"queue_size"`
+	MaxQueueSize       int64 `json:"max_queue_size"`
+}
+
+type quotaNetProviderOverview struct {
+	Provider string   `json:"provider"`
+	Models   []string `json:"models"`
+}
+
 func (h *QuotaNetNodeHandler) List(c *gin.Context) {
 	page, pageSize := response.ParsePagination(c)
 	items, total, err := h.manager.List(c.Request.Context(), nodes.ListParams{
@@ -103,6 +137,26 @@ func (h *QuotaNetNodeHandler) Sessions(c *gin.Context) {
 		out = append(out, quotaNetSessionToResponse(session))
 	}
 	response.Success(c, gin.H{"items": out})
+}
+
+func (h *QuotaNetNodeHandler) Overview(c *gin.Context) {
+	if h == nil || h.reg == nil {
+		response.Error(c, http.StatusServiceUnavailable, "quotanet registry is not initialized")
+		return
+	}
+	sessions := h.reg.Snapshot()
+	taskStatuses := map[string]int64{}
+	if h.taskStore != nil {
+		counts, err := h.taskStore.StatusCounts(c.Request.Context())
+		if err != nil {
+			response.Error(c, http.StatusInternalServerError, "quotanet task overview failed")
+			return
+		}
+		for _, item := range counts {
+			taskStatuses[item.Status] = item.Count
+		}
+	}
+	response.Success(c, quotaNetNodeOverview(sessions, taskStatuses))
 }
 
 func (h *QuotaNetNodeHandler) Get(c *gin.Context) {
@@ -244,6 +298,123 @@ func quotaNetSessionToResponse(session registry.Session) *quotaNetNodeSessionRes
 		resp.DisconnectedAt = &v
 	}
 	return resp
+}
+
+func quotaNetNodeOverview(sessions []registry.Session, taskStatuses map[string]int64) quotaNetNodeOverviewResponse {
+	statuses := map[string]int64{}
+	providerModels := map[string]map[string]struct{}{}
+	capacity := quotaNetCapacityOverview{}
+	recent := make([]*quotaNetNodeSessionResponse, 0, len(sessions))
+	now := time.Now().UTC()
+	const staleAfter = 60 * time.Second
+
+	var connected, stale int64
+	for _, session := range sessions {
+		status := strings.TrimSpace(session.Status)
+		if status == "" {
+			status = protocol.NodeStatusReady
+		}
+		statuses[status]++
+		if session.DisconnectedAt == nil {
+			connected++
+		}
+		if session.DisconnectedAt == nil && !session.LastHeartbeatAt.IsZero() && now.Sub(session.LastHeartbeatAt) > staleAfter {
+			stale++
+		}
+		capacity.CurrentConcurrency += int64(session.CurrentConcurrency)
+		capacity.MaxConcurrency += int64(session.MaxConcurrency)
+		available := session.MaxConcurrency - session.CurrentConcurrency
+		if available > 0 {
+			capacity.Available += int64(available)
+		}
+		capacity.QueueSize += int64(session.QueueSize)
+		capacity.MaxQueueSize += int64(session.MaxQueueSize)
+		for _, cap := range session.Capabilities {
+			provider := strings.TrimSpace(cap.Provider)
+			if provider == "" {
+				continue
+			}
+			models, ok := providerModels[provider]
+			if !ok {
+				models = map[string]struct{}{}
+				providerModels[provider] = models
+			}
+			for _, model := range cap.Models {
+				model = strings.TrimSpace(model)
+				if model != "" {
+					models[model] = struct{}{}
+				}
+			}
+		}
+		recent = append(recent, quotaNetSessionToResponse(session))
+	}
+
+	return quotaNetNodeOverviewResponse{
+		Sessions: quotaNetSessionOverview{
+			Total:      int64(len(sessions)),
+			Connected:  connected,
+			ByStatus:   statuses,
+			Ready:      statuses[protocol.NodeStatusReady],
+			Busy:       statuses[protocol.NodeStatusBusy],
+			Offline:    statuses[protocol.NodeStatusOffline],
+			Stale:      stale,
+			StaleAfter: staleAfter.String(),
+		},
+		Capacity:       capacity,
+		Providers:      quotaNetProviderOverviewList(providerModels),
+		TaskStatuses:   normalizeQuotaNetTaskStatuses(taskStatuses),
+		RecentSessions: recent,
+	}
+}
+
+func quotaNetProviderOverviewList(providerModels map[string]map[string]struct{}) []quotaNetProviderOverview {
+	out := make([]quotaNetProviderOverview, 0, len(providerModels))
+	for provider, models := range providerModels {
+		list := make([]string, 0, len(models))
+		for model := range models {
+			list = append(list, model)
+		}
+		sortStringsCaseInsensitive(list)
+		out = append(out, quotaNetProviderOverview{Provider: provider, Models: list})
+	}
+	for i := 1; i < len(out); i++ {
+		current := out[i]
+		j := i - 1
+		for ; j >= 0 && strings.ToLower(current.Provider) < strings.ToLower(out[j].Provider); j-- {
+			out[j+1] = out[j]
+		}
+		out[j+1] = current
+	}
+	return out
+}
+
+func normalizeQuotaNetTaskStatuses(counts map[string]int64) map[string]int64 {
+	out := map[string]int64{
+		protocol.TaskStatusQueued:    0,
+		protocol.TaskStatusRunning:   0,
+		protocol.TaskStatusSuccess:   0,
+		protocol.TaskStatusFailed:    0,
+		protocol.TaskStatusTimeout:   0,
+		protocol.TaskStatusCancelled: 0,
+	}
+	for status, count := range counts {
+		status = strings.TrimSpace(status)
+		if status != "" {
+			out[status] = count
+		}
+	}
+	return out
+}
+
+func sortStringsCaseInsensitive(values []string) {
+	for i := 1; i < len(values); i++ {
+		current := values[i]
+		j := i - 1
+		for ; j >= 0 && strings.ToLower(current) < strings.ToLower(values[j]); j-- {
+			values[j+1] = values[j]
+		}
+		values[j+1] = current
+	}
 }
 
 func formatQuotaNetTime(t time.Time) string {

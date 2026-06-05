@@ -83,6 +83,20 @@ func (s *EntStore) Events(ctx context.Context, taskID string) ([]*TaskEvent, err
 	return out, nil
 }
 
+func (s *EntStore) StatusCounts(ctx context.Context) ([]StatusCount, error) {
+	if s == nil || s.client == nil {
+		return nil, ErrTaskNotFound
+	}
+	var rows []StatusCount
+	if err := s.client.QuotaNetTask.Query().
+		GroupBy(quotanettask.FieldStatus).
+		Aggregate(ent.As(ent.Count(), "count")).
+		Scan(ctx, &rows); err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 func (s *EntStore) CreateQueued(ctx context.Context, input CreateTaskInput, taskID string) (*Task, error) {
 	if s == nil || s.client == nil {
 		return nil, ErrTaskNotFound

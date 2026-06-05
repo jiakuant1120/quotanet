@@ -248,7 +248,7 @@ func initializeApplication(buildInfo handler.BuildInfo) (*Application, error) {
 	quotaNetTaskStore := tasks.NewEntStore(client)
 	quotaNetRegistry := quotanetregistry.New()
 	quotaNetManager := nodes.NewManager(entStore)
-	quotaNetNodeHandler := admin.NewQuotaNetNodeHandler(quotaNetManager, quotaNetRegistry)
+	quotaNetNodeHandler := admin.NewQuotaNetNodeHandler(quotaNetManager, quotaNetRegistry, quotaNetTaskStore)
 	dispatcher := tasks.NewDispatcher(quotaNetTaskStore, quotaNetRegistry)
 	responseWaiter := tasks.NewResponseWaiter()
 	responseRecorder := tasks.NewResponseRecorder(quotaNetTaskStore, responseWaiter)

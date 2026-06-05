@@ -68,6 +68,11 @@ type TaskEvent struct {
 	CreatedAt time.Time
 }
 
+type StatusCount struct {
+	Status string `json:"status"`
+	Count  int64  `json:"count"`
+}
+
 type ListParams struct {
 	Page      int
 	PageSize  int
