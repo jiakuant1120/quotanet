@@ -42,6 +42,7 @@ func ProvideAdminHandlers(
 	contentModerationHandler *admin.ContentModerationHandler,
 	paymentHandler *admin.PaymentHandler,
 	affiliateHandler *admin.AffiliateHandler,
+	quotaNetNodeHandler *admin.QuotaNetNodeHandler,
 ) *AdminHandlers {
 	return &AdminHandlers{
 		Dashboard:              dashboardHandler,
@@ -74,6 +75,7 @@ func ProvideAdminHandlers(
 		ContentModeration:      contentModerationHandler,
 		Payment:                paymentHandler,
 		Affiliate:              affiliateHandler,
+		QuotaNetNode:           quotaNetNodeHandler,
 	}
 }
 
@@ -162,6 +164,7 @@ var ProviderSet = wire.NewSet(
 	NewPaymentWebhookHandler,
 	NewAvailableChannelHandler,
 	nodes.NewEntStore,
+	nodes.NewManager,
 	ProvideQuotaNetSessionManager,
 	NewQuotaNetHandler,
 
@@ -196,6 +199,7 @@ var ProviderSet = wire.NewSet(
 	admin.NewContentModerationHandler,
 	admin.NewPaymentHandler,
 	admin.NewAffiliateHandler,
+	admin.NewQuotaNetNodeHandler,
 
 	// AdminHandlers and Handlers constructors
 	ProvideAdminHandlers,

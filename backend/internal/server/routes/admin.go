@@ -97,6 +97,20 @@ func RegisterAdminRoutes(
 
 		// 邀请返利（专属用户管理）
 		registerAffiliateRoutes(admin, h)
+
+		// QuotaNet 节点管理
+		registerQuotaNetNodeRoutes(admin, h)
+	}
+}
+
+func registerQuotaNetNodeRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+	nodes := admin.Group("/quotanet/nodes")
+	{
+		nodes.GET("", h.Admin.QuotaNetNode.List)
+		nodes.POST("", h.Admin.QuotaNetNode.Create)
+		nodes.GET("/:id", h.Admin.QuotaNetNode.Get)
+		nodes.PUT("/:id/status", h.Admin.QuotaNetNode.UpdateStatus)
+		nodes.POST("/:id/reset-token", h.Admin.QuotaNetNode.ResetToken)
 	}
 }
 
