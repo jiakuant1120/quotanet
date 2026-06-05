@@ -138,6 +138,7 @@ func registerQuotaNetSettlementRoutes(admin *gin.RouterGroup, h *handler.Handler
 		settlements.GET("/ledgers", h.Admin.QuotaNetSettlement.Ledgers)
 		settlements.GET("/summary", h.Admin.QuotaNetSettlement.Summary)
 		settlements.GET("/wallets", h.Admin.QuotaNetSettlement.WalletSummaries)
+		settlements.POST("/batches", h.Admin.QuotaNetSettlement.CreateBatch)
 	}
 }
 

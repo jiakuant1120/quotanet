@@ -3,12 +3,21 @@ package settlements
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"strings"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/Wei-Shaw/sub2api/ent"
 	"github.com/Wei-Shaw/sub2api/ent/quotanetcontributionledger"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
+	"github.com/google/uuid"
+)
+
+var (
+	ErrInvalidBatchInput = errors.New("invalid quotanet settlement batch input")
+	ErrNoPendingLedger   = errors.New("no pending quotanet contribution ledger")
 )
 
 type Store struct {
@@ -49,6 +58,54 @@ type Summary struct {
 	LedgerCount int64   `json:"ledger_count"`
 	TokenFlow   int64   `json:"token_flow"`
 	AmountCxs   float64 `json:"amount_cxs"`
+}
+
+type PayoutBatch struct {
+	ID             int64
+	BatchKey       string
+	WindowStart    time.Time
+	WindowEnd      time.Time
+	Status         string
+	Network        string
+	TotalTokenFlow int64
+	TotalAmountCxs float64
+	ItemCount      int
+	CreatedBy      *int64
+	ApprovedBy     *int64
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+type PayoutItem struct {
+	ID            int64
+	ItemKey       string
+	BatchID       int64
+	NodeID        *int64
+	WalletAddress string
+	TokenFlow     int64
+	AmountCxs     float64
+	Status        string
+	TxHash        *string
+	ErrorMessage  *string
+	FinalizedAt   *time.Time
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
+
+type CreateBatchInput struct {
+	BatchKey    string
+	WindowStart time.Time
+	WindowEnd   time.Time
+	Network     string
+	Rate        float64
+	CreatedBy   *int64
+	ApprovedBy  *int64
+}
+
+type CreateBatchResult struct {
+	Batch       *PayoutBatch
+	Items       []*PayoutItem
+	LedgerCount int
 }
 
 type ListParams struct {
@@ -136,6 +193,115 @@ func (s *Store) WalletSummaries(ctx context.Context, params ListParams) ([]*Wall
 	return rows, nil
 }
 
+func (s *Store) CreateBatch(ctx context.Context, input CreateBatchInput) (*CreateBatchResult, error) {
+	if s == nil || s.client == nil {
+		return nil, ErrInvalidBatchInput
+	}
+	input = normalizeCreateBatchInput(input)
+	if err := validateCreateBatchInput(input); err != nil {
+		return nil, err
+	}
+
+	tx, err := s.client.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	ledgers, err := tx.QuotaNetContributionLedger.Query().
+		Where(
+			quotanetcontributionledger.StatusEQ(protocol.SettlementStatusPending),
+			quotanetcontributionledger.PayoutBatchIDIsNil(),
+			quotanetcontributionledger.CreatedAtGTE(input.WindowStart),
+			quotanetcontributionledger.CreatedAtLT(input.WindowEnd),
+		).
+		Order(quotanetcontributionledger.ByWalletAddress(sql.OrderAsc())).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if len(ledgers) == 0 {
+		return nil, ErrNoPendingLedger
+	}
+
+	wallets := buildWalletPayouts(ledgers, input.Rate)
+	var totalTokenFlow int64
+	var totalAmountCxs float64
+	for _, item := range wallets {
+		totalTokenFlow += item.TokenFlow
+		totalAmountCxs += item.AmountCxs
+	}
+
+	batchRow, err := tx.QuotaNetPayoutBatch.Create().
+		SetBatchKey(input.BatchKey).
+		SetWindowStart(input.WindowStart).
+		SetWindowEnd(input.WindowEnd).
+		SetStatus(protocol.SettlementStatusFinalized).
+		SetNetwork(input.Network).
+		SetTotalTokenFlow(totalTokenFlow).
+		SetTotalAmountCxs(totalAmountCxs).
+		SetItemCount(len(wallets)).
+		SetNillableCreatedBy(input.CreatedBy).
+		SetNillableApprovedBy(input.ApprovedBy).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	itemBuilders := make([]*ent.QuotaNetPayoutItemCreate, 0, len(wallets))
+	finalizedAt := time.Now().UTC()
+	for _, wallet := range wallets {
+		itemBuilders = append(itemBuilders, tx.QuotaNetPayoutItem.Create().
+			SetItemKey("qni_"+strings.ReplaceAll(uuid.NewString(), "-", "")).
+			SetBatchID(batchRow.ID).
+			SetNillableNodeID(wallet.NodeID).
+			SetWalletAddress(wallet.WalletAddress).
+			SetTokenFlow(wallet.TokenFlow).
+			SetAmountCxs(wallet.AmountCxs).
+			SetStatus(protocol.SettlementStatusFinalized).
+			SetFinalizedAt(finalizedAt))
+	}
+	itemRows, err := tx.QuotaNetPayoutItem.CreateBulk(itemBuilders...).Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, ledger := range ledgers {
+		affected, err := tx.QuotaNetContributionLedger.Update().
+			Where(
+				quotanetcontributionledger.IDEQ(ledger.ID),
+				quotanetcontributionledger.StatusEQ(protocol.SettlementStatusPending),
+				quotanetcontributionledger.PayoutBatchIDIsNil(),
+			).
+			SetStatus(protocol.SettlementStatusFinalized).
+			SetAmountCxs(float64(ledger.TokenFlow) * input.Rate).
+			SetRate(input.Rate).
+			SetPayoutBatchID(batchRow.ID).
+			SetSettledAt(finalizedAt).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if affected != 1 {
+			return nil, fmt.Errorf("quotanet settlement ledger changed before update: ledger_id=%d", ledger.ID)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	items := make([]*PayoutItem, 0, len(itemRows))
+	for _, row := range itemRows {
+		items = append(items, payoutItemFromEnt(row))
+	}
+	return &CreateBatchResult{
+		Batch:       payoutBatchFromEnt(batchRow),
+		Items:       items,
+		LedgerCount: len(ledgers),
+	}, nil
+}
+
 func normalizeListParams(params ListParams) ListParams {
 	if params.Page <= 0 {
 		params.Page = 1
@@ -149,6 +315,36 @@ func normalizeListParams(params ListParams) ListParams {
 	params.Status = strings.TrimSpace(params.Status)
 	params.WalletAddress = strings.TrimSpace(params.WalletAddress)
 	return params
+}
+
+func normalizeCreateBatchInput(input CreateBatchInput) CreateBatchInput {
+	input.BatchKey = strings.TrimSpace(input.BatchKey)
+	if input.BatchKey == "" {
+		input.BatchKey = "qnp_" + strings.ReplaceAll(uuid.NewString(), "-", "")
+	}
+	input.Network = strings.TrimSpace(input.Network)
+	if input.Network == "" {
+		input.Network = "solana-devnet"
+	}
+	input.WindowStart = input.WindowStart.UTC()
+	input.WindowEnd = input.WindowEnd.UTC()
+	return input
+}
+
+func validateCreateBatchInput(input CreateBatchInput) error {
+	if input.BatchKey == "" {
+		return fmt.Errorf("%w: batch_key is required", ErrInvalidBatchInput)
+	}
+	if input.WindowStart.IsZero() || input.WindowEnd.IsZero() || !input.WindowEnd.After(input.WindowStart) {
+		return fmt.Errorf("%w: invalid settlement window", ErrInvalidBatchInput)
+	}
+	if input.Rate < 0 {
+		return fmt.Errorf("%w: rate must be non-negative", ErrInvalidBatchInput)
+	}
+	if input.Network == "" {
+		return fmt.Errorf("%w: network is required", ErrInvalidBatchInput)
+	}
+	return nil
 }
 
 func applyLedgerFilters(query *ent.QuotaNetContributionLedgerQuery, params ListParams) *ent.QuotaNetContributionLedgerQuery {
@@ -189,6 +385,84 @@ func ledgerFromEnt(row *ent.QuotaNetContributionLedger) *Ledger {
 		Status:        row.Status,
 		PayoutBatchID: row.PayoutBatchID,
 		SettledAt:     row.SettledAt,
+		CreatedAt:     row.CreatedAt,
+		UpdatedAt:     row.UpdatedAt,
+	}
+}
+
+type walletPayout struct {
+	WalletAddress string
+	NodeID        *int64
+	TokenFlow     int64
+	AmountCxs     float64
+}
+
+func buildWalletPayouts(ledgers []*ent.QuotaNetContributionLedger, rate float64) []*walletPayout {
+	byWallet := make(map[string]*walletPayout)
+	order := make([]string, 0)
+	for _, ledger := range ledgers {
+		if ledger == nil {
+			continue
+		}
+		item, ok := byWallet[ledger.WalletAddress]
+		if !ok {
+			nodeID := ledger.NodeID
+			item = &walletPayout{
+				WalletAddress: ledger.WalletAddress,
+				NodeID:        &nodeID,
+			}
+			byWallet[ledger.WalletAddress] = item
+			order = append(order, ledger.WalletAddress)
+		} else if item.NodeID != nil && *item.NodeID != ledger.NodeID {
+			item.NodeID = nil
+		}
+		item.TokenFlow += ledger.TokenFlow
+		item.AmountCxs += float64(ledger.TokenFlow) * rate
+	}
+	out := make([]*walletPayout, 0, len(order))
+	for _, wallet := range order {
+		out = append(out, byWallet[wallet])
+	}
+	return out
+}
+
+func payoutBatchFromEnt(row *ent.QuotaNetPayoutBatch) *PayoutBatch {
+	if row == nil {
+		return nil
+	}
+	return &PayoutBatch{
+		ID:             row.ID,
+		BatchKey:       row.BatchKey,
+		WindowStart:    row.WindowStart,
+		WindowEnd:      row.WindowEnd,
+		Status:         row.Status,
+		Network:        row.Network,
+		TotalTokenFlow: row.TotalTokenFlow,
+		TotalAmountCxs: row.TotalAmountCxs,
+		ItemCount:      row.ItemCount,
+		CreatedBy:      row.CreatedBy,
+		ApprovedBy:     row.ApprovedBy,
+		CreatedAt:      row.CreatedAt,
+		UpdatedAt:      row.UpdatedAt,
+	}
+}
+
+func payoutItemFromEnt(row *ent.QuotaNetPayoutItem) *PayoutItem {
+	if row == nil {
+		return nil
+	}
+	return &PayoutItem{
+		ID:            row.ID,
+		ItemKey:       row.ItemKey,
+		BatchID:       row.BatchID,
+		NodeID:        row.NodeID,
+		WalletAddress: row.WalletAddress,
+		TokenFlow:     row.TokenFlow,
+		AmountCxs:     row.AmountCxs,
+		Status:        row.Status,
+		TxHash:        row.TxHash,
+		ErrorMessage:  row.ErrorMessage,
+		FinalizedAt:   row.FinalizedAt,
 		CreatedAt:     row.CreatedAt,
 		UpdatedAt:     row.UpdatedAt,
 	}
