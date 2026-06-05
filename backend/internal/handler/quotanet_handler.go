@@ -55,7 +55,7 @@ func (h *QuotaNetHandler) NodeWebSocket(c *gin.Context) {
 		instanceID = sessionID
 	}
 	reason := "client_ip=" + ip.GetClientIP(c)
-	if err := h.sessionManager.Serve(c.Request.Context(), &gorillaConn{conn: conn}, qws.ServeOptions{
+	if err := h.sessionManager.Serve(c.Request.Context(), qws.NewSerialConn(&gorillaConn{conn: conn}), qws.ServeOptions{
 		SessionID:   sessionID,
 		InstanceID:  instanceID,
 		Token:       token,

@@ -50,6 +50,32 @@ func TestSessionManagerServeHelloHeartbeatAndClose(t *testing.T) {
 	}
 }
 
+func TestSessionManagerServeAttachesSender(t *testing.T) {
+	token, hash := tokenAndHash(t)
+	reg := registry.New()
+	manager := NewSessionManager(&transportAuthenticator{hash: hash}, reg)
+	conn := NewSerialConn(&scriptedConn{
+		read:    []protocol.Envelope{helloForTransport(t)},
+		readErr: io.EOF,
+	})
+
+	err := manager.Serve(context.Background(), conn, ServeOptions{
+		SessionID:  "sess-1",
+		InstanceID: "inst-1",
+		Token:      token,
+	})
+	if !errors.Is(err, io.EOF) {
+		t.Fatalf("Serve() error = %v, want io.EOF", err)
+	}
+	envelope, err := protocol.NewEnvelope(protocol.EventTaskCancel, "msg-cancel", protocol.TaskCancel{TaskID: "task-1"})
+	if err != nil {
+		t.Fatalf("NewEnvelope() error = %v", err)
+	}
+	if err := reg.Send(context.Background(), "sess-1", envelope); !errors.Is(err, registry.ErrInvalidSession) {
+		t.Fatalf("Send(after close) error = %v, want ErrInvalidSession", err)
+	}
+}
+
 func TestSessionManagerServeStopsAfterRejectedHello(t *testing.T) {
 	manager := NewSessionManager(&transportAuthenticator{err: errors.New("nope")}, registry.New())
 	conn := &scriptedConn{read: []protocol.Envelope{helloForTransport(t)}}
