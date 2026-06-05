@@ -160,6 +160,10 @@ func ProvideQuotaNetResponseRecorder(taskStore *tasks.EntStore, waiter *tasks.Re
 	return tasks.NewResponseRecorder(taskStore, waiter)
 }
 
+func ProvideQuotaNetTaskService(dispatcher *tasks.Dispatcher, waiter *tasks.ResponseWaiter) *tasks.Service {
+	return tasks.NewService(dispatcher, waiter)
+}
+
 func ProvideQuotaNetSessionManager(nodeStore *nodes.EntStore, responseRecorder *tasks.ResponseRecorder, reg *registry.Registry) *qws.SessionManager {
 	return qws.NewSessionManager(nodes.NewAuthenticator(nodeStore), reg).
 		WithSessionStore(nodeStore).
@@ -191,6 +195,7 @@ var ProviderSet = wire.NewSet(
 	ProvideQuotaNetDispatcher,
 	ProvideQuotaNetResponseWaiter,
 	ProvideQuotaNetResponseRecorder,
+	ProvideQuotaNetTaskService,
 	ProvideQuotaNetSessionManager,
 	NewQuotaNetHandler,
 

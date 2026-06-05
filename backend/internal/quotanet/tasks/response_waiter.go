@@ -22,30 +22,65 @@ type ResponseWaiter struct {
 	waiters map[string][]chan protocol.TaskResponse
 }
 
+type ResponseSubscription struct {
+	waiter *ResponseWaiter
+	taskID string
+	ch     chan protocol.TaskResponse
+	once   sync.Once
+}
+
 func NewResponseWaiter() *ResponseWaiter {
 	return &ResponseWaiter{waiters: make(map[string][]chan protocol.TaskResponse)}
 }
 
 func (w *ResponseWaiter) Await(ctx context.Context, taskID string) (protocol.TaskResponse, error) {
+	sub, err := w.Subscribe(taskID)
+	if err != nil {
+		return protocol.TaskResponse{}, err
+	}
+	defer sub.Close()
+	return sub.Await(ctx)
+}
+
+func (w *ResponseWaiter) Subscribe(taskID string) (*ResponseSubscription, error) {
 	taskID = strings.TrimSpace(taskID)
 	if taskID == "" {
-		return protocol.TaskResponse{}, ErrInvalidTaskInput
+		return nil, ErrInvalidTaskInput
+	}
+	ch := make(chan protocol.TaskResponse, 1)
+	if err := w.add(taskID, ch); err != nil {
+		return nil, err
+	}
+	return &ResponseSubscription{waiter: w, taskID: taskID, ch: ch}, nil
+}
+
+func (s *ResponseSubscription) Await(ctx context.Context) (protocol.TaskResponse, error) {
+	if s == nil || s.ch == nil {
+		return protocol.TaskResponse{}, ErrResponseWaiterClosed
 	}
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	ch := make(chan protocol.TaskResponse, 1)
-	if err := w.add(taskID, ch); err != nil {
-		return protocol.TaskResponse{}, err
-	}
-	defer w.remove(taskID, ch)
-
 	select {
 	case <-ctx.Done():
 		return protocol.TaskResponse{}, ctx.Err()
-	case response := <-ch:
+	case response, ok := <-s.ch:
+		if !ok {
+			return protocol.TaskResponse{}, ErrResponseWaiterClosed
+		}
 		return response, nil
 	}
+}
+
+func (s *ResponseSubscription) Close() {
+	if s == nil {
+		return
+	}
+	s.once.Do(func() {
+		if s.waiter != nil {
+			s.waiter.remove(s.taskID, s.ch)
+		}
+	})
 }
 
 func (w *ResponseWaiter) Notify(response protocol.TaskResponse) {
