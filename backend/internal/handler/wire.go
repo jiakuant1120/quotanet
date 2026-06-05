@@ -4,6 +4,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/internal/handler/admin"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/nodes"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/registry"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/settlements"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/tasks"
 	qws "github.com/Wei-Shaw/sub2api/internal/quotanet/ws"
 	"github.com/Wei-Shaw/sub2api/internal/service"
@@ -45,6 +46,7 @@ func ProvideAdminHandlers(
 	affiliateHandler *admin.AffiliateHandler,
 	quotaNetNodeHandler *admin.QuotaNetNodeHandler,
 	quotaNetTaskHandler *admin.QuotaNetTaskHandler,
+	quotaNetSettlementHandler *admin.QuotaNetSettlementHandler,
 ) *AdminHandlers {
 	return &AdminHandlers{
 		Dashboard:              dashboardHandler,
@@ -79,6 +81,7 @@ func ProvideAdminHandlers(
 		Affiliate:              affiliateHandler,
 		QuotaNetNode:           quotaNetNodeHandler,
 		QuotaNetTask:           quotaNetTaskHandler,
+		QuotaNetSettlement:     quotaNetSettlementHandler,
 	}
 }
 
@@ -190,6 +193,7 @@ var ProviderSet = wire.NewSet(
 	NewAvailableChannelHandler,
 	nodes.NewEntStore,
 	tasks.NewEntStore,
+	settlements.NewStore,
 	nodes.NewManager,
 	ProvideQuotaNetRegistry,
 	ProvideQuotaNetDispatcher,
@@ -232,6 +236,7 @@ var ProviderSet = wire.NewSet(
 	admin.NewAffiliateHandler,
 	admin.NewQuotaNetNodeHandler,
 	admin.NewQuotaNetTaskHandler,
+	admin.NewQuotaNetSettlementHandler,
 
 	// AdminHandlers and Handlers constructors
 	ProvideAdminHandlers,

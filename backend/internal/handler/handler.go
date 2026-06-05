@@ -38,6 +38,7 @@ type AdminHandlers struct {
 	Affiliate              *admin.AffiliateHandler
 	QuotaNetNode           *admin.QuotaNetNodeHandler
 	QuotaNetTask           *admin.QuotaNetTaskHandler
+	QuotaNetSettlement     *admin.QuotaNetSettlementHandler
 }
 
 // Handlers contains all HTTP handlers

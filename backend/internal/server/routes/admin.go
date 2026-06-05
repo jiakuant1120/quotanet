@@ -103,6 +103,9 @@ func RegisterAdminRoutes(
 
 		// QuotaNet 任务管理
 		registerQuotaNetTaskRoutes(admin, h)
+
+		// QuotaNet 结算管理
+		registerQuotaNetSettlementRoutes(admin, h)
 	}
 }
 
@@ -126,6 +129,15 @@ func registerQuotaNetTaskRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 		tasks.POST("/dispatch-sync", h.Admin.QuotaNetTask.DispatchSync)
 		tasks.GET("/:task_id/events", h.Admin.QuotaNetTask.Events)
 		tasks.GET("/:task_id", h.Admin.QuotaNetTask.Get)
+	}
+}
+
+func registerQuotaNetSettlementRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+	settlements := admin.Group("/quotanet/settlements")
+	{
+		settlements.GET("/ledgers", h.Admin.QuotaNetSettlement.Ledgers)
+		settlements.GET("/summary", h.Admin.QuotaNetSettlement.Summary)
+		settlements.GET("/wallets", h.Admin.QuotaNetSettlement.WalletSummaries)
 	}
 }
 

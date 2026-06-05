@@ -15,6 +15,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/internal/payment"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/nodes"
 	quotanetregistry "github.com/Wei-Shaw/sub2api/internal/quotanet/registry"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/settlements"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/tasks"
 	quotanetws "github.com/Wei-Shaw/sub2api/internal/quotanet/ws"
 	"github.com/Wei-Shaw/sub2api/internal/repository"
@@ -253,7 +254,9 @@ func initializeApplication(buildInfo handler.BuildInfo) (*Application, error) {
 	responseRecorder := tasks.NewResponseRecorder(quotaNetTaskStore, responseWaiter)
 	quotaNetTaskService := tasks.NewService(dispatcher, responseWaiter)
 	quotaNetTaskHandler := admin.NewQuotaNetTaskHandler(quotaNetTaskStore, dispatcher, quotaNetTaskService)
-	adminHandlers := handler.ProvideAdminHandlers(dashboardHandler, adminUserHandler, groupHandler, accountHandler, adminAnnouncementHandler, dataManagementHandler, backupHandler, oAuthHandler, openAIOAuthHandler, geminiOAuthHandler, antigravityOAuthHandler, proxyHandler, adminRedeemHandler, promoHandler, settingHandler, opsHandler, systemHandler, adminSubscriptionHandler, adminUsageHandler, userAttributeHandler, errorPassthroughHandler, tlsFingerprintProfileHandler, adminAPIKeyHandler, scheduledTestHandler, channelHandler, channelMonitorHandler, channelMonitorRequestTemplateHandler, contentModerationHandler, paymentHandler, affiliateHandler, quotaNetNodeHandler, quotaNetTaskHandler)
+	quotaNetSettlementStore := settlements.NewStore(client)
+	quotaNetSettlementHandler := admin.NewQuotaNetSettlementHandler(quotaNetSettlementStore)
+	adminHandlers := handler.ProvideAdminHandlers(dashboardHandler, adminUserHandler, groupHandler, accountHandler, adminAnnouncementHandler, dataManagementHandler, backupHandler, oAuthHandler, openAIOAuthHandler, geminiOAuthHandler, antigravityOAuthHandler, proxyHandler, adminRedeemHandler, promoHandler, settingHandler, opsHandler, systemHandler, adminSubscriptionHandler, adminUsageHandler, userAttributeHandler, errorPassthroughHandler, tlsFingerprintProfileHandler, adminAPIKeyHandler, scheduledTestHandler, channelHandler, channelMonitorHandler, channelMonitorRequestTemplateHandler, contentModerationHandler, paymentHandler, affiliateHandler, quotaNetNodeHandler, quotaNetTaskHandler, quotaNetSettlementHandler)
 	usageRecordWorkerPool := service.NewUsageRecordWorkerPool(configConfig)
 	userMsgQueueCache := repository.NewUserMsgQueueCache(redisClient)
 	userMessageQueueService := service.ProvideUserMessageQueueService(userMsgQueueCache, rpmCache, configConfig)
