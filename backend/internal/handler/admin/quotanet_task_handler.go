@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/pkg/response"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/tasks"
 
 	"github.com/gin-gonic/gin"
@@ -17,10 +18,11 @@ import (
 type QuotaNetTaskHandler struct {
 	store      *tasks.EntStore
 	dispatcher *tasks.Dispatcher
+	service    *tasks.Service
 }
 
-func NewQuotaNetTaskHandler(store *tasks.EntStore, dispatcher *tasks.Dispatcher) *QuotaNetTaskHandler {
-	return &QuotaNetTaskHandler{store: store, dispatcher: dispatcher}
+func NewQuotaNetTaskHandler(store *tasks.EntStore, dispatcher *tasks.Dispatcher, service *tasks.Service) *QuotaNetTaskHandler {
+	return &QuotaNetTaskHandler{store: store, dispatcher: dispatcher, service: service}
 }
 
 type quotaNetTaskResponse struct {
@@ -74,6 +76,22 @@ type quotaNetTaskDispatchRequest struct {
 	Payload        map[string]any `json:"payload"`
 }
 
+type quotaNetTaskDispatchSyncResponse struct {
+	Task     *quotaNetTaskResponse     `json:"task"`
+	Response tasksProtocolTaskResponse `json:"response"`
+}
+
+type tasksProtocolTaskResponse struct {
+	TaskID       string         `json:"task_id"`
+	Status       string         `json:"status"`
+	ErrorCode    string         `json:"error_code,omitempty"`
+	ErrorMessage string         `json:"error_msg,omitempty"`
+	Usage        map[string]int `json:"usage"`
+	Payload      map[string]any `json:"payload,omitempty"`
+	DurationMS   int            `json:"duration_ms,omitempty"`
+	FirstTokenMS int            `json:"first_token_ms,omitempty"`
+}
+
 func (h *QuotaNetTaskHandler) List(c *gin.Context) {
 	if h == nil || h.store == nil {
 		response.Error(c, http.StatusServiceUnavailable, "quotanet task service is not initialized")
@@ -101,36 +119,36 @@ func (h *QuotaNetTaskHandler) Dispatch(c *gin.Context) {
 		response.Error(c, http.StatusServiceUnavailable, "quotanet task dispatcher is not initialized")
 		return
 	}
-	var req quotaNetTaskDispatchRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "Invalid request: "+err.Error())
+	input, ok := quotaNetTaskDispatchInput(c)
+	if !ok {
 		return
 	}
-	if req.Payload == nil {
-		req.Payload = map[string]any{}
-	}
-	requestID := strings.TrimSpace(req.RequestID)
-	if requestID == "" {
-		requestID = "admin_" + strings.ReplaceAll(uuid.NewString(), "-", "")
-	}
-	task, err := h.dispatcher.Dispatch(c.Request.Context(), tasks.CreateTaskInput{
-		RequestID:      requestID,
-		UserID:         req.UserID,
-		APIKeyID:       req.APIKeyID,
-		GroupID:        req.GroupID,
-		AccountID:      req.AccountID,
-		Platform:       strings.TrimSpace(req.Platform),
-		Endpoint:       strings.TrimSpace(req.Endpoint),
-		Model:          strings.TrimSpace(req.Model),
-		Stream:         req.Stream,
-		TimeoutSeconds: req.TimeoutSeconds,
-		Payload:        req.Payload,
-	})
+	task, err := h.dispatcher.Dispatch(c.Request.Context(), input)
 	if err != nil {
 		quotaNetTaskError(c, err)
 		return
 	}
 	response.Created(c, quotaNetTaskToResponse(task))
+}
+
+func (h *QuotaNetTaskHandler) DispatchSync(c *gin.Context) {
+	if h == nil || h.service == nil {
+		response.Error(c, http.StatusServiceUnavailable, "quotanet task service is not initialized")
+		return
+	}
+	input, ok := quotaNetTaskDispatchInput(c)
+	if !ok {
+		return
+	}
+	result, err := h.service.DispatchAndWait(c.Request.Context(), input)
+	if err != nil {
+		quotaNetTaskError(c, err)
+		return
+	}
+	response.Success(c, quotaNetTaskDispatchSyncResponse{
+		Task:     quotaNetTaskToResponse(result.Task),
+		Response: quotaNetTaskResponsePayload(result.Response),
+	})
 }
 
 func (h *QuotaNetTaskHandler) Get(c *gin.Context) {
@@ -194,6 +212,34 @@ func quotaNetTaskListParams(c *gin.Context, page, pageSize int) (tasks.ListParam
 	return params, true
 }
 
+func quotaNetTaskDispatchInput(c *gin.Context) (tasks.CreateTaskInput, bool) {
+	var req quotaNetTaskDispatchRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return tasks.CreateTaskInput{}, false
+	}
+	if req.Payload == nil {
+		req.Payload = map[string]any{}
+	}
+	requestID := strings.TrimSpace(req.RequestID)
+	if requestID == "" {
+		requestID = "admin_" + strings.ReplaceAll(uuid.NewString(), "-", "")
+	}
+	return tasks.CreateTaskInput{
+		RequestID:      requestID,
+		UserID:         req.UserID,
+		APIKeyID:       req.APIKeyID,
+		GroupID:        req.GroupID,
+		AccountID:      req.AccountID,
+		Platform:       strings.TrimSpace(req.Platform),
+		Endpoint:       strings.TrimSpace(req.Endpoint),
+		Model:          strings.TrimSpace(req.Model),
+		Stream:         req.Stream,
+		TimeoutSeconds: req.TimeoutSeconds,
+		Payload:        req.Payload,
+	}, true
+}
+
 func optionalInt64Query(c *gin.Context, key string) (*int64, bool) {
 	value := strings.TrimSpace(c.Query(key))
 	if value == "" {
@@ -205,6 +251,23 @@ func optionalInt64Query(c *gin.Context, key string) (*int64, bool) {
 		return nil, false
 	}
 	return &id, true
+}
+
+func quotaNetTaskResponsePayload(resp protocol.TaskResponse) tasksProtocolTaskResponse {
+	return tasksProtocolTaskResponse{
+		TaskID:       resp.TaskID,
+		Status:       resp.Status,
+		ErrorCode:    resp.ErrorCode,
+		ErrorMessage: resp.ErrorMessage,
+		Usage: map[string]int{
+			"prompt_tokens":     resp.Usage.PromptTokens,
+			"completion_tokens": resp.Usage.CompletionTokens,
+			"total_tokens":      resp.Usage.TotalTokens,
+		},
+		Payload:      resp.Payload,
+		DurationMS:   resp.DurationMS,
+		FirstTokenMS: resp.FirstTokenMS,
+	}
 }
 
 func quotaNetTaskError(c *gin.Context, err error) {
