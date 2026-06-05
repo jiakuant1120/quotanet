@@ -2,6 +2,7 @@
 package registry
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"sync"
@@ -13,7 +14,12 @@ import (
 var (
 	ErrSessionNotFound = errors.New("quotanet session not found")
 	ErrInvalidSession  = errors.New("quotanet session is invalid")
+	ErrSenderNotFound  = errors.New("quotanet session sender not found")
 )
+
+type Sender interface {
+	Send(ctx context.Context, envelope protocol.Envelope) error
+}
 
 type Session struct {
 	SessionID          string
@@ -51,12 +57,14 @@ type Candidate struct {
 type Registry struct {
 	mu       sync.RWMutex
 	sessions map[string]*Session
+	senders  map[string]Sender
 	now      func() time.Time
 }
 
 func New() *Registry {
 	return &Registry{
 		sessions: make(map[string]*Session),
+		senders:  make(map[string]Sender),
 		now:      time.Now,
 	}
 }
@@ -91,6 +99,46 @@ func (r *Registry) Register(session Session) error {
 	copy := cloneSession(session)
 	r.sessions[session.SessionID] = &copy
 	return nil
+}
+
+func (r *Registry) AttachSender(sessionID string, sender Sender) error {
+	sessionID = strings.TrimSpace(sessionID)
+	if sessionID == "" {
+		return ErrInvalidSession
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if _, ok := r.sessions[sessionID]; !ok {
+		return ErrSessionNotFound
+	}
+	if sender == nil {
+		delete(r.senders, sessionID)
+		return nil
+	}
+	r.senders[sessionID] = sender
+	return nil
+}
+
+func (r *Registry) Send(ctx context.Context, sessionID string, envelope protocol.Envelope) error {
+	sessionID = strings.TrimSpace(sessionID)
+	if sessionID == "" {
+		return ErrInvalidSession
+	}
+	r.mu.RLock()
+	session, sessionOK := r.sessions[sessionID]
+	sender, senderOK := r.senders[sessionID]
+	ready := sessionReady(session, r.currentTime(), 0)
+	r.mu.RUnlock()
+	if !sessionOK {
+		return ErrSessionNotFound
+	}
+	if !ready {
+		return ErrInvalidSession
+	}
+	if !senderOK || sender == nil {
+		return ErrSenderNotFound
+	}
+	return sender.Send(ctx, envelope)
 }
 
 func (r *Registry) UpdateHeartbeat(sessionID string, heartbeat protocol.ClientHeartbeat) error {
@@ -136,6 +184,7 @@ func (r *Registry) Unregister(sessionID, reason string) error {
 	session.Status = protocol.NodeStatusOffline
 	session.DisconnectedAt = &now
 	session.CloseReason = strings.TrimSpace(reason)
+	delete(r.senders, sessionID)
 	return nil
 }
 

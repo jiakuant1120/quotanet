@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -133,6 +134,53 @@ func TestRegistryInvalidInputs(t *testing.T) {
 	}
 }
 
+func TestRegistrySenderLifecycle(t *testing.T) {
+	reg := New()
+	if err := reg.Register(validSession("sess-1", 1, 3)); err != nil {
+		t.Fatalf("Register() error = %v", err)
+	}
+	sender := &stubSender{}
+	if err := reg.AttachSender("sess-1", sender); err != nil {
+		t.Fatalf("AttachSender() error = %v", err)
+	}
+	envelope, err := protocol.NewEnvelope(protocol.EventTaskDispatch, "msg-1", protocol.TaskDispatch{
+		TaskID:   "task-1",
+		Provider: "openai",
+		Model:    "gpt-4.1",
+		Payload:  map[string]any{},
+	})
+	if err != nil {
+		t.Fatalf("NewEnvelope() error = %v", err)
+	}
+	if err := reg.Send(context.Background(), "sess-1", envelope); err != nil {
+		t.Fatalf("Send() error = %v", err)
+	}
+	if sender.sent.MsgID != "msg-1" {
+		t.Fatalf("sent envelope = %+v", sender.sent)
+	}
+
+	if err := reg.Unregister("sess-1", "closed"); err != nil {
+		t.Fatalf("Unregister() error = %v", err)
+	}
+	if err := reg.Send(context.Background(), "sess-1", envelope); !errors.Is(err, ErrInvalidSession) {
+		t.Fatalf("Send(after unregister) error = %v, want ErrInvalidSession", err)
+	}
+}
+
+func TestRegistrySendRequiresSender(t *testing.T) {
+	reg := New()
+	if err := reg.Register(validSession("sess-1", 1, 3)); err != nil {
+		t.Fatalf("Register() error = %v", err)
+	}
+	envelope, err := protocol.NewEnvelope(protocol.EventTaskCancel, "msg-1", protocol.TaskCancel{TaskID: "task-1"})
+	if err != nil {
+		t.Fatalf("NewEnvelope() error = %v", err)
+	}
+	if err := reg.Send(context.Background(), "sess-1", envelope); !errors.Is(err, ErrSenderNotFound) {
+		t.Fatalf("Send(no sender) error = %v, want ErrSenderNotFound", err)
+	}
+}
+
 func validSession(sessionID string, nodeID int64, maxConcurrency int) Session {
 	return Session{
 		SessionID:          sessionID,
@@ -148,4 +196,13 @@ func validSession(sessionID string, nodeID int64, maxConcurrency int) Session {
 		},
 		LastHeartbeatAt: time.Now(),
 	}
+}
+
+type stubSender struct {
+	sent protocol.Envelope
+}
+
+func (s *stubSender) Send(_ context.Context, envelope protocol.Envelope) error {
+	s.sent = envelope
+	return nil
 }
