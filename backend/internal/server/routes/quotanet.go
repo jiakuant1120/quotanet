@@ -13,5 +13,6 @@ func RegisterQuotaNetRoutes(v1 *gin.RouterGroup, h *handler.Handlers) {
 	quotanet := v1.Group("/quotanet")
 	{
 		quotanet.GET("/nodes/ws", h.QuotaNet.NodeWebSocket)
+		quotanet.POST("/openai/v1/chat/completions", h.QuotaNet.OpenAIChatCompletions)
 	}
 }

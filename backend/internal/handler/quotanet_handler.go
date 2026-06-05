@@ -1,11 +1,15 @@
 package handler
 
 import (
+	"context"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/pkg/ip"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/tasks"
 	qws "github.com/Wei-Shaw/sub2api/internal/quotanet/ws"
 
 	"github.com/gin-gonic/gin"
@@ -19,18 +23,81 @@ const (
 
 type QuotaNetHandler struct {
 	sessionManager *qws.SessionManager
+	taskService    quotaNetTaskService
 	upgrader       websocket.Upgrader
 }
 
-func NewQuotaNetHandler(sessionManager *qws.SessionManager) *QuotaNetHandler {
+type quotaNetTaskService interface {
+	DispatchAndWait(ctx context.Context, input tasks.CreateTaskInput) (*tasks.DispatchResult, error)
+}
+
+func NewQuotaNetHandler(sessionManager *qws.SessionManager, taskService *tasks.Service) *QuotaNetHandler {
 	return &QuotaNetHandler{
 		sessionManager: sessionManager,
+		taskService:    taskService,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(*http.Request) bool {
 				return true
 			},
 		},
 	}
+}
+
+func (h *QuotaNetHandler) OpenAIChatCompletions(c *gin.Context) {
+	if h == nil || h.taskService == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": gin.H{
+			"type":    "api_error",
+			"message": "quotanet task service is not initialized",
+		}})
+		return
+	}
+	var payload map[string]any
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": gin.H{
+			"type":    "invalid_request_error",
+			"message": "invalid JSON request body",
+		}})
+		return
+	}
+	model, _ := payload["model"].(string)
+	model = strings.TrimSpace(model)
+	if model == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": gin.H{
+			"type":    "invalid_request_error",
+			"message": "model is required",
+		}})
+		return
+	}
+	stream, _ := payload["stream"].(bool)
+	input := tasks.CreateTaskInput{
+		RequestID:      quotanetRequestID(c),
+		Platform:       "openai",
+		Endpoint:       "/v1/chat/completions",
+		Model:          model,
+		Stream:         stream,
+		TimeoutSeconds: quotanetTimeoutSeconds(payload),
+		Payload:        payload,
+	}
+	result, err := h.taskService.DispatchAndWait(c.Request.Context(), input)
+	if err != nil {
+		quotanetOpenAIError(c, err)
+		return
+	}
+	if result.Response.Status != protocol.TaskStatusSuccess {
+		status := http.StatusBadGateway
+		if result.Response.Status == protocol.TaskStatusTimeout {
+			status = http.StatusGatewayTimeout
+		}
+		c.JSON(status, gin.H{"error": gin.H{
+			"type":    strings.TrimSpace(result.Response.ErrorCode),
+			"message": strings.TrimSpace(result.Response.ErrorMessage),
+		}})
+		return
+	}
+	if result.Response.Payload == nil {
+		result.Response.Payload = map[string]any{}
+	}
+	c.JSON(http.StatusOK, result.Response.Payload)
 }
 
 func (h *QuotaNetHandler) NodeWebSocket(c *gin.Context) {
@@ -88,6 +155,49 @@ func quotanetInstanceID(c *gin.Context) string {
 		return id
 	}
 	return strings.TrimSpace(c.Query("instance_id"))
+}
+
+func quotanetRequestID(c *gin.Context) string {
+	if c != nil {
+		if requestID := strings.TrimSpace(c.GetHeader("X-Request-ID")); requestID != "" {
+			return requestID
+		}
+	}
+	return "http_" + strings.ReplaceAll(uuid.NewString(), "-", "")
+}
+
+func quotanetTimeoutSeconds(payload map[string]any) int {
+	switch v := payload["timeout_seconds"].(type) {
+	case float64:
+		if v > 0 {
+			return int(v)
+		}
+	case int:
+		if v > 0 {
+			return v
+		}
+	}
+	return 60
+}
+
+func quotanetOpenAIError(c *gin.Context, err error) {
+	status := http.StatusInternalServerError
+	message := "quotanet task operation failed"
+	switch {
+	case errors.Is(err, tasks.ErrInvalidTaskInput):
+		status = http.StatusBadRequest
+		message = "invalid quotanet task input"
+	case errors.Is(err, tasks.ErrNoNodeAvailable):
+		status = http.StatusServiceUnavailable
+		message = "no quotanet node available"
+	case errors.Is(err, context.DeadlineExceeded):
+		status = http.StatusGatewayTimeout
+		message = "quotanet task timed out"
+	}
+	c.JSON(status, gin.H{"error": gin.H{
+		"type":    "api_error",
+		"message": message,
+	}})
 }
 
 type gorillaConn struct {
