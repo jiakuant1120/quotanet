@@ -54,6 +54,10 @@ func TestRegistryHeartbeatAndUnregister(t *testing.T) {
 		MaxConcurrency:     3,
 		QueueSize:          1,
 		MaxQueueSize:       10,
+		Accounts: []protocol.AccountHeartbeat{
+			{Provider: " openai ", Status: " ready ", CurrentConcurrency: 1, MaxConcurrency: 3, Models: []string{" gpt-4.1 ", ""}},
+			{Provider: "", Status: "ready", Models: []string{"ignored"}},
+		},
 	})
 	if err != nil {
 		t.Fatalf("UpdateHeartbeat() error = %v", err)
@@ -61,6 +65,9 @@ func TestRegistryHeartbeatAndUnregister(t *testing.T) {
 	session, _ := reg.Get("sess-1")
 	if session.WalletAddress != "wallet-new" || session.CurrentConcurrency != 2 || session.QueueSize != 1 {
 		t.Fatalf("heartbeat not applied: %+v", session)
+	}
+	if len(session.Accounts) != 1 || session.Accounts[0].Provider != "openai" || session.Accounts[0].Status != "ready" || session.Accounts[0].Models[0] != "gpt-4.1" {
+		t.Fatalf("account heartbeats not normalized: %+v", session.Accounts)
 	}
 
 	if err := reg.Unregister("sess-1", "closed"); err != nil {

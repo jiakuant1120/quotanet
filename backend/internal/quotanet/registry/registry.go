@@ -35,6 +35,7 @@ type Session struct {
 	MaxConcurrency     int
 	QueueSize          int
 	MaxQueueSize       int
+	Accounts           []protocol.AccountHeartbeat
 	ConnectedAt        time.Time
 	LastHeartbeatAt    time.Time
 	DisconnectedAt     *time.Time
@@ -162,6 +163,7 @@ func (r *Registry) UpdateHeartbeat(sessionID string, heartbeat protocol.ClientHe
 	session.MaxConcurrency = heartbeat.MaxConcurrency
 	session.QueueSize = heartbeat.QueueSize
 	session.MaxQueueSize = heartbeat.MaxQueueSize
+	session.Accounts = normalizeAccountHeartbeats(heartbeat.Accounts)
 	session.LastHeartbeatAt = r.currentTime()
 	session.DisconnectedAt = nil
 	session.CloseReason = ""
@@ -359,11 +361,39 @@ func lessCandidate(a, b Candidate) bool {
 
 func cloneSession(session Session) Session {
 	session.Capabilities = append([]protocol.Capability(nil), session.Capabilities...)
+	session.Accounts = append([]protocol.AccountHeartbeat(nil), session.Accounts...)
 	if session.DisconnectedAt != nil {
 		disconnectedAt := *session.DisconnectedAt
 		session.DisconnectedAt = &disconnectedAt
 	}
 	return session
+}
+
+func normalizeAccountHeartbeats(accounts []protocol.AccountHeartbeat) []protocol.AccountHeartbeat {
+	out := make([]protocol.AccountHeartbeat, 0, len(accounts))
+	for _, account := range accounts {
+		account.Provider = strings.TrimSpace(account.Provider)
+		account.Status = strings.TrimSpace(account.Status)
+		if account.Provider == "" || account.Status == "" {
+			continue
+		}
+		if account.CurrentConcurrency < 0 {
+			account.CurrentConcurrency = 0
+		}
+		if account.MaxConcurrency < 0 {
+			account.MaxConcurrency = 0
+		}
+		models := make([]string, 0, len(account.Models))
+		for _, model := range account.Models {
+			model = strings.TrimSpace(model)
+			if model != "" {
+				models = append(models, model)
+			}
+		}
+		account.Models = models
+		out = append(out, account)
+	}
+	return out
 }
 
 func (r *Registry) currentTime() time.Time {

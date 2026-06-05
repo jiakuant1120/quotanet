@@ -53,23 +53,24 @@ type quotaNetNodeCreateResponse struct {
 }
 
 type quotaNetNodeSessionResponse struct {
-	SessionID          string                `json:"session_id"`
-	NodeID             int64                 `json:"node_id"`
-	NodeKey            string                `json:"node_key"`
-	InstanceID         string                `json:"instance_id"`
-	WalletAddress      string                `json:"wallet_address"`
-	ClientVersion      string                `json:"client_version,omitempty"`
-	ProtocolVersion    string                `json:"protocol_version,omitempty"`
-	Capabilities       []protocol.Capability `json:"capabilities"`
-	Status             string                `json:"status"`
-	CurrentConcurrency int                   `json:"current_concurrency"`
-	MaxConcurrency     int                   `json:"max_concurrency"`
-	QueueSize          int                   `json:"queue_size"`
-	MaxQueueSize       int                   `json:"max_queue_size"`
-	ConnectedAt        string                `json:"connected_at,omitempty"`
-	LastHeartbeatAt    string                `json:"last_heartbeat_at,omitempty"`
-	DisconnectedAt     *string               `json:"disconnected_at,omitempty"`
-	CloseReason        string                `json:"close_reason,omitempty"`
+	SessionID          string                      `json:"session_id"`
+	NodeID             int64                       `json:"node_id"`
+	NodeKey            string                      `json:"node_key"`
+	InstanceID         string                      `json:"instance_id"`
+	WalletAddress      string                      `json:"wallet_address"`
+	ClientVersion      string                      `json:"client_version,omitempty"`
+	ProtocolVersion    string                      `json:"protocol_version,omitempty"`
+	Capabilities       []protocol.Capability       `json:"capabilities"`
+	Status             string                      `json:"status"`
+	CurrentConcurrency int                         `json:"current_concurrency"`
+	MaxConcurrency     int                         `json:"max_concurrency"`
+	QueueSize          int                         `json:"queue_size"`
+	MaxQueueSize       int                         `json:"max_queue_size"`
+	Accounts           []protocol.AccountHeartbeat `json:"accounts,omitempty"`
+	ConnectedAt        string                      `json:"connected_at,omitempty"`
+	LastHeartbeatAt    string                      `json:"last_heartbeat_at,omitempty"`
+	DisconnectedAt     *string                     `json:"disconnected_at,omitempty"`
+	CloseReason        string                      `json:"close_reason,omitempty"`
 }
 
 func (h *QuotaNetNodeHandler) List(c *gin.Context) {
@@ -233,6 +234,7 @@ func quotaNetSessionToResponse(session registry.Session) *quotaNetNodeSessionRes
 		MaxConcurrency:     session.MaxConcurrency,
 		QueueSize:          session.QueueSize,
 		MaxQueueSize:       session.MaxQueueSize,
+		Accounts:           session.Accounts,
 		ConnectedAt:        formatQuotaNetTime(session.ConnectedAt),
 		LastHeartbeatAt:    formatQuotaNetTime(session.LastHeartbeatAt),
 		CloseReason:        session.CloseReason,
