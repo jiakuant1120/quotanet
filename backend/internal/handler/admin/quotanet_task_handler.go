@@ -209,6 +209,12 @@ func quotaNetTaskListParams(c *gin.Context, page, pageSize int) (tasks.ListParam
 	if params.UserID, ok = optionalInt64Query(c, "user_id"); !ok {
 		return tasks.ListParams{}, false
 	}
+	if params.APIKeyID, ok = optionalInt64Query(c, "api_key_id"); !ok {
+		return tasks.ListParams{}, false
+	}
+	if params.GroupID, ok = optionalInt64Query(c, "group_id"); !ok {
+		return tasks.ListParams{}, false
+	}
 	return params, true
 }
 

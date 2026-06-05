@@ -76,6 +76,8 @@ type ListParams struct {
 	NodeID    *int64
 	AccountID *int64
 	UserID    *int64
+	APIKeyID  *int64
+	GroupID   *int64
 	Search    string
 }
 

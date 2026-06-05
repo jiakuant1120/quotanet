@@ -342,6 +342,12 @@ func applyTaskFilters(query *ent.QuotaNetTaskQuery, params ListParams) *ent.Quot
 	if params.UserID != nil {
 		query = query.Where(quotanettask.UserIDEQ(*params.UserID))
 	}
+	if params.APIKeyID != nil {
+		query = query.Where(quotanettask.APIKeyIDEQ(*params.APIKeyID))
+	}
+	if params.GroupID != nil {
+		query = query.Where(quotanettask.GroupIDEQ(*params.GroupID))
+	}
 	if params.Search != "" {
 		query = query.Where(quotanettask.Or(
 			quotanettask.TaskIDContainsFold(params.Search),
