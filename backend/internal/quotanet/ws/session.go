@@ -37,6 +37,7 @@ type SessionManager struct {
 	authenticator NodeAuthenticator
 	registry      *registry.Registry
 	sessionStore  SessionStore
+	taskStore     TaskStore
 	now           func() time.Time
 }
 
@@ -44,6 +45,10 @@ type SessionStore interface {
 	SessionConnected(ctx context.Context, session registry.Session, remoteAddr string) error
 	SessionHeartbeat(ctx context.Context, sessionID string, heartbeat protocol.ClientHeartbeat, at time.Time) error
 	SessionDisconnected(ctx context.Context, sessionID, reason string, at time.Time) error
+}
+
+type TaskStore interface {
+	TaskResponseReceived(ctx context.Context, sessionID string, response protocol.TaskResponse, at time.Time) error
 }
 
 func NewSessionManager(authenticator NodeAuthenticator, reg *registry.Registry) *SessionManager {
@@ -59,6 +64,11 @@ func NewSessionManager(authenticator NodeAuthenticator, reg *registry.Registry) 
 
 func (m *SessionManager) WithSessionStore(store SessionStore) *SessionManager {
 	m.sessionStore = store
+	return m
+}
+
+func (m *SessionManager) WithTaskStore(store TaskStore) *SessionManager {
+	m.taskStore = store
 	return m
 }
 
@@ -146,6 +156,26 @@ func (m *SessionManager) HandleHeartbeat(sessionID string, envelope protocol.Env
 		}
 	}
 	return m.okAck(envelope.MsgID, "heartbeat accepted")
+}
+
+func (m *SessionManager) HandleTaskResponse(ctx context.Context, sessionID string, envelope protocol.Envelope) (protocol.Envelope, error) {
+	if envelope.Event != protocol.EventTaskResponse {
+		return m.errorAck(envelope.MsgID, fmt.Sprintf("expected %s", protocol.EventTaskResponse)), ErrUnexpectedEvent
+	}
+	var response protocol.TaskResponse
+	if err := envelope.DecodeData(&response); err != nil {
+		return m.errorAck(envelope.MsgID, err.Error()), err
+	}
+	if err := response.Validate(); err != nil {
+		return m.errorAck(envelope.MsgID, err.Error()), err
+	}
+	if m.taskStore == nil {
+		return m.errorAck(envelope.MsgID, "task response store is not configured"), ErrUnexpectedEvent
+	}
+	if err := m.taskStore.TaskResponseReceived(ctx, strings.TrimSpace(sessionID), response, m.currentTime()); err != nil {
+		return m.errorAck(envelope.MsgID, "failed to persist task response"), err
+	}
+	return m.okAck(envelope.MsgID, "task response accepted")
 }
 
 func (m *SessionManager) Disconnect(ctx context.Context, sessionID, reason string) {

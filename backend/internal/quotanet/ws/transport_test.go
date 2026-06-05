@@ -97,13 +97,41 @@ func TestSessionManagerServeStopsAfterRejectedHello(t *testing.T) {
 	}
 }
 
+func TestSessionManagerServeAcceptsTaskResponse(t *testing.T) {
+	token, hash := tokenAndHash(t)
+	taskStore := &stubTaskStore{}
+	manager := NewSessionManager(&transportAuthenticator{hash: hash}, registry.New()).WithTaskStore(taskStore)
+	response, err := protocol.NewEnvelope(protocol.EventTaskResponse, "msg-x", protocol.TaskResponse{
+		TaskID: "task-1",
+		Status: protocol.TaskStatusSuccess,
+		Usage:  protocol.Usage{PromptTokens: 1, CompletionTokens: 2, TotalTokens: 3},
+	})
+	if err != nil {
+		t.Fatalf("NewEnvelope() error = %v", err)
+	}
+	conn := &scriptedConn{read: []protocol.Envelope{helloForTransport(t), response}, readErr: io.EOF}
+
+	err = manager.Serve(context.Background(), conn, ServeOptions{
+		SessionID:  "sess-1",
+		InstanceID: "inst-1",
+		Token:      token,
+	})
+	if !errors.Is(err, io.EOF) {
+		t.Fatalf("Serve() error = %v, want io.EOF", err)
+	}
+	if len(conn.written) != 2 {
+		t.Fatalf("written ack count = %d, want 2", len(conn.written))
+	}
+	assertAck(t, conn.written[1], AckStatusOK)
+	if taskStore.sessionID != "sess-1" || taskStore.response.TaskID != "task-1" {
+		t.Fatalf("task store session=%q response=%+v", taskStore.sessionID, taskStore.response)
+	}
+}
+
 func TestSessionManagerServeRejectsUnsupportedEvent(t *testing.T) {
 	token, hash := tokenAndHash(t)
 	manager := NewSessionManager(&transportAuthenticator{hash: hash}, registry.New())
-	unsupported, err := protocol.NewEnvelope(protocol.EventTaskResponse, "msg-x", protocol.TaskResponse{
-		TaskID: "task-1",
-		Status: protocol.TaskStatusSuccess,
-	})
+	unsupported, err := protocol.NewEnvelope(protocol.EventTaskDelta, "msg-x", map[string]any{"task_id": "task-1"})
 	if err != nil {
 		t.Fatalf("NewEnvelope() error = %v", err)
 	}

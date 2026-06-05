@@ -74,6 +74,14 @@ func (m *SessionManager) Serve(ctx context.Context, conn Conn, opts ServeOptions
 			if err != nil {
 				return err
 			}
+		case protocol.EventTaskResponse:
+			ack, err := m.HandleTaskResponse(ctx, session.SessionID, envelope)
+			if writeErr := conn.WriteJSON(ack); writeErr != nil {
+				return fmt.Errorf("write quotanet task response ack: %w", writeErr)
+			}
+			if err != nil {
+				return err
+			}
 		default:
 			ack := m.errorAck(envelope.MsgID, fmt.Sprintf("unsupported event %q", envelope.Event))
 			if writeErr := conn.WriteJSON(ack); writeErr != nil {

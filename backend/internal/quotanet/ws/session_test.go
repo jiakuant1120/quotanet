@@ -157,6 +157,48 @@ func TestSessionManagerHandleHeartbeatUpdatesRegistry(t *testing.T) {
 	}
 }
 
+func TestSessionManagerHandleTaskResponsePersistsResult(t *testing.T) {
+	store := &stubTaskStore{}
+	manager := NewSessionManager(&stubAuthenticator{}, registry.New()).WithTaskStore(store)
+	now := time.Date(2026, 6, 5, 13, 0, 0, 0, time.UTC)
+	manager.now = func() time.Time { return now }
+
+	envelope, err := protocol.NewEnvelope(protocol.EventTaskResponse, "msg-task", protocol.TaskResponse{
+		TaskID: "task-1",
+		Status: protocol.TaskStatusSuccess,
+		Usage:  protocol.Usage{PromptTokens: 2, CompletionTokens: 3, TotalTokens: 5},
+	})
+	if err != nil {
+		t.Fatalf("NewEnvelope() error = %v", err)
+	}
+
+	ack, err := manager.HandleTaskResponse(context.Background(), "sess-1", envelope)
+	if err != nil {
+		t.Fatalf("HandleTaskResponse() error = %v", err)
+	}
+	assertAck(t, ack, AckStatusOK)
+	if store.sessionID != "sess-1" || store.response.TaskID != "task-1" || !store.at.Equal(now) {
+		t.Fatalf("task store session=%q response=%+v at=%v", store.sessionID, store.response, store.at)
+	}
+}
+
+func TestSessionManagerHandleTaskResponseRequiresStore(t *testing.T) {
+	manager := NewSessionManager(&stubAuthenticator{}, registry.New())
+	envelope, err := protocol.NewEnvelope(protocol.EventTaskResponse, "msg-task", protocol.TaskResponse{
+		TaskID: "task-1",
+		Status: protocol.TaskStatusSuccess,
+	})
+	if err != nil {
+		t.Fatalf("NewEnvelope() error = %v", err)
+	}
+
+	ack, err := manager.HandleTaskResponse(context.Background(), "sess-1", envelope)
+	if !errors.Is(err, ErrUnexpectedEvent) {
+		t.Fatalf("HandleTaskResponse() error = %v, want ErrUnexpectedEvent", err)
+	}
+	assertAck(t, ack, AckStatusError)
+}
+
 func TestSessionManagerPersistsLifecycle(t *testing.T) {
 	reg := registry.New()
 	store := &stubSessionStore{}
@@ -273,5 +315,22 @@ func (s *stubSessionStore) SessionHeartbeat(_ context.Context, sessionID string,
 func (s *stubSessionStore) SessionDisconnected(_ context.Context, sessionID, reason string, _ time.Time) error {
 	s.disconnectedSessionID = sessionID
 	s.disconnectReason = reason
+	return nil
+}
+
+type stubTaskStore struct {
+	sessionID string
+	response  protocol.TaskResponse
+	at        time.Time
+	err       error
+}
+
+func (s *stubTaskStore) TaskResponseReceived(_ context.Context, sessionID string, response protocol.TaskResponse, at time.Time) error {
+	if s.err != nil {
+		return s.err
+	}
+	s.sessionID = sessionID
+	s.response = response
+	s.at = at
 	return nil
 }
