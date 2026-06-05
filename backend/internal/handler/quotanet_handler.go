@@ -122,16 +122,35 @@ func (h *QuotaNetHandler) OpenAIChatCompletions(c *gin.Context) {
 		if result.Response.Status == protocol.TaskStatusTimeout {
 			status = http.StatusGatewayTimeout
 		}
-		c.JSON(status, gin.H{"error": gin.H{
-			"type":    strings.TrimSpace(result.Response.ErrorCode),
-			"message": strings.TrimSpace(result.Response.ErrorMessage),
-		}})
+		c.JSON(status, gin.H{"error": quotanetTaskOpenAIErrorPayload(result.Response)})
 		return
 	}
 	if result.Response.Payload == nil {
 		result.Response.Payload = map[string]any{}
 	}
 	c.JSON(http.StatusOK, result.Response.Payload)
+}
+
+func quotanetTaskOpenAIErrorPayload(resp protocol.TaskResponse) gin.H {
+	errorType := strings.TrimSpace(resp.ErrorCode)
+	if errorType == "" {
+		errorType = "api_error"
+	}
+	message := strings.TrimSpace(resp.ErrorMessage)
+	if message == "" {
+		switch resp.Status {
+		case protocol.TaskStatusTimeout:
+			message = "quotanet task timed out"
+		case protocol.TaskStatusCancelled:
+			message = "quotanet task was cancelled"
+		default:
+			message = "quotanet task failed"
+		}
+	}
+	return gin.H{
+		"type":    errorType,
+		"message": message,
+	}
 }
 
 func applyQuotaNetCallerContext(c *gin.Context, input *tasks.CreateTaskInput) {

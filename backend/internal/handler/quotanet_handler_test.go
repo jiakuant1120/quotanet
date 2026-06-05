@@ -113,6 +113,37 @@ func TestQuotaNetOpenAIChatCompletionsReturnsPayload(t *testing.T) {
 	}
 }
 
+func TestQuotaNetOpenAIChatCompletionsNormalizesEmptyTaskError(t *testing.T) {
+	w := httptest.NewRecorder()
+	c := newQuotaNetTestContext(w, `{"model":"gpt-4.1","messages":[]}`)
+	h := &QuotaNetHandler{taskService: &stubQuotaNetTaskService{
+		result: &tasks.DispatchResult{
+			Response: protocol.TaskResponse{
+				TaskID: "task-1",
+				Status: protocol.TaskStatusTimeout,
+			},
+		},
+	}}
+
+	h.OpenAIChatCompletions(c)
+
+	if w.Code != http.StatusGatewayTimeout {
+		t.Fatalf("status = %d, want 504, body=%s", w.Code, w.Body.String())
+	}
+	var body struct {
+		Error struct {
+			Type    string `json:"type"`
+			Message string `json:"message"`
+		} `json:"error"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatalf("json decode error = %v", err)
+	}
+	if body.Error.Type != "api_error" || body.Error.Message != "quotanet task timed out" {
+		t.Fatalf("error = %+v", body.Error)
+	}
+}
+
 func TestQuotaNetOpenAIChatCompletionsPropagatesCallerContext(t *testing.T) {
 	w := httptest.NewRecorder()
 	c := newQuotaNetTestContext(w, `{"model":"gpt-4.1","messages":[]}`)
