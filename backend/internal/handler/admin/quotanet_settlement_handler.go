@@ -190,6 +190,7 @@ func (h *QuotaNetSettlementHandler) BatchItems(c *gin.Context) {
 		BatchID:       batchID,
 		Status:        strings.TrimSpace(c.Query("status")),
 		WalletAddress: strings.TrimSpace(c.Query("wallet_address")),
+		TxHash:        strings.TrimSpace(c.Query("tx_hash")),
 	})
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "quotanet settlement operation failed")

@@ -141,3 +141,23 @@ func TestExplorerTxURL(t *testing.T) {
 		})
 	}
 }
+
+func TestNormalizeItemListParamsTrimsTxHash(t *testing.T) {
+	params := normalizeItemListParams(ItemListParams{
+		Page:          -1,
+		PageSize:      500,
+		Status:        " finalized ",
+		WalletAddress: " wallet-1 ",
+		TxHash:        " tx-1 ",
+	})
+
+	if params.Page != 1 {
+		t.Fatalf("page = %d, want 1", params.Page)
+	}
+	if params.PageSize != 100 {
+		t.Fatalf("page_size = %d, want 100", params.PageSize)
+	}
+	if params.Status != "finalized" || params.WalletAddress != "wallet-1" || params.TxHash != "tx-1" {
+		t.Fatalf("params = %+v", params)
+	}
+}

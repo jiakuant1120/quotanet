@@ -139,6 +139,7 @@ type ItemListParams struct {
 	BatchID       int64
 	Status        string
 	WalletAddress string
+	TxHash        string
 }
 
 func (s *Store) List(ctx context.Context, params ListParams) ([]*Ledger, int64, error) {
@@ -206,6 +207,9 @@ func (s *Store) ListItems(ctx context.Context, params ItemListParams) ([]*Payout
 	}
 	if params.WalletAddress != "" {
 		query = query.Where(quotanetpayoutitem.WalletAddressEQ(params.WalletAddress))
+	}
+	if params.TxHash != "" {
+		query = query.Where(quotanetpayoutitem.TxHashContainsFold(params.TxHash))
 	}
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -565,6 +569,7 @@ func normalizeItemListParams(params ItemListParams) ItemListParams {
 	}
 	params.Status = strings.TrimSpace(params.Status)
 	params.WalletAddress = strings.TrimSpace(params.WalletAddress)
+	params.TxHash = strings.TrimSpace(params.TxHash)
 	return params
 }
 
