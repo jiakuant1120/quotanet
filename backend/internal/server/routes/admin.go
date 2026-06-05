@@ -141,6 +141,7 @@ func registerQuotaNetSettlementRoutes(admin *gin.RouterGroup, h *handler.Handler
 		settlements.GET("/batches", h.Admin.QuotaNetSettlement.Batches)
 		settlements.POST("/batches", h.Admin.QuotaNetSettlement.CreateBatch)
 		settlements.GET("/batches/:id/items", h.Admin.QuotaNetSettlement.BatchItems)
+		settlements.PUT("/items/:id/status", h.Admin.QuotaNetSettlement.UpdateItemStatus)
 	}
 }
 

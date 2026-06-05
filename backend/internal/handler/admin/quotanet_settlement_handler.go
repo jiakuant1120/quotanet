@@ -50,6 +50,12 @@ type quotaNetPayoutBatchCreateRequest struct {
 	ApprovedBy  *int64  `json:"approved_by"`
 }
 
+type quotaNetPayoutItemStatusRequest struct {
+	Status       string `json:"status" binding:"required"`
+	TxHash       string `json:"tx_hash"`
+	ErrorMessage string `json:"error_message"`
+}
+
 type quotaNetPayoutBatchResponse struct {
 	ID             int64   `json:"id"`
 	BatchKey       string  `json:"batch_key"`
@@ -217,6 +223,32 @@ func (h *QuotaNetSettlementHandler) CreateBatch(c *gin.Context) {
 		Items:       items,
 		LedgerCount: result.LedgerCount,
 	})
+}
+
+func (h *QuotaNetSettlementHandler) UpdateItemStatus(c *gin.Context) {
+	if h == nil || h.store == nil {
+		response.Error(c, http.StatusServiceUnavailable, "quotanet settlement service is not initialized")
+		return
+	}
+	itemID, ok := requiredPositiveInt64(c, c.Param("id"), "item id")
+	if !ok {
+		return
+	}
+	var req quotaNetPayoutItemStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+	item, err := h.store.UpdateItemStatus(c.Request.Context(), itemID, settlements.UpdateItemStatusInput{
+		Status:       strings.TrimSpace(req.Status),
+		TxHash:       strings.TrimSpace(req.TxHash),
+		ErrorMessage: strings.TrimSpace(req.ErrorMessage),
+	})
+	if err != nil {
+		quotaNetSettlementError(c, err)
+		return
+	}
+	response.Success(c, quotaNetPayoutItemToResponse(item))
 }
 
 func quotaNetSettlementListParams(c *gin.Context, page, pageSize int) (settlements.ListParams, bool) {

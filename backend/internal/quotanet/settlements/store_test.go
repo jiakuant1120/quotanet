@@ -1,9 +1,11 @@
 package settlements
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/Wei-Shaw/sub2api/ent"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
 )
 
 func TestBuildWalletPayoutsAggregatesByWallet(t *testing.T) {
@@ -43,5 +45,56 @@ func TestBuildWalletPayoutsClearsNodeIDForMultiNodeWallet(t *testing.T) {
 	}
 	if items[0].TokenFlow != 300 {
 		t.Fatalf("token_flow = %d, want 300", items[0].TokenFlow)
+	}
+}
+
+func TestValidateUpdateItemStatusInput(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   UpdateItemStatusInput
+		wantErr bool
+	}{
+		{
+			name:  "pending allows empty details",
+			input: UpdateItemStatusInput{Status: protocol.SettlementStatusPending},
+		},
+		{
+			name:    "finalized requires tx hash",
+			input:   UpdateItemStatusInput{Status: protocol.SettlementStatusFinalized},
+			wantErr: true,
+		},
+		{
+			name:  "finalized accepts tx hash",
+			input: UpdateItemStatusInput{Status: protocol.SettlementStatusFinalized, TxHash: "tx-1"},
+		},
+		{
+			name:    "failed requires error message",
+			input:   UpdateItemStatusInput{Status: protocol.SettlementStatusFailed},
+			wantErr: true,
+		},
+		{
+			name:  "failed accepts error message",
+			input: UpdateItemStatusInput{Status: protocol.SettlementStatusFailed, ErrorMessage: "rejected"},
+		},
+		{
+			name:    "unknown status rejected",
+			input:   UpdateItemStatusInput{Status: "done"},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateUpdateItemStatusInput(tt.input)
+			if tt.wantErr {
+				if !errors.Is(err, ErrInvalidBatchInput) {
+					t.Fatalf("error = %v, want ErrInvalidBatchInput", err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("error = %v, want nil", err)
+			}
+		})
 	}
 }

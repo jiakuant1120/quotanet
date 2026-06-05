@@ -104,6 +104,12 @@ type CreateBatchInput struct {
 	ApprovedBy  *int64
 }
 
+type UpdateItemStatusInput struct {
+	Status       string
+	TxHash       string
+	ErrorMessage string
+}
+
 type CreateBatchResult struct {
 	Batch       *PayoutBatch
 	Items       []*PayoutItem
@@ -217,6 +223,70 @@ func (s *Store) ListItems(ctx context.Context, params ItemListParams) ([]*Payout
 		out = append(out, payoutItemFromEnt(row))
 	}
 	return out, int64(total), nil
+}
+
+func (s *Store) UpdateItemStatus(ctx context.Context, id int64, input UpdateItemStatusInput) (*PayoutItem, error) {
+	if s == nil || s.client == nil || id <= 0 {
+		return nil, ErrInvalidBatchInput
+	}
+	input = normalizeUpdateItemStatusInput(input)
+	if err := validateUpdateItemStatusInput(input); err != nil {
+		return nil, err
+	}
+
+	tx, err := s.client.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	item, err := tx.QuotaNetPayoutItem.Query().
+		Where(quotanetpayoutitem.IDEQ(id)).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	update := tx.QuotaNetPayoutItem.UpdateOneID(id).
+		SetStatus(input.Status)
+	switch input.Status {
+	case protocol.SettlementStatusFinalized:
+		update.SetTxHash(input.TxHash)
+		update.ClearErrorMessage()
+		update.SetFinalizedAt(time.Now().UTC())
+	case protocol.SettlementStatusFailed:
+		update.ClearTxHash()
+		update.SetErrorMessage(input.ErrorMessage)
+		update.ClearFinalizedAt()
+	case protocol.SettlementStatusPending:
+		update.ClearTxHash()
+		update.ClearErrorMessage()
+		update.ClearFinalizedAt()
+	}
+	row, err := update.Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	ledgerUpdate := tx.QuotaNetContributionLedger.Update().
+		Where(
+			quotanetcontributionledger.PayoutBatchIDEQ(item.BatchID),
+			quotanetcontributionledger.WalletAddressEQ(item.WalletAddress),
+		).
+		SetStatus(input.Status)
+	if input.Status == protocol.SettlementStatusPending {
+		ledgerUpdate.ClearSettledAt()
+	} else {
+		ledgerUpdate.SetSettledAt(time.Now().UTC())
+	}
+	if _, err := ledgerUpdate.Save(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return payoutItemFromEnt(row), nil
 }
 
 func (s *Store) Summary(ctx context.Context, params ListParams) (*Summary, error) {
@@ -450,6 +520,32 @@ func validateCreateBatchInput(input CreateBatchInput) error {
 		return fmt.Errorf("%w: network is required", ErrInvalidBatchInput)
 	}
 	return nil
+}
+
+func normalizeUpdateItemStatusInput(input UpdateItemStatusInput) UpdateItemStatusInput {
+	input.Status = strings.TrimSpace(input.Status)
+	input.TxHash = strings.TrimSpace(input.TxHash)
+	input.ErrorMessage = strings.TrimSpace(input.ErrorMessage)
+	return input
+}
+
+func validateUpdateItemStatusInput(input UpdateItemStatusInput) error {
+	switch input.Status {
+	case protocol.SettlementStatusPending:
+		return nil
+	case protocol.SettlementStatusFinalized:
+		if input.TxHash == "" {
+			return fmt.Errorf("%w: tx_hash is required for finalized item", ErrInvalidBatchInput)
+		}
+		return nil
+	case protocol.SettlementStatusFailed:
+		if input.ErrorMessage == "" {
+			return fmt.Errorf("%w: error_message is required for failed item", ErrInvalidBatchInput)
+		}
+		return nil
+	default:
+		return fmt.Errorf("%w: invalid item status", ErrInvalidBatchInput)
+	}
 }
 
 func applyLedgerFilters(query *ent.QuotaNetContributionLedgerQuery, params ListParams) *ent.QuotaNetContributionLedgerQuery {
