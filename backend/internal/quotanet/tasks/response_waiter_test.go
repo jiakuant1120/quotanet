@@ -108,6 +108,29 @@ func TestResponseRecorderDoesNotNotifyOnStoreError(t *testing.T) {
 	}
 }
 
+func TestResponseRecorderIgnoresDuplicateResponseWithoutNotify(t *testing.T) {
+	store := &stubResponseStore{err: ErrDuplicateTaskResponse}
+	waiter := NewResponseWaiter()
+	recorder := NewResponseRecorder(store, waiter)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+	done := make(chan error, 1)
+	go func() {
+		_, err := waiter.Await(ctx, "task-1")
+		done <- err
+	}()
+	waitForWaiter(t, waiter, "task-1")
+
+	err := recorder.TaskResponseReceived(context.Background(), "sess-1", protocol.TaskResponse{TaskID: "task-1", Status: protocol.TaskStatusSuccess}, time.Now())
+	if err != nil {
+		t.Fatalf("TaskResponseReceived() error = %v, want nil duplicate ignore", err)
+	}
+	if err := <-done; !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("Await() error = %v, want context deadline", err)
+	}
+}
+
 type stubResponseStore struct {
 	sessionID string
 	response  protocol.TaskResponse

@@ -174,6 +174,9 @@ func (r *ResponseRecorder) TaskResponseReceived(ctx context.Context, sessionID s
 	}
 	if r.store != nil {
 		if err := r.store.TaskResponseReceived(ctx, sessionID, response, at); err != nil {
+			if errors.Is(err, ErrDuplicateTaskResponse) {
+				return nil
+			}
 			return err
 		}
 	}

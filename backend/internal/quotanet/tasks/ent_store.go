@@ -2,7 +2,6 @@ package tasks
 
 import (
 	"context"
-	"errors"
 	"strings"
 	"time"
 
@@ -13,8 +12,6 @@ import (
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/registry"
 )
-
-var ErrTaskNotFound = errors.New("quotanet task not found")
 
 type EntStore struct {
 	client *ent.Client
@@ -209,6 +206,21 @@ func (s *EntStore) TaskResponseReceived(ctx context.Context, sessionID string, r
 		return err
 	}
 	if affected == 0 {
+		row, findErr := tx.QuotaNetTask.Query().
+			Where(
+				quotanettask.TaskIDEQ(taskID),
+				quotanettask.SessionIDEQ(sessionID),
+			).
+			Only(ctx)
+		if findErr != nil {
+			if ent.IsNotFound(findErr) {
+				return ErrTaskNotFound
+			}
+			return findErr
+		}
+		if row.CompletedAt != nil || row.Status != protocol.TaskStatusRunning {
+			return ErrDuplicateTaskResponse
+		}
 		return ErrTaskNotFound
 	}
 

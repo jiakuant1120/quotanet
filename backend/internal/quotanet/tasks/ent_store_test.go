@@ -3,6 +3,7 @@ package tasks
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -83,6 +84,40 @@ func TestEntStoreMarkFailed(t *testing.T) {
 	}
 	if row.CompletedAt == nil || !row.CompletedAt.Equal(completedAt) {
 		t.Fatalf("completed_at = %v, want %v", row.CompletedAt, completedAt)
+	}
+}
+
+func TestEntStoreTaskResponseReceivedIsIdempotent(t *testing.T) {
+	client := newTaskEntClient(t)
+	store := NewEntStore(client)
+	ctx := context.Background()
+
+	if _, err := store.CreateQueued(ctx, validInput(), "task-1"); err != nil {
+		t.Fatalf("CreateQueued() error = %v", err)
+	}
+	candidate := registry.Candidate{NodeID: 7, SessionID: "sess-1"}
+	if err := store.MarkDispatched(ctx, "task-1", candidate, time.Unix(100, 0).UTC()); err != nil {
+		t.Fatalf("MarkDispatched() error = %v", err)
+	}
+
+	response := protocol.TaskResponse{
+		TaskID: "task-1",
+		Status: protocol.TaskStatusSuccess,
+		Usage:  protocol.Usage{PromptTokens: 1, CompletionTokens: 2, TotalTokens: 3},
+	}
+	if err := store.TaskResponseReceived(ctx, "sess-1", response, time.Unix(200, 0).UTC()); err != nil {
+		t.Fatalf("TaskResponseReceived() first error = %v", err)
+	}
+	if err := store.TaskResponseReceived(ctx, "sess-1", response, time.Unix(201, 0).UTC()); !errors.Is(err, ErrDuplicateTaskResponse) {
+		t.Fatalf("TaskResponseReceived() duplicate error = %v, want ErrDuplicateTaskResponse", err)
+	}
+
+	events, err := client.QuotaNetTaskEvent.Query().Where(quotanettaskevent.TaskIDEQ("task-1")).All(ctx)
+	if err != nil {
+		t.Fatalf("query events error = %v", err)
+	}
+	if len(events) != 1 || events[0].EventType != protocol.EventTaskResponse {
+		t.Fatalf("events = %+v, want one task_response event", events)
 	}
 }
 
