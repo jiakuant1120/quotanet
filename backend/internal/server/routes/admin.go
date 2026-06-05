@@ -121,6 +121,7 @@ func registerQuotaNetTaskRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 	tasks := admin.Group("/quotanet/tasks")
 	{
 		tasks.GET("", h.Admin.QuotaNetTask.List)
+		tasks.POST("/dispatch", h.Admin.QuotaNetTask.Dispatch)
 		tasks.GET("/:task_id/events", h.Admin.QuotaNetTask.Events)
 		tasks.GET("/:task_id", h.Admin.QuotaNetTask.Get)
 	}
