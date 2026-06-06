@@ -17,6 +17,7 @@ func RegisterQuotaNetRoutes(v1 *gin.RouterGroup, h *handler.Handlers) {
 	}
 	quotanet := v1.Group("/quotanet")
 	{
+		quotanet.POST("/nodes/register", h.QuotaNet.RegisterNode)
 		quotanet.GET("/nodes/ws", h.QuotaNet.NodeWebSocket)
 	}
 }

@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/auth"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
 )
 
 var (
@@ -22,17 +24,34 @@ type ListParams struct {
 }
 
 type CreateInput struct {
-	Name          string
-	WalletAddress string
-	OwnerUserID   *int64
-	Status        string
+	Name            string
+	WalletAddress   string
+	OwnerUserID     *int64
+	Status          string
+	ProtocolVersion string
+	ClientVersion   string
+	LastSeenAt      *time.Time
 }
 
 type UpdateStatusInput struct {
 	Status string
 }
 
+type RegisterDevelopmentNodeInput struct {
+	Name            string
+	WalletAddress   string
+	ClientVersion   string
+	ProtocolVersion string
+	ResetToken      bool
+	AllowResetToken bool
+}
+
 type CreateResult struct {
+	Node  *Node
+	Token string
+}
+
+type RegisterDevelopmentNodeResult struct {
 	Node  *Node
 	Token string
 }
@@ -44,6 +63,8 @@ type ResetTokenResult struct {
 
 type ManagementStore interface {
 	Create(ctx context.Context, input CreateInput, nodeKey, tokenHash string) (*Node, error)
+	GetByWalletAddress(ctx context.Context, walletAddress string) (*Node, error)
+	UpdateRegistration(ctx context.Context, id int64, input CreateInput, tokenHash string, updateToken bool) (*Node, error)
 	List(ctx context.Context, params ListParams) ([]*Node, int64, error)
 	GetByID(ctx context.Context, id int64) (*Node, error)
 	UpdateStatus(ctx context.Context, id int64, status string) (*Node, error)
@@ -94,6 +115,59 @@ func (m *Manager) Create(ctx context.Context, input CreateInput) (*CreateResult,
 		return nil, err
 	}
 	return &CreateResult{Node: node, Token: token}, nil
+}
+
+func (m *Manager) RegisterDevelopmentNode(ctx context.Context, input RegisterDevelopmentNodeInput) (*RegisterDevelopmentNodeResult, error) {
+	if m == nil || m.store == nil {
+		return nil, ErrNodeNotFound
+	}
+	createInput, err := normalizeDevelopmentRegistration(input)
+	if err != nil {
+		return nil, err
+	}
+
+	existing, err := m.store.GetByWalletAddress(ctx, createInput.WalletAddress)
+	if err != nil && !errors.Is(err, ErrNodeNotFound) {
+		return nil, err
+	}
+	if existing == nil || errors.Is(err, ErrNodeNotFound) {
+		token, tokenHash, nodeKey, err := newNodeTokenMaterial()
+		if err != nil {
+			return nil, err
+		}
+		node, err := m.store.Create(ctx, createInput, nodeKey, tokenHash)
+		if err != nil {
+			return nil, err
+		}
+		return &RegisterDevelopmentNodeResult{Node: node, Token: token}, nil
+	}
+
+	switch strings.TrimSpace(existing.Status) {
+	case StatusDisabled, StatusBanned:
+		return nil, ErrNodeInactive
+	}
+
+	token := ""
+	tokenHash := ""
+	updateToken := false
+	if input.ResetToken {
+		if !input.AllowResetToken {
+			return nil, fmt.Errorf("%w: token reset is not allowed", ErrInvalidNodeInput)
+		}
+		nextToken, nextHash, _, err := newNodeTokenMaterial()
+		if err != nil {
+			return nil, err
+		}
+		token = nextToken
+		tokenHash = nextHash
+		updateToken = true
+	}
+
+	node, err := m.store.UpdateRegistration(ctx, existing.ID, createInput, tokenHash, updateToken)
+	if err != nil {
+		return nil, err
+	}
+	return &RegisterDevelopmentNodeResult{Node: node, Token: token}, nil
 }
 
 func (m *Manager) List(ctx context.Context, params ListParams) ([]*Node, int64, error) {
@@ -154,6 +228,47 @@ func (m *Manager) ResetToken(ctx context.Context, id int64) (*ResetTokenResult, 
 		return nil, err
 	}
 	return &ResetTokenResult{Node: node, Token: token}, nil
+}
+
+func normalizeDevelopmentRegistration(input RegisterDevelopmentNodeInput) (CreateInput, error) {
+	name := strings.TrimSpace(input.Name)
+	walletAddress := strings.TrimSpace(input.WalletAddress)
+	protocolVersion := strings.TrimSpace(input.ProtocolVersion)
+	clientVersion := strings.TrimSpace(input.ClientVersion)
+	if walletAddress == "" {
+		return CreateInput{}, fmt.Errorf("%w: wallet_address is required", ErrInvalidNodeInput)
+	}
+	if protocolVersion != protocol.Version {
+		return CreateInput{}, protocol.ErrUnsupportedVersion
+	}
+	if name == "" {
+		name = "QuotaNet Client"
+	}
+	now := time.Now().UTC()
+	return CreateInput{
+		Name:            name,
+		WalletAddress:   walletAddress,
+		Status:          StatusActive,
+		ProtocolVersion: protocolVersion,
+		ClientVersion:   clientVersion,
+		LastSeenAt:      &now,
+	}, nil
+}
+
+func newNodeTokenMaterial() (token, tokenHash, nodeKey string, err error) {
+	token, err = auth.GenerateNodeToken()
+	if err != nil {
+		return "", "", "", err
+	}
+	tokenHash, err = auth.HashNodeToken(token)
+	if err != nil {
+		return "", "", "", err
+	}
+	fingerprint, err := auth.FingerprintNodeToken(token)
+	if err != nil {
+		return "", "", "", err
+	}
+	return token, tokenHash, "qnn_" + fingerprint, nil
 }
 
 func normalizeStatus(status, fallback string) string {

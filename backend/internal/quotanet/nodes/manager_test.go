@@ -105,18 +105,131 @@ func TestManagerResetToken(t *testing.T) {
 	}
 }
 
+func TestManagerRegisterDevelopmentNodeCreatesActiveNode(t *testing.T) {
+	store := &stubManagementStore{}
+	manager := NewManager(store)
+
+	result, err := manager.RegisterDevelopmentNode(context.Background(), RegisterDevelopmentNodeInput{
+		Name:            "dev node",
+		WalletAddress:   "wallet-dev",
+		ClientVersion:   "v0.1.0",
+		ProtocolVersion: "2026-06-qt1",
+	})
+	if err != nil {
+		t.Fatalf("RegisterDevelopmentNode() error = %v", err)
+	}
+	if result.Token == "" {
+		t.Fatal("RegisterDevelopmentNode() token is empty")
+	}
+	if result.Node == nil || result.Node.Status != StatusActive || result.Node.NodeKey == "" {
+		t.Fatalf("RegisterDevelopmentNode() result = %+v", result)
+	}
+	if store.createdInput.Status != StatusActive || store.createdInput.ProtocolVersion != "2026-06-qt1" || store.createdInput.ClientVersion != "v0.1.0" {
+		t.Fatalf("created input = %+v", store.createdInput)
+	}
+	if !isStoredHashForToken(t, result.Token, store.createdTokenHash) {
+		t.Fatal("stored token hash does not verify returned token")
+	}
+}
+
+func TestManagerRegisterDevelopmentNodeReusesWalletWithoutResettingToken(t *testing.T) {
+	store := &stubManagementStore{
+		walletNode: &Node{ID: 7, NodeKey: "qnn_existing", WalletAddress: "wallet-dev", Status: StatusActive, TokenHash: "old-hash"},
+	}
+	manager := NewManager(store)
+
+	result, err := manager.RegisterDevelopmentNode(context.Background(), RegisterDevelopmentNodeInput{
+		Name:            "updated",
+		WalletAddress:   "wallet-dev",
+		ProtocolVersion: "2026-06-qt1",
+	})
+	if err != nil {
+		t.Fatalf("RegisterDevelopmentNode() error = %v", err)
+	}
+	if result.Token != "" {
+		t.Fatalf("RegisterDevelopmentNode() token = %q, want empty", result.Token)
+	}
+	if store.updateRegistrationToken {
+		t.Fatal("UpdateRegistration updated token, want false")
+	}
+	if result.Node.ID != 7 || result.Node.Status != StatusActive {
+		t.Fatalf("RegisterDevelopmentNode() node = %+v", result.Node)
+	}
+}
+
+func TestManagerRegisterDevelopmentNodeCanResetTokenWhenAllowed(t *testing.T) {
+	store := &stubManagementStore{
+		walletNode: &Node{ID: 7, NodeKey: "qnn_existing", WalletAddress: "wallet-dev", Status: StatusActive, TokenHash: "old-hash"},
+	}
+	manager := NewManager(store)
+
+	result, err := manager.RegisterDevelopmentNode(context.Background(), RegisterDevelopmentNodeInput{
+		WalletAddress:   "wallet-dev",
+		ProtocolVersion: "2026-06-qt1",
+		ResetToken:      true,
+		AllowResetToken: true,
+	})
+	if err != nil {
+		t.Fatalf("RegisterDevelopmentNode(reset) error = %v", err)
+	}
+	if result.Token == "" {
+		t.Fatal("RegisterDevelopmentNode(reset) token is empty")
+	}
+	if !store.updateRegistrationToken {
+		t.Fatal("UpdateRegistration did not update token")
+	}
+	if !isStoredHashForToken(t, result.Token, store.updateRegistrationTokenHash) {
+		t.Fatal("stored reset hash does not verify returned token")
+	}
+}
+
+func TestManagerRegisterDevelopmentNodeRejectsDisabledNode(t *testing.T) {
+	store := &stubManagementStore{
+		walletNode: &Node{ID: 7, NodeKey: "qnn_existing", WalletAddress: "wallet-dev", Status: StatusDisabled},
+	}
+	manager := NewManager(store)
+
+	_, err := manager.RegisterDevelopmentNode(context.Background(), RegisterDevelopmentNodeInput{
+		WalletAddress:   "wallet-dev",
+		ProtocolVersion: "2026-06-qt1",
+		ResetToken:      true,
+		AllowResetToken: true,
+	})
+	if !errors.Is(err, ErrNodeInactive) {
+		t.Fatalf("RegisterDevelopmentNode(disabled) error = %v, want ErrNodeInactive", err)
+	}
+	if store.updateRegistrationToken {
+		t.Fatal("disabled node should not reset token")
+	}
+}
+
+func TestManagerRegisterDevelopmentNodeRejectsUnsupportedProtocol(t *testing.T) {
+	manager := NewManager(&stubManagementStore{})
+	_, err := manager.RegisterDevelopmentNode(context.Background(), RegisterDevelopmentNodeInput{
+		WalletAddress:   "wallet-dev",
+		ProtocolVersion: "old",
+	})
+	if err == nil {
+		t.Fatal("RegisterDevelopmentNode(old protocol) error is nil")
+	}
+}
+
 func isStoredHashForToken(t *testing.T, token, hash string) bool {
 	t.Helper()
 	return auth.VerifyNodeToken(token, hash) == nil
 }
 
 type stubManagementStore struct {
-	createdInput     CreateInput
-	createdNodeKey   string
-	createdTokenHash string
-	listParams       ListParams
-	updatedStatus    string
-	resetTokenHash   string
+	createdInput                CreateInput
+	createdNodeKey              string
+	createdTokenHash            string
+	walletNode                  *Node
+	updateRegistrationInput     CreateInput
+	updateRegistrationToken     bool
+	updateRegistrationTokenHash string
+	listParams                  ListParams
+	updatedStatus               string
+	resetTokenHash              string
 }
 
 func (s *stubManagementStore) Create(_ context.Context, input CreateInput, nodeKey, tokenHash string) (*Node, error) {
@@ -130,6 +243,34 @@ func (s *stubManagementStore) Create(_ context.Context, input CreateInput, nodeK
 		OwnerUserID:   input.OwnerUserID,
 		WalletAddress: input.WalletAddress,
 		TokenHash:     tokenHash,
+		Status:        input.Status,
+	}, nil
+}
+
+func (s *stubManagementStore) GetByWalletAddress(_ context.Context, walletAddress string) (*Node, error) {
+	if s.walletNode == nil || s.walletNode.WalletAddress != walletAddress {
+		return nil, ErrNodeNotFound
+	}
+	return s.walletNode, nil
+}
+
+func (s *stubManagementStore) UpdateRegistration(_ context.Context, id int64, input CreateInput, tokenHash string, updateToken bool) (*Node, error) {
+	s.updateRegistrationInput = input
+	s.updateRegistrationToken = updateToken
+	s.updateRegistrationTokenHash = tokenHash
+	token := ""
+	if s.walletNode != nil {
+		token = s.walletNode.TokenHash
+	}
+	if updateToken {
+		token = tokenHash
+	}
+	return &Node{
+		ID:            id,
+		NodeKey:       "qnn_existing",
+		Name:          input.Name,
+		WalletAddress: input.WalletAddress,
+		TokenHash:     token,
 		Status:        input.Status,
 	}, nil
 }

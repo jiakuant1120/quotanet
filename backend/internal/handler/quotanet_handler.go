@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/pkg/ip"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/nodes"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/registry"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/tasks"
@@ -25,23 +27,26 @@ const (
 )
 
 type QuotaNetHandler struct {
-	sessionManager *qws.SessionManager
-	taskService    quotaNetTaskService
-	registry       *registry.Registry
-	upgrader       websocket.Upgrader
+	sessionManager      *qws.SessionManager
+	nodeManager         *nodes.Manager
+	taskService         quotaNetTaskService
+	registry            *registry.Registry
+	upgrader            websocket.Upgrader
+	registrationEnabled func() bool
 }
 
 type quotaNetTaskService interface {
 	DispatchAndWait(ctx context.Context, input tasks.CreateTaskInput) (*tasks.DispatchResult, error)
 }
 
-func NewQuotaNetHandler(sessionManager *qws.SessionManager, taskService *tasks.Service) *QuotaNetHandler {
+func NewQuotaNetHandler(sessionManager *qws.SessionManager, nodeManager *nodes.Manager, taskService *tasks.Service) *QuotaNetHandler {
 	var reg *registry.Registry
 	if sessionManager != nil {
 		reg = sessionManager.Registry()
 	}
 	return &QuotaNetHandler{
 		sessionManager: sessionManager,
+		nodeManager:    nodeManager,
 		taskService:    taskService,
 		registry:       reg,
 		upgrader: websocket.Upgrader{
@@ -49,7 +54,65 @@ func NewQuotaNetHandler(sessionManager *qws.SessionManager, taskService *tasks.S
 				return true
 			},
 		},
+		registrationEnabled: quotanetDevelopmentRegistrationEnabled,
 	}
+}
+
+type quotaNetNodeRegisterRequest struct {
+	Name            string `json:"name"`
+	WalletAddress   string `json:"wallet_address"`
+	ClientVersion   string `json:"client_version"`
+	ProtocolVersion string `json:"protocol_version"`
+	ResetToken      bool   `json:"reset_token"`
+}
+
+type quotaNetNodeRegisterNodeResponse struct {
+	ID            int64  `json:"id"`
+	NodeKey       string `json:"node_key"`
+	Name          string `json:"name"`
+	WalletAddress string `json:"wallet_address"`
+	Status        string `json:"status"`
+}
+
+type quotaNetNodeRegisterResponse struct {
+	Node  quotaNetNodeRegisterNodeResponse `json:"node"`
+	Token string                           `json:"token,omitempty"`
+}
+
+func (h *QuotaNetHandler) RegisterNode(c *gin.Context) {
+	if h == nil || h.nodeManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "quotanet node manager is not initialized"})
+		return
+	}
+	enabled := quotanetDevelopmentRegistrationEnabled
+	if h.registrationEnabled != nil {
+		enabled = h.registrationEnabled
+	}
+	if !enabled() {
+		c.JSON(http.StatusForbidden, gin.H{"error": "quotanet node registration is disabled"})
+		return
+	}
+	var req quotaNetNodeRegisterRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request: " + err.Error()})
+		return
+	}
+	result, err := h.nodeManager.RegisterDevelopmentNode(c.Request.Context(), nodes.RegisterDevelopmentNodeInput{
+		Name:            req.Name,
+		WalletAddress:   req.WalletAddress,
+		ClientVersion:   req.ClientVersion,
+		ProtocolVersion: req.ProtocolVersion,
+		ResetToken:      req.ResetToken,
+		AllowResetToken: quotanetRegistrationResetAllowed(),
+	})
+	if err != nil {
+		quotanetNodeRegisterError(c, err, req.ProtocolVersion)
+		return
+	}
+	c.JSON(http.StatusOK, quotaNetNodeRegisterResponse{
+		Node:  quotaNetNodeRegisterNode(result.Node),
+		Token: result.Token,
+	})
 }
 
 func (h *QuotaNetHandler) OpenAIModels(c *gin.Context) {
@@ -267,6 +330,55 @@ func quotanetOpenAIError(c *gin.Context, err error) {
 		"type":    "api_error",
 		"message": message,
 	}})
+}
+
+func quotanetNodeRegisterError(c *gin.Context, err error, clientProtocolVersion string) {
+	switch {
+	case errors.Is(err, nodes.ErrInvalidNodeInput):
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	case errors.Is(err, protocol.ErrUnsupportedVersion):
+		c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported protocol version: client=" + strings.TrimSpace(clientProtocolVersion) + " server=" + protocol.Version})
+	case errors.Is(err, nodes.ErrNodeInactive):
+		c.JSON(http.StatusForbidden, gin.H{"error": "quotanet node is disabled"})
+	default:
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "quotanet node registration failed"})
+	}
+}
+
+func quotaNetNodeRegisterNode(node *nodes.Node) quotaNetNodeRegisterNodeResponse {
+	if node == nil {
+		return quotaNetNodeRegisterNodeResponse{}
+	}
+	return quotaNetNodeRegisterNodeResponse{
+		ID:            node.ID,
+		NodeKey:       node.NodeKey,
+		Name:          node.Name,
+		WalletAddress: node.WalletAddress,
+		Status:        node.Status,
+	}
+}
+
+func quotanetDevelopmentRegistrationEnabled() bool {
+	if raw := strings.TrimSpace(os.Getenv("QUOTANET_NODE_REGISTRATION_ENABLED")); raw != "" {
+		return parseQuotaNetBool(raw)
+	}
+	return strings.EqualFold(strings.TrimSpace(os.Getenv("SERVER_MODE")), "debug")
+}
+
+func quotanetRegistrationResetAllowed() bool {
+	if raw := strings.TrimSpace(os.Getenv("QUOTANET_NODE_REGISTRATION_ALLOW_RESET_TOKEN")); raw != "" {
+		return parseQuotaNetBool(raw)
+	}
+	return true
+}
+
+func parseQuotaNetBool(value string) bool {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "1", "true", "yes", "on", "enabled":
+		return true
+	default:
+		return false
+	}
 }
 
 type gorillaConn struct {

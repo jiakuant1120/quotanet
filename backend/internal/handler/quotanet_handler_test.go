@@ -7,9 +7,11 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/nodes"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/registry"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/tasks"
@@ -60,6 +62,56 @@ func TestQuotaNetOpenAIModelsReturnsRegistryModels(t *testing.T) {
 	}
 	if body.Object != "list" || len(body.Data) != 2 || body.Data[0].ID != "gpt-4.1" || body.Data[0].Object != "model" || body.Data[0].OwnedBy != "quotanet" {
 		t.Fatalf("body = %+v", body)
+	}
+}
+
+func TestQuotaNetRegisterNodeDisabled(t *testing.T) {
+	w := httptest.NewRecorder()
+	c := newQuotaNetTestContext(w, `{"wallet_address":"wallet","protocol_version":"2026-06-qt1"}`)
+	h := &QuotaNetHandler{
+		nodeManager:         nodes.NewManager(&stubQuotaNetNodeStore{}),
+		registrationEnabled: func() bool { return false },
+	}
+
+	h.RegisterNode(c)
+
+	if w.Code != http.StatusForbidden {
+		t.Fatalf("status = %d, want 403, body=%s", w.Code, w.Body.String())
+	}
+}
+
+func TestQuotaNetRegisterNodeReturnsNodeKeyAndToken(t *testing.T) {
+	w := httptest.NewRecorder()
+	c := newQuotaNetTestContext(w, `{"name":"dev","wallet_address":"wallet","protocol_version":"2026-06-qt1","client_version":"v0.1.0"}`)
+	h := &QuotaNetHandler{
+		nodeManager:         nodes.NewManager(&stubQuotaNetNodeStore{}),
+		registrationEnabled: func() bool { return true },
+	}
+
+	h.RegisterNode(c)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200, body=%s", w.Code, w.Body.String())
+	}
+	var body struct {
+		Node struct {
+			NodeKey       string `json:"node_key"`
+			WalletAddress string `json:"wallet_address"`
+			Status        string `json:"status"`
+		} `json:"node"`
+		Token string `json:"token"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatalf("json decode error = %v", err)
+	}
+	if body.Node.NodeKey == "" || !strings.HasPrefix(body.Node.NodeKey, "qnn_") {
+		t.Fatalf("node_key = %q, want qnn_ prefix", body.Node.NodeKey)
+	}
+	if body.Token == "" || !strings.HasPrefix(body.Token, "qnc_") {
+		t.Fatalf("token = %q, want qnc_ prefix", body.Token)
+	}
+	if body.Node.WalletAddress != "wallet" || body.Node.Status != nodes.StatusActive {
+		t.Fatalf("node = %+v", body.Node)
 	}
 }
 
@@ -193,6 +245,59 @@ type stubQuotaNetTaskService struct {
 	input  tasks.CreateTaskInput
 	result *tasks.DispatchResult
 	err    error
+}
+
+type stubQuotaNetNodeStore struct {
+	node *nodes.Node
+}
+
+func (s *stubQuotaNetNodeStore) Create(_ context.Context, input nodes.CreateInput, nodeKey, tokenHash string) (*nodes.Node, error) {
+	s.node = &nodes.Node{
+		ID:            1,
+		NodeKey:       nodeKey,
+		Name:          input.Name,
+		WalletAddress: input.WalletAddress,
+		TokenHash:     tokenHash,
+		Status:        input.Status,
+	}
+	return s.node, nil
+}
+
+func (s *stubQuotaNetNodeStore) GetByWalletAddress(_ context.Context, walletAddress string) (*nodes.Node, error) {
+	if s.node == nil || s.node.WalletAddress != walletAddress {
+		return nil, nodes.ErrNodeNotFound
+	}
+	return s.node, nil
+}
+
+func (s *stubQuotaNetNodeStore) UpdateRegistration(_ context.Context, id int64, input nodes.CreateInput, tokenHash string, updateToken bool) (*nodes.Node, error) {
+	if s.node == nil {
+		return nil, nodes.ErrNodeNotFound
+	}
+	s.node.ID = id
+	s.node.Name = input.Name
+	s.node.WalletAddress = input.WalletAddress
+	s.node.Status = input.Status
+	if updateToken {
+		s.node.TokenHash = tokenHash
+	}
+	return s.node, nil
+}
+
+func (s *stubQuotaNetNodeStore) List(_ context.Context, _ nodes.ListParams) ([]*nodes.Node, int64, error) {
+	return nil, 0, nil
+}
+
+func (s *stubQuotaNetNodeStore) GetByID(_ context.Context, id int64) (*nodes.Node, error) {
+	return &nodes.Node{ID: id}, nil
+}
+
+func (s *stubQuotaNetNodeStore) UpdateStatus(_ context.Context, id int64, status string) (*nodes.Node, error) {
+	return &nodes.Node{ID: id, Status: status}, nil
+}
+
+func (s *stubQuotaNetNodeStore) ResetToken(_ context.Context, id int64, tokenHash string) (*nodes.Node, error) {
+	return &nodes.Node{ID: id, TokenHash: tokenHash}, nil
 }
 
 func (s *stubQuotaNetTaskService) DispatchAndWait(_ context.Context, input tasks.CreateTaskInput) (*tasks.DispatchResult, error) {

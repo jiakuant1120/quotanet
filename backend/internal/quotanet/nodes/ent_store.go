@@ -34,15 +34,69 @@ func (s *EntStore) GetByNodeKey(ctx context.Context, nodeKey string) (*Node, err
 }
 
 func (s *EntStore) Create(ctx context.Context, input CreateInput, nodeKey, tokenHash string) (*Node, error) {
-	row, err := s.client.QuotaNetNode.Create().
+	create := s.client.QuotaNetNode.Create().
 		SetNodeKey(nodeKey).
 		SetName(input.Name).
 		SetWalletAddress(input.WalletAddress).
 		SetTokenHash(tokenHash).
 		SetStatus(input.Status).
-		SetNillableOwnerUserID(input.OwnerUserID).
-		Save(ctx)
+		SetNillableOwnerUserID(input.OwnerUserID)
+	if strings.TrimSpace(input.ProtocolVersion) != "" {
+		create.SetProtocolVersion(strings.TrimSpace(input.ProtocolVersion))
+	}
+	if strings.TrimSpace(input.ClientVersion) != "" {
+		create.SetClientVersion(strings.TrimSpace(input.ClientVersion))
+	}
+	if input.LastSeenAt != nil {
+		create.SetLastSeenAt(*input.LastSeenAt)
+	}
+	row, err := create.Save(ctx)
 	if err != nil {
+		return nil, err
+	}
+	return nodeFromEnt(row), nil
+}
+
+func (s *EntStore) GetByWalletAddress(ctx context.Context, walletAddress string) (*Node, error) {
+	if s == nil || s.client == nil {
+		return nil, ErrNodeNotFound
+	}
+	walletAddress = strings.TrimSpace(walletAddress)
+	row, err := s.client.QuotaNetNode.Query().
+		Where(quotanetnode.WalletAddressEQ(walletAddress)).
+		Order(quotanetnode.ByCreatedAt(sql.OrderAsc())).
+		First(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, ErrNodeNotFound
+		}
+		return nil, err
+	}
+	return nodeFromEnt(row), nil
+}
+
+func (s *EntStore) UpdateRegistration(ctx context.Context, id int64, input CreateInput, tokenHash string, updateToken bool) (*Node, error) {
+	update := s.client.QuotaNetNode.UpdateOneID(id).
+		SetName(input.Name).
+		SetWalletAddress(input.WalletAddress).
+		SetStatus(input.Status)
+	if strings.TrimSpace(input.ProtocolVersion) != "" {
+		update.SetProtocolVersion(strings.TrimSpace(input.ProtocolVersion))
+	}
+	if strings.TrimSpace(input.ClientVersion) != "" {
+		update.SetClientVersion(strings.TrimSpace(input.ClientVersion))
+	}
+	if input.LastSeenAt != nil {
+		update.SetLastSeenAt(*input.LastSeenAt)
+	}
+	if updateToken {
+		update.SetTokenHash(tokenHash)
+	}
+	row, err := update.Save(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, ErrNodeNotFound
+		}
 		return nil, err
 	}
 	return nodeFromEnt(row), nil
