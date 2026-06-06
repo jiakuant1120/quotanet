@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -26,6 +27,30 @@ func TestQuotaNetTaskListParamsParsesCallerFilters(t *testing.T) {
 	}
 	if params.UserID == nil || *params.UserID != 33 {
 		t.Fatalf("user_id = %v, want 33", params.UserID)
+	}
+}
+
+func TestQuotaNetTaskDispatchInputParsesNodeID(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	body := []byte(`{
+		"request_id": "req-1",
+		"node_id": 42,
+		"platform": "openai",
+		"endpoint": "/v1/chat/completions",
+		"model": "gpt-4.1",
+		"payload": {"messages": []}
+	}`)
+	c.Request = httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(body))
+	c.Request.Header.Set("Content-Type", "application/json")
+
+	input, ok := quotaNetTaskDispatchInput(c)
+	if !ok {
+		t.Fatal("quotaNetTaskDispatchInput() ok = false")
+	}
+	if input.NodeID == nil || *input.NodeID != 42 {
+		t.Fatalf("node_id = %v, want 42", input.NodeID)
 	}
 }
 

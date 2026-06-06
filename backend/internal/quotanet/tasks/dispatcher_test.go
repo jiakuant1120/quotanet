@@ -64,6 +64,59 @@ func TestDispatcherDispatchWithTaskID(t *testing.T) {
 	}
 }
 
+func TestDispatcherDispatchToNodeID(t *testing.T) {
+	reg := registry.New()
+	if err := reg.Register(validSession("sess-1", 10)); err != nil {
+		t.Fatalf("Register(sess-1) error = %v", err)
+	}
+	if err := reg.Register(validSession("sess-2", 20)); err != nil {
+		t.Fatalf("Register(sess-2) error = %v", err)
+	}
+	if err := reg.AttachSender("sess-1", &stubSender{}); err != nil {
+		t.Fatalf("AttachSender(sess-1) error = %v", err)
+	}
+	targetSender := &stubSender{}
+	if err := reg.AttachSender("sess-2", targetSender); err != nil {
+		t.Fatalf("AttachSender(sess-2) error = %v", err)
+	}
+	store := &stubStore{}
+	dispatcher := NewDispatcher(store, reg)
+	dispatcher.newTaskID = func() string { return "task-1" }
+	dispatcher.newMessage = func() string { return "msg-1" }
+
+	task, err := dispatcher.DispatchToNodeID(context.Background(), validInput(), 20)
+	if err != nil {
+		t.Fatalf("DispatchToNodeID() error = %v", err)
+	}
+	if task.NodeID == nil || *task.NodeID != 20 || store.dispatchedCandidate.SessionID != "sess-2" {
+		t.Fatalf("task=%+v candidate=%+v", task, store.dispatchedCandidate)
+	}
+	if targetSender.sent.Event != protocol.EventTaskDispatch {
+		t.Fatalf("target sender event = %q, want task_dispatch", targetSender.sent.Event)
+	}
+}
+
+func TestDispatcherDispatchToUnavailableNodeID(t *testing.T) {
+	reg := registry.New()
+	if err := reg.Register(validSession("sess-1", 10)); err != nil {
+		t.Fatalf("Register() error = %v", err)
+	}
+	if err := reg.AttachSender("sess-1", &stubSender{}); err != nil {
+		t.Fatalf("AttachSender() error = %v", err)
+	}
+	store := &stubStore{}
+	dispatcher := NewDispatcher(store, reg)
+	dispatcher.newTaskID = func() string { return "task-1" }
+
+	_, err := dispatcher.DispatchToNodeID(context.Background(), validInput(), 99)
+	if !errors.Is(err, ErrNoNodeAvailable) {
+		t.Fatalf("DispatchToNodeID() error = %v, want ErrNoNodeAvailable", err)
+	}
+	if store.failedCode != "NO_NODE_AVAILABLE" {
+		t.Fatalf("failed code = %q", store.failedCode)
+	}
+}
+
 func TestDispatcherNoNodeAvailable(t *testing.T) {
 	store := &stubStore{}
 	dispatcher := NewDispatcher(store, registry.New())

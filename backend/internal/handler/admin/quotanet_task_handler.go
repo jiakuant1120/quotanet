@@ -68,6 +68,7 @@ type quotaNetTaskDispatchRequest struct {
 	APIKeyID       *int64         `json:"api_key_id"`
 	GroupID        *int64         `json:"group_id"`
 	AccountID      *int64         `json:"account_id"`
+	NodeID         *int64         `json:"node_id"`
 	Platform       string         `json:"platform" binding:"required,max=50"`
 	Endpoint       string         `json:"endpoint" binding:"required,max=100"`
 	Model          string         `json:"model" binding:"required,max=100"`
@@ -237,6 +238,7 @@ func quotaNetTaskDispatchInput(c *gin.Context) (tasks.CreateTaskInput, bool) {
 		APIKeyID:       req.APIKeyID,
 		GroupID:        req.GroupID,
 		AccountID:      req.AccountID,
+		NodeID:         req.NodeID,
 		Platform:       strings.TrimSpace(req.Platform),
 		Endpoint:       strings.TrimSpace(req.Endpoint),
 		Model:          strings.TrimSpace(req.Model),

@@ -23,6 +23,7 @@ type CreateTaskInput struct {
 	APIKeyID       *int64
 	GroupID        *int64
 	AccountID      *int64
+	NodeID         *int64
 	Platform       string
 	Endpoint       string
 	Model          string
@@ -114,15 +115,36 @@ func NewDispatcher(store Store, reg *registry.Registry) *Dispatcher {
 }
 
 func (d *Dispatcher) Dispatch(ctx context.Context, input CreateTaskInput) (*Task, error) {
+	if input.NodeID != nil {
+		return d.DispatchToNodeID(ctx, input, *input.NodeID)
+	}
 	return d.DispatchWithTaskID(ctx, input, d.newTaskID())
 }
 
+func (d *Dispatcher) DispatchToNodeID(ctx context.Context, input CreateTaskInput, nodeID int64) (*Task, error) {
+	if nodeID <= 0 {
+		return nil, fmt.Errorf("%w: node_id must be positive", ErrInvalidTaskInput)
+	}
+	return d.dispatch(ctx, input, d.newTaskID(), nodeID)
+}
+
 func (d *Dispatcher) DispatchWithTaskID(ctx context.Context, input CreateTaskInput, taskID string) (*Task, error) {
+	nodeID := int64(0)
+	if input.NodeID != nil {
+		nodeID = *input.NodeID
+	}
+	return d.dispatch(ctx, input, taskID, nodeID)
+}
+
+func (d *Dispatcher) dispatch(ctx context.Context, input CreateTaskInput, taskID string, nodeID int64) (*Task, error) {
 	if err := validateCreateInput(input); err != nil {
 		return nil, err
 	}
 	if d == nil || d.store == nil || d.registry == nil {
 		return nil, ErrInvalidTaskInput
+	}
+	if nodeID <= 0 && input.NodeID != nil {
+		return nil, fmt.Errorf("%w: node_id must be positive", ErrInvalidTaskInput)
 	}
 	taskID = strings.TrimSpace(taskID)
 	if taskID == "" {
@@ -139,7 +161,11 @@ func (d *Dispatcher) DispatchWithTaskID(ctx context.Context, input CreateTaskInp
 		_ = d.store.MarkFailed(ctx, taskID, "NO_NODE_AVAILABLE", ErrNoNodeAvailable.Error(), d.now())
 		return nil, ErrNoNodeAvailable
 	}
-	candidate := candidates[0]
+	candidate, ok := chooseCandidate(candidates, nodeID)
+	if !ok {
+		_ = d.store.MarkFailed(ctx, taskID, "NO_NODE_AVAILABLE", ErrNoNodeAvailable.Error(), d.now())
+		return nil, ErrNoNodeAvailable
+	}
 	if err := d.store.MarkDispatched(ctx, taskID, candidate, d.now()); err != nil {
 		return nil, err
 	}
@@ -176,6 +202,21 @@ func (d *Dispatcher) DispatchWithTaskID(ctx context.Context, input CreateTaskInp
 	return task, nil
 }
 
+func chooseCandidate(candidates []registry.Candidate, nodeID int64) (registry.Candidate, bool) {
+	if len(candidates) == 0 {
+		return registry.Candidate{}, false
+	}
+	if nodeID <= 0 {
+		return candidates[0], true
+	}
+	for _, candidate := range candidates {
+		if candidate.NodeID == nodeID {
+			return candidate, true
+		}
+	}
+	return registry.Candidate{}, false
+}
+
 func (d *Dispatcher) MarkTimedOut(ctx context.Context, taskID string) error {
 	if d == nil || d.store == nil {
 		return ErrInvalidTaskInput
@@ -202,6 +243,9 @@ func validateCreateInput(input CreateTaskInput) error {
 	}
 	if input.TimeoutSeconds < 0 {
 		return fmt.Errorf("%w: timeout_seconds must be non-negative", ErrInvalidTaskInput)
+	}
+	if input.NodeID != nil && *input.NodeID <= 0 {
+		return fmt.Errorf("%w: node_id must be positive", ErrInvalidTaskInput)
 	}
 	return nil
 }

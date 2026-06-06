@@ -32,6 +32,41 @@ func TestServiceDispatchAndWait(t *testing.T) {
 	}
 }
 
+func TestServiceDispatchAndWaitToNodeID(t *testing.T) {
+	reg := registry.New()
+	if err := reg.Register(validSession("sess-1", 10)); err != nil {
+		t.Fatalf("Register(sess-1) error = %v", err)
+	}
+	if err := reg.Register(validSession("sess-2", 20)); err != nil {
+		t.Fatalf("Register(sess-2) error = %v", err)
+	}
+	if err := reg.AttachSender("sess-1", &stubSender{}); err != nil {
+		t.Fatalf("AttachSender(sess-1) error = %v", err)
+	}
+	waiter := NewResponseWaiter()
+	if err := reg.AttachSender("sess-2", &notifyingSender{waiter: waiter}); err != nil {
+		t.Fatalf("AttachSender(sess-2) error = %v", err)
+	}
+	store := &stubStore{}
+	dispatcher := NewDispatcher(store, reg)
+	svc := NewService(dispatcher, waiter)
+	svc.newTaskID = func() string { return "task-1" }
+	nodeID := int64(20)
+	input := validInput()
+	input.NodeID = &nodeID
+
+	result, err := svc.DispatchAndWait(context.Background(), input)
+	if err != nil {
+		t.Fatalf("DispatchAndWait() error = %v", err)
+	}
+	if result.Task.NodeID == nil || *result.Task.NodeID != nodeID {
+		t.Fatalf("task node id = %v, want %d", result.Task.NodeID, nodeID)
+	}
+	if store.dispatchedCandidate.SessionID != "sess-2" {
+		t.Fatalf("candidate = %+v, want sess-2", store.dispatchedCandidate)
+	}
+}
+
 func TestServiceDispatchAndWaitDispatchFailure(t *testing.T) {
 	svc := NewService(NewDispatcher(&stubStore{}, registry.New()), NewResponseWaiter())
 	svc.newTaskID = func() string { return "task-1" }
