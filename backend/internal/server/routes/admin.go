@@ -98,6 +98,9 @@ func RegisterAdminRoutes(
 		// 邀请返利（专属用户管理）
 		registerAffiliateRoutes(admin, h)
 
+		// QuotaNet 管理总览
+		admin.GET("/quotanet/overview", h.Admin.QuotaNetNode.Overview)
+
 		// QuotaNet 节点管理
 		registerQuotaNetNodeRoutes(admin, h)
 

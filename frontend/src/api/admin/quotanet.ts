@@ -139,7 +139,7 @@ export interface QuotaNetTaskListParams {
 }
 
 export async function getNodeOverview(options?: FetchOptions): Promise<QuotaNetNodeOverview> {
-  const { data } = await apiClient.get<QuotaNetNodeOverview>('/admin/quotanet/nodes/overview', {
+  const { data } = await apiClient.get<QuotaNetNodeOverview>('/admin/quotanet/overview', {
     signal: options?.signal
   })
   return data
