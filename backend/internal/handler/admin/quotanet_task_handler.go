@@ -82,6 +82,11 @@ type quotaNetTaskDispatchSyncResponse struct {
 	Response tasksProtocolTaskResponse `json:"response"`
 }
 
+type quotaNetTaskTimeoutSweepRequest struct {
+	OlderThanSeconds int `json:"older_than_seconds" binding:"omitempty,min=1"`
+	Limit            int `json:"limit" binding:"omitempty,min=1,max=500"`
+}
+
 type tasksProtocolTaskResponse struct {
 	TaskID       string         `json:"task_id"`
 	Status       string         `json:"status"`
@@ -150,6 +155,33 @@ func (h *QuotaNetTaskHandler) DispatchSync(c *gin.Context) {
 		Task:     quotaNetTaskToResponse(result.Task),
 		Response: quotaNetTaskResponsePayload(result.Response),
 	})
+}
+
+func (h *QuotaNetTaskHandler) TimeoutSweep(c *gin.Context) {
+	if h == nil || h.store == nil {
+		response.Error(c, http.StatusServiceUnavailable, "quotanet task service is not initialized")
+		return
+	}
+	var req quotaNetTaskTimeoutSweepRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+	if req.OlderThanSeconds <= 0 {
+		req.OlderThanSeconds = 300
+	}
+	now := time.Now().UTC()
+	result, err := h.store.MarkRunningTimedOutBefore(
+		c.Request.Context(),
+		now.Add(-time.Duration(req.OlderThanSeconds)*time.Second),
+		now,
+		req.Limit,
+	)
+	if err != nil {
+		quotaNetTaskError(c, err)
+		return
+	}
+	response.Success(c, result)
 }
 
 func (h *QuotaNetTaskHandler) Get(c *gin.Context) {

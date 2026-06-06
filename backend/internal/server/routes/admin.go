@@ -132,6 +132,7 @@ func registerQuotaNetTaskRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 		tasks.GET("", h.Admin.QuotaNetTask.List)
 		tasks.POST("/dispatch", h.Admin.QuotaNetTask.Dispatch)
 		tasks.POST("/dispatch-sync", h.Admin.QuotaNetTask.DispatchSync)
+		tasks.POST("/timeout-sweep", h.Admin.QuotaNetTask.TimeoutSweep)
 		tasks.GET("/:task_id/events", h.Admin.QuotaNetTask.Events)
 		tasks.GET("/:task_id", h.Admin.QuotaNetTask.Get)
 	}

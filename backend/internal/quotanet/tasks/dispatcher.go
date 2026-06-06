@@ -74,6 +74,11 @@ type StatusCount struct {
 	Count  int64  `json:"count"`
 }
 
+type TimeoutSweepResult struct {
+	Count   int64    `json:"count"`
+	TaskIDs []string `json:"task_ids"`
+}
+
 type ListParams struct {
 	Page      int
 	PageSize  int

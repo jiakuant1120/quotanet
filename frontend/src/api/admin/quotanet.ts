@@ -141,6 +141,16 @@ export interface QuotaNetTaskDispatchSyncResponse {
   }
 }
 
+export interface QuotaNetTaskTimeoutSweepRequest {
+  older_than_seconds?: number
+  limit?: number
+}
+
+export interface QuotaNetTaskTimeoutSweepResponse {
+  count: number
+  task_ids: string[]
+}
+
 export interface QuotaNetTaskListParams {
   page?: number
   page_size?: number
@@ -208,6 +218,11 @@ export async function dispatchTaskSync(req: QuotaNetTaskDispatchRequest): Promis
   return data
 }
 
+export async function timeoutSweep(req: QuotaNetTaskTimeoutSweepRequest): Promise<QuotaNetTaskTimeoutSweepResponse> {
+  const { data } = await apiClient.post<QuotaNetTaskTimeoutSweepResponse>('/admin/quotanet/tasks/timeout-sweep', req)
+  return data
+}
+
 export async function getTaskEvents(taskID: string, options?: FetchOptions): Promise<{ items: QuotaNetTaskEvent[] }> {
   const { data } = await apiClient.get<{ items: QuotaNetTaskEvent[] }>(`/admin/quotanet/tasks/${encodeURIComponent(taskID)}/events`, {
     signal: options?.signal
@@ -225,6 +240,7 @@ const quotanetAPI = {
   listNodeTasks,
   dispatchTask,
   dispatchTaskSync,
+  timeoutSweep,
   getTaskEvents
 }
 

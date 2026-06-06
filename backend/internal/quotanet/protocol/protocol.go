@@ -12,13 +12,14 @@ import (
 const Version = "2026-06-qt1"
 
 const (
-	EventClientHello     = "client_hello"
-	EventClientHeartbeat = "client_heartbeat"
-	EventServerAck       = "server_ack"
-	EventTaskDispatch    = "task_dispatch"
-	EventTaskDelta       = "task_delta"
-	EventTaskResponse    = "task_response"
-	EventTaskCancel      = "task_cancel"
+	EventClientHello      = "client_hello"
+	EventClientHeartbeat  = "client_heartbeat"
+	EventServerAck        = "server_ack"
+	EventTaskDispatch     = "task_dispatch"
+	EventTaskDelta        = "task_delta"
+	EventTaskResponse     = "task_response"
+	EventTaskTimeout      = "task_timeout"
+	EventTaskCancel       = "task_cancel"
 	EventSettlementNotice = "settlement_notice"
 	EventRouterShutdown   = "router_shutdown"
 )
@@ -269,13 +270,13 @@ func (p TaskCancel) Validate() error {
 }
 
 type SettlementNotice struct {
-	ID         string `json:"id"`
-	AmountCXS  string `json:"amountCxs"`
-	TokenFlow  int64  `json:"tokenFlow"`
-	TxHash     string `json:"txHash,omitempty"`
-	Status     string `json:"status"`
-	CreatedAt  string `json:"createdAt,omitempty"`
-	UpdatedAt  string `json:"updatedAt,omitempty"`
+	ID        string `json:"id"`
+	AmountCXS string `json:"amountCxs"`
+	TokenFlow int64  `json:"tokenFlow"`
+	TxHash    string `json:"txHash,omitempty"`
+	Status    string `json:"status"`
+	CreatedAt string `json:"createdAt,omitempty"`
+	UpdatedAt string `json:"updatedAt,omitempty"`
 }
 
 func (p SettlementNotice) Validate() error {

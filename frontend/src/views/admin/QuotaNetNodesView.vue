@@ -141,6 +141,7 @@
               <option value="timeout">Timeout</option>
             </select>
             <button class="btn btn-secondary" :disabled="tasksLoading" @click="loadTasks">Reload Tasks</button>
+            <button class="btn btn-secondary" :disabled="tasksLoading" @click="showTimeoutSweepConfirm = true">Sweep Timeouts</button>
           </div>
         </div>
         <DataTable :columns="taskColumns" :data="tasks" :loading="tasksLoading">
@@ -264,6 +265,17 @@
       @confirm="resetSelectedNodeToken"
       @cancel="showResetTokenConfirm = false"
     />
+
+    <ConfirmDialog
+      :show="showTimeoutSweepConfirm"
+      title="Sweep Running Tasks"
+      message="Mark running QuotaNet tasks dispatched more than 5 minutes ago as timeout? This is useful when a client node disconnected or never returned a response."
+      confirm-text="Sweep"
+      cancel-text="Cancel"
+      :danger="true"
+      @confirm="runTimeoutSweep"
+      @cancel="showTimeoutSweepConfirm = false"
+    />
   </AppLayout>
 </template>
 
@@ -309,6 +321,7 @@ const nodeSubmitting = ref(false)
 const issuedToken = ref('')
 const showResetTokenConfirm = ref(false)
 const resettingNode = ref<QuotaNetNode | null>(null)
+const showTimeoutSweepConfirm = ref(false)
 const taskPagination = reactive({ page: 1, page_size: 20, total: 0 })
 const dispatchForm = reactive({
   nodeID: '',
@@ -521,6 +534,17 @@ async function resetSelectedNodeToken() {
 
 function copyIssuedToken() {
   copyToClipboard(issuedToken.value, 'Node token copied')
+}
+
+async function runTimeoutSweep() {
+  showTimeoutSweepConfirm.value = false
+  try {
+    const res = await adminAPI.quotanet.timeoutSweep({ older_than_seconds: 300, limit: 100 })
+    appStore.showSuccess(`Marked ${res.count} QuotaNet tasks as timeout`)
+    await reload()
+  } catch (err) {
+    appStore.showError(extractApiErrorMessage(err, 'Failed to sweep QuotaNet timeouts'))
+  }
 }
 
 async function submitDispatch() {

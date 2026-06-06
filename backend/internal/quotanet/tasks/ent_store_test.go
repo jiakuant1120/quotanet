@@ -188,6 +188,55 @@ func TestEntStoreTaskResponseReceivedSkipsLedgerForFailure(t *testing.T) {
 	}
 }
 
+func TestEntStoreMarkRunningTimedOutBefore(t *testing.T) {
+	client := newTaskEntClient(t)
+	store := NewEntStore(client)
+	ctx := context.Background()
+
+	if _, err := store.CreateQueued(ctx, validInput(), "old-task"); err != nil {
+		t.Fatalf("CreateQueued(old) error = %v", err)
+	}
+	if _, err := store.CreateQueued(ctx, validInput(), "fresh-task"); err != nil {
+		t.Fatalf("CreateQueued(fresh) error = %v", err)
+	}
+	candidate := registry.Candidate{NodeID: 1, SessionID: "sess-1"}
+	if err := store.MarkDispatched(ctx, "old-task", candidate, time.Unix(100, 0).UTC()); err != nil {
+		t.Fatalf("MarkDispatched(old) error = %v", err)
+	}
+	if err := store.MarkDispatched(ctx, "fresh-task", candidate, time.Unix(300, 0).UTC()); err != nil {
+		t.Fatalf("MarkDispatched(fresh) error = %v", err)
+	}
+
+	result, err := store.MarkRunningTimedOutBefore(ctx, time.Unix(200, 0).UTC(), time.Unix(400, 0).UTC(), 100)
+	if err != nil {
+		t.Fatalf("MarkRunningTimedOutBefore() error = %v", err)
+	}
+	if result.Count != 1 || len(result.TaskIDs) != 1 || result.TaskIDs[0] != "old-task" {
+		t.Fatalf("result = %+v, want old-task only", result)
+	}
+	oldRow, err := client.QuotaNetTask.Query().Where(quotanettask.TaskIDEQ("old-task")).Only(ctx)
+	if err != nil {
+		t.Fatalf("query old task error = %v", err)
+	}
+	if oldRow.Status != protocol.TaskStatusTimeout || oldRow.ErrorCode == nil || *oldRow.ErrorCode != "TIMEOUT_SWEEP" {
+		t.Fatalf("old task = %+v, want timeout", oldRow)
+	}
+	freshRow, err := client.QuotaNetTask.Query().Where(quotanettask.TaskIDEQ("fresh-task")).Only(ctx)
+	if err != nil {
+		t.Fatalf("query fresh task error = %v", err)
+	}
+	if freshRow.Status != protocol.TaskStatusRunning {
+		t.Fatalf("fresh task status = %q, want running", freshRow.Status)
+	}
+	events, err := client.QuotaNetTaskEvent.Query().Where(quotanettaskevent.TaskIDEQ("old-task")).All(ctx)
+	if err != nil {
+		t.Fatalf("query events error = %v", err)
+	}
+	if len(events) != 1 || events[0].EventType != protocol.EventTaskTimeout {
+		t.Fatalf("events = %+v, want one task_timeout event", events)
+	}
+}
+
 func newTaskEntClient(t *testing.T) *dbent.Client {
 	t.Helper()
 

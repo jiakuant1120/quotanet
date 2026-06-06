@@ -176,6 +176,86 @@ func (s *EntStore) MarkFailed(ctx context.Context, taskID, code, message string,
 	return nil
 }
 
+func (s *EntStore) MarkRunningTimedOutBefore(ctx context.Context, cutoff, at time.Time, limit int) (*TimeoutSweepResult, error) {
+	if s == nil || s.client == nil {
+		return nil, ErrTaskNotFound
+	}
+	if cutoff.IsZero() {
+		return nil, ErrInvalidTaskInput
+	}
+	if limit <= 0 {
+		limit = 100
+	}
+	if limit > 500 {
+		limit = 500
+	}
+	tx, err := s.client.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	rows, err := tx.QuotaNetTask.Query().
+		Where(
+			quotanettask.StatusEQ(protocol.TaskStatusRunning),
+			quotanettask.CompletedAtIsNil(),
+			quotanettask.DispatchedAtNotNil(),
+			quotanettask.DispatchedAtLTE(cutoff),
+		).
+		Order(quotanettask.ByDispatchedAt(sql.OrderAsc())).
+		Limit(limit).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result := &TimeoutSweepResult{TaskIDs: make([]string, 0, len(rows))}
+	for _, row := range rows {
+		affected, err := tx.QuotaNetTask.Update().
+			Where(
+				quotanettask.IDEQ(row.ID),
+				quotanettask.StatusEQ(protocol.TaskStatusRunning),
+				quotanettask.CompletedAtIsNil(),
+			).
+			SetStatus(protocol.TaskStatusTimeout).
+			SetErrorCode("TIMEOUT_SWEEP").
+			SetErrorMessage("quotanet task timed out before client response").
+			SetCompletedAt(at).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if affected == 0 {
+			continue
+		}
+		count, err := tx.QuotaNetTaskEvent.Query().
+			Where(quotanettaskevent.TaskIDEQ(row.TaskID)).
+			Count(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if _, err := tx.QuotaNetTaskEvent.Create().
+			SetTaskID(row.TaskID).
+			SetEventType(protocol.EventTaskTimeout).
+			SetSequence(int64(count + 1)).
+			SetPayload(map[string]any{
+				"code":          "TIMEOUT_SWEEP",
+				"message":       "quotanet task timed out before client response",
+				"cutoff":        cutoff.UTC().Format(time.RFC3339),
+				"dispatched_at": row.DispatchedAt,
+			}).
+			SetCreatedAt(at).
+			Save(ctx); err != nil {
+			return nil, err
+		}
+		result.Count++
+		result.TaskIDs = append(result.TaskIDs, row.TaskID)
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 func (s *EntStore) TaskResponseReceived(ctx context.Context, sessionID string, response protocol.TaskResponse, at time.Time) error {
 	if s == nil || s.client == nil {
 		return ErrTaskNotFound
