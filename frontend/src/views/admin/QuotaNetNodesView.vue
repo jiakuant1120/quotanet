@@ -10,6 +10,9 @@
           <button class="btn btn-secondary" :disabled="loading" @click="reload">
             Refresh
           </button>
+          <button class="btn btn-secondary" @click="openCreateNodeDialog">
+            Register Node
+          </button>
           <button class="btn btn-primary" :disabled="!selectedNodeID" @click="openDispatchDialog(selectedNodeID)">
             Dispatch Test
           </button>
@@ -71,23 +74,51 @@
           </DataTable>
         </section>
 
-        <section class="rounded-lg border border-gray-200 bg-white dark:border-dark-700 dark:bg-dark-900">
-          <div class="border-b border-gray-200 p-4 dark:border-dark-700">
-            <h2 class="text-base font-semibold text-gray-900 dark:text-white">Providers</h2>
-            <p class="text-sm text-gray-500 dark:text-dark-300">Available capability summary from connected nodes</p>
-          </div>
-          <div class="space-y-3 p-4">
-            <div v-if="providers.length === 0" class="text-sm text-gray-500 dark:text-dark-300">No provider capability reported.</div>
-            <div v-for="provider in providers" :key="provider.provider" class="rounded-md border border-gray-200 p-3 dark:border-dark-700">
-              <div class="font-medium text-gray-900 dark:text-white">{{ provider.provider }}</div>
-              <div class="mt-2 flex flex-wrap gap-1.5">
-                <span v-for="model in provider.models" :key="model" class="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700 dark:bg-dark-800 dark:text-dark-200">
-                  {{ model }}
-                </span>
+        <div class="space-y-6">
+          <section class="rounded-lg border border-gray-200 bg-white dark:border-dark-700 dark:bg-dark-900">
+            <div class="flex items-center justify-between gap-3 border-b border-gray-200 p-4 dark:border-dark-700">
+              <div>
+                <h2 class="text-base font-semibold text-gray-900 dark:text-white">Registered Nodes</h2>
+                <p class="text-sm text-gray-500 dark:text-dark-300">{{ nodes.length }} records in database</p>
               </div>
             </div>
-          </div>
-        </section>
+            <div class="max-h-[360px] space-y-3 overflow-auto p-4">
+              <div v-if="nodes.length === 0" class="text-sm text-gray-500 dark:text-dark-300">No nodes registered.</div>
+              <div v-for="node in nodes" :key="node.id" class="rounded-md border border-gray-200 p-3 dark:border-dark-700">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="font-medium text-gray-900 dark:text-white">#{{ node.id }} {{ node.name }}</div>
+                    <div class="mt-1 truncate text-xs text-gray-500 dark:text-dark-400">{{ node.node_key }}</div>
+                    <div class="mt-1 truncate text-xs text-gray-500 dark:text-dark-400">{{ node.wallet_address }}</div>
+                  </div>
+                  <span :class="statusBadgeClass(node.status)">{{ node.status }}</span>
+                </div>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <button class="btn btn-secondary btn-sm" @click="selectNode(node.id)">Tasks</button>
+                  <button class="btn btn-secondary btn-sm" @click="confirmResetToken(node)">Reset Token</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="rounded-lg border border-gray-200 bg-white dark:border-dark-700 dark:bg-dark-900">
+            <div class="border-b border-gray-200 p-4 dark:border-dark-700">
+              <h2 class="text-base font-semibold text-gray-900 dark:text-white">Providers</h2>
+              <p class="text-sm text-gray-500 dark:text-dark-300">Available capability summary from connected nodes</p>
+            </div>
+            <div class="space-y-3 p-4">
+              <div v-if="providers.length === 0" class="text-sm text-gray-500 dark:text-dark-300">No provider capability reported.</div>
+              <div v-for="provider in providers" :key="provider.provider" class="rounded-md border border-gray-200 p-3 dark:border-dark-700">
+                <div class="font-medium text-gray-900 dark:text-white">{{ provider.provider }}</div>
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                  <span v-for="model in provider.models" :key="model" class="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700 dark:bg-dark-800 dark:text-dark-200">
+                    {{ model }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
 
       <section class="rounded-lg border border-gray-200 bg-white dark:border-dark-700 dark:bg-dark-900">
@@ -176,6 +207,30 @@
       </template>
     </BaseDialog>
 
+    <BaseDialog :show="showNodeDialog" title="Register QuotaNet Node" width="normal" @close="closeNodeDialog">
+      <div v-if="!issuedToken" class="space-y-4">
+        <Input v-model="nodeForm.name" label="Node Name" required />
+        <Input v-model="nodeForm.walletAddress" label="Wallet Address" required />
+        <Input v-model="nodeForm.ownerUserID" label="Owner User ID" type="number" />
+        <select v-model="nodeForm.status" class="input w-full">
+          <option value="active">Active</option>
+          <option value="pending">Pending</option>
+          <option value="disabled">Disabled</option>
+        </select>
+      </div>
+      <div v-if="issuedToken" class="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
+        <div class="text-sm font-medium text-amber-900 dark:text-amber-100">Node token is shown once.</div>
+        <pre class="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-all text-xs text-amber-900 dark:text-amber-100">{{ issuedToken }}</pre>
+        <button class="btn btn-secondary btn-sm mt-3" @click="copyIssuedToken">Copy Token</button>
+      </div>
+      <template #footer>
+        <button class="btn btn-secondary" @click="closeNodeDialog">Close</button>
+        <button v-if="!issuedToken" class="btn btn-primary" :disabled="nodeSubmitting" @click="submitCreateNode">
+          {{ nodeSubmitting ? 'Creating...' : 'Create Node' }}
+        </button>
+      </template>
+    </BaseDialog>
+
     <BaseDialog :show="showEventsDialog" title="QuotaNet Task Events" width="wide" @close="showEventsDialog = false">
       <div v-if="selectedTask" class="mb-4 rounded-md border border-gray-200 bg-gray-50 p-3 text-sm dark:border-dark-700 dark:bg-dark-800">
         <div class="font-medium text-gray-900 dark:text-white">{{ selectedTask.task_id }}</div>
@@ -198,6 +253,17 @@
         <button class="btn btn-secondary" @click="showEventsDialog = false">Close</button>
       </template>
     </BaseDialog>
+
+    <ConfirmDialog
+      :show="showResetTokenConfirm"
+      title="Reset Node Token"
+      :message="resetTokenMessage"
+      confirm-text="Reset Token"
+      cancel-text="Cancel"
+      :danger="true"
+      @confirm="resetSelectedNodeToken"
+      @cancel="showResetTokenConfirm = false"
+    />
   </AppLayout>
 </template>
 
@@ -207,9 +273,11 @@ import { useAppStore } from '@/stores/app'
 import { adminAPI } from '@/api/admin'
 import type { QuotaNetCapability, QuotaNetNode, QuotaNetNodeOverview, QuotaNetSession, QuotaNetTask, QuotaNetTaskDispatchRequest, QuotaNetTaskEvent } from '@/api/admin/quotanet'
 import type { Column } from '@/components/common/types'
+import { useClipboard } from '@/composables/useClipboard'
 import { extractApiErrorMessage } from '@/utils/apiError'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import BaseDialog from '@/components/common/BaseDialog.vue'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import Input from '@/components/common/Input.vue'
@@ -217,6 +285,7 @@ import Pagination from '@/components/common/Pagination.vue'
 import TextArea from '@/components/common/TextArea.vue'
 
 const appStore = useAppStore()
+const { copyToClipboard } = useClipboard()
 
 const loading = ref(false)
 const tasksLoading = ref(false)
@@ -235,6 +304,11 @@ const showEventsDialog = ref(false)
 const eventsLoading = ref(false)
 const selectedTask = ref<QuotaNetTask | null>(null)
 const taskEvents = ref<QuotaNetTaskEvent[]>([])
+const showNodeDialog = ref(false)
+const nodeSubmitting = ref(false)
+const issuedToken = ref('')
+const showResetTokenConfirm = ref(false)
+const resettingNode = ref<QuotaNetNode | null>(null)
 const taskPagination = reactive({ page: 1, page_size: 20, total: 0 })
 const dispatchForm = reactive({
   nodeID: '',
@@ -244,6 +318,12 @@ const dispatchForm = reactive({
   timeoutSeconds: '60',
   sync: true,
   payloadText: JSON.stringify({ messages: [{ role: 'user', content: 'ping' }] }, null, 2)
+})
+const nodeForm = reactive({
+  name: '',
+  walletAddress: '',
+  ownerUserID: '',
+  status: 'active'
 })
 
 const selectedNodeID = computed(() => {
@@ -284,6 +364,12 @@ const overviewCards = computed(() => {
 const filteredSessions = computed(() => {
   if (!statusFilter.value) return sessions.value
   return sessions.value.filter((item) => (item.status || 'ready') === statusFilter.value)
+})
+const resetTokenMessage = computed(() => {
+  const node = resettingNode.value
+  return node
+    ? `Reset token for node #${node.id} ${node.name}? Existing clients using the old token will no longer be able to reconnect.`
+    : 'Reset this node token?'
 })
 
 const sessionColumns: Column[] = [
@@ -370,6 +456,71 @@ function openDispatchDialog(nodeID: number | null) {
 function closeDispatchDialog() {
   if (dispatching.value) return
   showDispatchDialog.value = false
+}
+
+function openCreateNodeDialog() {
+  nodeForm.name = ''
+  nodeForm.walletAddress = ''
+  nodeForm.ownerUserID = ''
+  nodeForm.status = 'active'
+  issuedToken.value = ''
+  showNodeDialog.value = true
+}
+
+function closeNodeDialog() {
+  if (nodeSubmitting.value) return
+  showNodeDialog.value = false
+  issuedToken.value = ''
+}
+
+async function submitCreateNode() {
+  nodeSubmitting.value = true
+  try {
+    const ownerID = Number(nodeForm.ownerUserID)
+    const res = await adminAPI.quotanet.createNode({
+      name: nodeForm.name.trim(),
+      wallet_address: nodeForm.walletAddress.trim(),
+      owner_user_id: Number.isFinite(ownerID) && ownerID > 0 ? ownerID : undefined,
+      status: nodeForm.status
+    })
+    issuedToken.value = res.token
+    appStore.showSuccess('QuotaNet node created')
+    await reload()
+  } catch (err) {
+    appStore.showError(extractApiErrorMessage(err, 'Failed to create QuotaNet node'))
+  } finally {
+    nodeSubmitting.value = false
+  }
+}
+
+function confirmResetToken(node: QuotaNetNode) {
+  resettingNode.value = node
+  showResetTokenConfirm.value = true
+}
+
+async function resetSelectedNodeToken() {
+  const node = resettingNode.value
+  if (!node) return
+  showResetTokenConfirm.value = false
+  try {
+    const res = await adminAPI.quotanet.resetNodeToken(node.id)
+    nodeForm.name = node.name
+    nodeForm.walletAddress = node.wallet_address
+    nodeForm.ownerUserID = node.owner_user_id ? String(node.owner_user_id) : ''
+    nodeForm.status = node.status
+    issuedToken.value = res.token
+    showNodeDialog.value = true
+    appStore.showSuccess('QuotaNet node token reset')
+    await reload()
+  } catch (err) {
+    appStore.showError(extractApiErrorMessage(err, 'Failed to reset QuotaNet node token'))
+  } finally {
+    resettingNode.value = null
+  }
+}
+
+function copyIssuedToken() {
+  copyToClipboard(issuedToken.value, 'Node token copied')
 }
 
 async function submitDispatch() {

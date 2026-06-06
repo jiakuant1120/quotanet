@@ -19,6 +19,18 @@ export interface QuotaNetNode {
   last_seen_at?: string | null
 }
 
+export interface CreateQuotaNetNodeRequest {
+  name: string
+  wallet_address: string
+  owner_user_id?: number | null
+  status?: string
+}
+
+export interface QuotaNetNodeTokenResponse {
+  node: QuotaNetNode
+  token: string
+}
+
 export interface QuotaNetSession {
   session_id: string
   node_id: number
@@ -153,6 +165,16 @@ export async function listNodes(params?: { page?: number; page_size?: number; st
   return data
 }
 
+export async function createNode(req: CreateQuotaNetNodeRequest): Promise<QuotaNetNodeTokenResponse> {
+  const { data } = await apiClient.post<QuotaNetNodeTokenResponse>('/admin/quotanet/nodes', req)
+  return data
+}
+
+export async function resetNodeToken(nodeID: number): Promise<QuotaNetNodeTokenResponse> {
+  const { data } = await apiClient.post<QuotaNetNodeTokenResponse>(`/admin/quotanet/nodes/${nodeID}/reset-token`)
+  return data
+}
+
 export async function listSessions(options?: FetchOptions): Promise<{ items: QuotaNetSession[] }> {
   const { data } = await apiClient.get<{ items: QuotaNetSession[] }>('/admin/quotanet/nodes/sessions', {
     signal: options?.signal
@@ -196,6 +218,8 @@ export async function getTaskEvents(taskID: string, options?: FetchOptions): Pro
 const quotanetAPI = {
   getNodeOverview,
   listNodes,
+  createNode,
+  resetNodeToken,
   listSessions,
   listTasks,
   listNodeTasks,
