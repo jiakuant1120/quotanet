@@ -304,6 +304,14 @@ func quotaNetNodeToResponse(node *nodes.Node) *quotaNetNodeResponse {
 }
 
 func quotaNetSessionToResponse(session registry.Session) *quotaNetNodeSessionResponse {
+	capabilities := session.Capabilities
+	if capabilities == nil {
+		capabilities = []protocol.Capability{}
+	}
+	accounts := session.Accounts
+	if accounts == nil {
+		accounts = []protocol.AccountHeartbeat{}
+	}
 	resp := &quotaNetNodeSessionResponse{
 		SessionID:          session.SessionID,
 		NodeID:             session.NodeID,
@@ -312,13 +320,13 @@ func quotaNetSessionToResponse(session registry.Session) *quotaNetNodeSessionRes
 		WalletAddress:      session.WalletAddress,
 		ClientVersion:      session.ClientVersion,
 		ProtocolVersion:    session.ProtocolVersion,
-		Capabilities:       session.Capabilities,
+		Capabilities:       capabilities,
 		Status:             session.Status,
 		CurrentConcurrency: session.CurrentConcurrency,
 		MaxConcurrency:     session.MaxConcurrency,
 		QueueSize:          session.QueueSize,
 		MaxQueueSize:       session.MaxQueueSize,
-		Accounts:           session.Accounts,
+		Accounts:           accounts,
 		ConnectedAt:        formatQuotaNetTime(session.ConnectedAt),
 		LastHeartbeatAt:    formatQuotaNetTime(session.LastHeartbeatAt),
 		CloseReason:        session.CloseReason,

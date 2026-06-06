@@ -31,8 +31,8 @@
         <section class="rounded-lg border border-gray-200 bg-white dark:border-dark-700 dark:bg-dark-900">
           <div class="flex flex-col gap-3 border-b border-gray-200 p-4 dark:border-dark-700 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 class="text-base font-semibold text-gray-900 dark:text-white">Online Sessions</h2>
-              <p class="text-sm text-gray-500 dark:text-dark-300">{{ sessions.length }} sessions reported by registry</p>
+              <h2 class="text-base font-semibold text-gray-900 dark:text-white">Node Sessions</h2>
+              <p class="text-sm text-gray-500 dark:text-dark-300">{{ sessions.length }} active or recent sessions reported by registry</p>
             </div>
             <select v-model="statusFilter" class="input w-full sm:w-40">
               <option value="">All statuses</option>
@@ -614,7 +614,8 @@ function nodeName(nodeID: number): string {
   return nodes.value.find((node) => node.id === nodeID)?.name || ''
 }
 
-function capabilitySummary(capabilities: QuotaNetCapability[] = []): string {
+function capabilitySummary(capabilities?: QuotaNetCapability[] | null): string {
+  if (!Array.isArray(capabilities)) return '-'
   if (!capabilities.length) return '-'
   return capabilities.map((item) => `${item.provider}: ${(item.models || []).join(', ')}`).join(' / ')
 }
