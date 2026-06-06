@@ -89,6 +89,55 @@ func TestRegistryHeartbeatAndUnregister(t *testing.T) {
 	}
 }
 
+func TestRegistryHeartbeatPreservesCapabilitiesWhenOmitted(t *testing.T) {
+	reg := New()
+	if err := reg.Register(validSession("sess-1", 1, 3)); err != nil {
+		t.Fatalf("Register() error = %v", err)
+	}
+
+	err := reg.UpdateHeartbeat("sess-1", protocol.ClientHeartbeat{
+		WalletAddress:      "wallet-sess-1",
+		Status:             protocol.NodeStatusReady,
+		CurrentConcurrency: 0,
+		MaxConcurrency:     3,
+	})
+	if err != nil {
+		t.Fatalf("UpdateHeartbeat() error = %v", err)
+	}
+	session, _ := reg.Get("sess-1")
+	if len(session.Capabilities) != 1 || len(session.Capabilities[0].Models) != 2 {
+		t.Fatalf("capabilities should be preserved when omitted: %+v", session.Capabilities)
+	}
+	if candidates := reg.Candidates("openai", "gpt-4.1", time.Minute); len(candidates) != 1 {
+		t.Fatalf("Candidates(gpt-4.1) = %+v, want preserved capability", candidates)
+	}
+}
+
+func TestRegistryHeartbeatClearsCapabilitiesWhenExplicitlyEmpty(t *testing.T) {
+	reg := New()
+	if err := reg.Register(validSession("sess-1", 1, 3)); err != nil {
+		t.Fatalf("Register() error = %v", err)
+	}
+
+	err := reg.UpdateHeartbeat("sess-1", protocol.ClientHeartbeat{
+		WalletAddress:      "wallet-sess-1",
+		Status:             protocol.NodeStatusReady,
+		CurrentConcurrency: 0,
+		MaxConcurrency:     3,
+		Capabilities:       []protocol.Capability{},
+	})
+	if err != nil {
+		t.Fatalf("UpdateHeartbeat() error = %v", err)
+	}
+	session, _ := reg.Get("sess-1")
+	if len(session.Capabilities) != 0 {
+		t.Fatalf("capabilities should be cleared when explicitly empty: %+v", session.Capabilities)
+	}
+	if candidates := reg.Candidates("openai", "gpt-4.1", time.Minute); len(candidates) != 0 {
+		t.Fatalf("Candidates(gpt-4.1) = %+v, want none", candidates)
+	}
+}
+
 func TestRegistryCandidatesFilterAndSort(t *testing.T) {
 	reg := New()
 	now := time.Date(2026, 6, 5, 10, 0, 0, 0, time.UTC)

@@ -163,7 +163,9 @@ func (r *Registry) UpdateHeartbeat(sessionID string, heartbeat protocol.ClientHe
 	session.MaxConcurrency = heartbeat.MaxConcurrency
 	session.QueueSize = heartbeat.QueueSize
 	session.MaxQueueSize = heartbeat.MaxQueueSize
-	session.Capabilities = normalizeCapabilities(heartbeat.Capabilities)
+	if heartbeat.Capabilities != nil {
+		session.Capabilities = normalizeCapabilities(heartbeat.Capabilities)
+	}
 	session.Accounts = normalizeAccountHeartbeats(heartbeat.Accounts)
 	session.LastHeartbeatAt = r.currentTime()
 	session.DisconnectedAt = nil
