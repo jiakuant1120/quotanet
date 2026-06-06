@@ -41,7 +41,7 @@
               <option value="offline">Offline</option>
             </select>
           </div>
-          <DataTable :columns="sessionColumns" :data="filteredSessions" :loading="loading">
+          <DataTable :columns="sessionColumns" :data="filteredSessions" :loading="loading" :virtualized="false">
             <template #cell-status="{ row }">
               <span :class="statusBadgeClass(row.status)">{{ row.status || 'ready' }}</span>
             </template>
@@ -144,7 +144,7 @@
             <button class="btn btn-secondary" :disabled="tasksLoading" @click="showTimeoutSweepConfirm = true">Sweep Timeouts</button>
           </div>
         </div>
-        <DataTable :columns="taskColumns" :data="tasks" :loading="tasksLoading">
+        <DataTable :columns="taskColumns" :data="tasks" :loading="tasksLoading" :virtualized="false">
           <template #cell-task="{ row }">
             <div>
               <p class="font-medium text-gray-900 dark:text-white">{{ row.task_id }}</p>

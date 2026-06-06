@@ -361,6 +361,8 @@ interface Props {
   estimateRowHeight?: number
   /** Number of rows to render beyond the visible area (default 5) */
   overscan?: number
+  /** Disable desktop virtual rows for short tables rendered in auto-height panels */
+  virtualized?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -369,7 +371,8 @@ const props = withDefaults(defineProps<Props>(), {
   stickyActionsColumn: true,
   expandableActions: true,
   defaultSortOrder: 'asc',
-  serverSideSort: false
+  serverSideSort: false,
+  virtualized: true
 })
 
 const sortKey = ref<string>('')
@@ -574,27 +577,34 @@ const sortedData = computed(() => {
 
 // --- Virtual scrolling ---
 const rowVirtualizer = useVirtualizer(computed(() => ({
-  count: isDesktopViewport.value ? (sortedData.value?.length ?? 0) : 0,
+  count: isDesktopViewport.value && props.virtualized ? (sortedData.value?.length ?? 0) : 0,
   getScrollElement: () => tableWrapperRef.value,
   estimateSize: () => props.estimateRowHeight ?? 56,
   overscan: props.overscan ?? 5,
 })))
 
-const virtualItems = computed(() => rowVirtualizer.value.getVirtualItems())
+const virtualItems = computed(() => {
+  if (props.virtualized) {
+    return rowVirtualizer.value.getVirtualItems()
+  }
+  return (sortedData.value ?? []).map((_, index) => ({ index, start: 0, end: 0 }))
+})
 
 const virtualPaddingTop = computed(() => {
+  if (!props.virtualized) return 0
   const items = virtualItems.value
   return items.length > 0 ? items[0].start : 0
 })
 
 const virtualPaddingBottom = computed(() => {
+  if (!props.virtualized) return 0
   const items = virtualItems.value
   if (items.length === 0) return 0
   return rowVirtualizer.value.getTotalSize() - items[items.length - 1].end
 })
 
 const measureElement = (el: any) => {
-  if (el) {
+  if (el && props.virtualized) {
     rowVirtualizer.value.measureElement(el as Element)
   }
 }
