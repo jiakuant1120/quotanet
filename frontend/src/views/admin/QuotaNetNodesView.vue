@@ -131,6 +131,9 @@
           <template #cell-created_at="{ value }">
             <span>{{ formatTime(value) }}</span>
           </template>
+          <template #cell-actions="{ row }">
+            <button class="btn btn-secondary btn-sm" @click="openTaskEvents(row)">Events</button>
+          </template>
           <template #empty>
             <EmptyState title="No tasks" description="No tasks match the current filter." />
           </template>
@@ -172,6 +175,29 @@
         </button>
       </template>
     </BaseDialog>
+
+    <BaseDialog :show="showEventsDialog" title="QuotaNet Task Events" width="wide" @close="showEventsDialog = false">
+      <div v-if="selectedTask" class="mb-4 rounded-md border border-gray-200 bg-gray-50 p-3 text-sm dark:border-dark-700 dark:bg-dark-800">
+        <div class="font-medium text-gray-900 dark:text-white">{{ selectedTask.task_id }}</div>
+        <div class="mt-1 text-gray-500 dark:text-dark-300">
+          node {{ selectedTask.node_id ? `#${selectedTask.node_id}` : '-' }} / {{ selectedTask.platform }} / {{ selectedTask.model }} / {{ selectedTask.status }}
+        </div>
+      </div>
+      <div v-if="eventsLoading" class="py-8 text-center text-sm text-gray-500 dark:text-dark-300">Loading events...</div>
+      <div v-else-if="taskEvents.length === 0" class="py-8 text-center text-sm text-gray-500 dark:text-dark-300">No events recorded for this task.</div>
+      <div v-else class="space-y-3">
+        <div v-for="event in taskEvents" :key="event.id" class="rounded-md border border-gray-200 p-3 dark:border-dark-700">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="font-medium text-gray-900 dark:text-white">#{{ event.sequence }} {{ event.event_type }}</div>
+            <div class="text-xs text-gray-500 dark:text-dark-400">{{ formatTime(event.created_at) }}</div>
+          </div>
+          <pre class="mt-3 max-h-64 overflow-auto rounded bg-gray-50 p-3 text-xs text-gray-800 dark:bg-dark-800 dark:text-dark-100">{{ formatJSON(event.payload) }}</pre>
+        </div>
+      </div>
+      <template #footer>
+        <button class="btn btn-secondary" @click="showEventsDialog = false">Close</button>
+      </template>
+    </BaseDialog>
   </AppLayout>
 </template>
 
@@ -179,7 +205,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { adminAPI } from '@/api/admin'
-import type { QuotaNetCapability, QuotaNetNode, QuotaNetNodeOverview, QuotaNetSession, QuotaNetTask, QuotaNetTaskDispatchRequest } from '@/api/admin/quotanet'
+import type { QuotaNetCapability, QuotaNetNode, QuotaNetNodeOverview, QuotaNetSession, QuotaNetTask, QuotaNetTaskDispatchRequest, QuotaNetTaskEvent } from '@/api/admin/quotanet'
 import type { Column } from '@/components/common/types'
 import { extractApiErrorMessage } from '@/utils/apiError'
 import AppLayout from '@/components/layout/AppLayout.vue'
@@ -205,6 +231,10 @@ const showDispatchDialog = ref(false)
 const dispatching = ref(false)
 const dispatchResult = ref('')
 const payloadError = ref('')
+const showEventsDialog = ref(false)
+const eventsLoading = ref(false)
+const selectedTask = ref<QuotaNetTask | null>(null)
+const taskEvents = ref<QuotaNetTaskEvent[]>([])
 const taskPagination = reactive({ page: 1, page_size: 20, total: 0 })
 const dispatchForm = reactive({
   nodeID: '',
@@ -274,6 +304,7 @@ const taskColumns: Column[] = [
   { key: 'status', label: 'Status' },
   { key: 'error', label: 'Error' },
   { key: 'created_at', label: 'Created' },
+  { key: 'actions', label: 'Actions' },
 ]
 
 async function reload() {
@@ -378,6 +409,21 @@ function onTaskPageChange(page: number) {
   loadTasks()
 }
 
+async function openTaskEvents(task: QuotaNetTask) {
+  selectedTask.value = task
+  taskEvents.value = []
+  showEventsDialog.value = true
+  eventsLoading.value = true
+  try {
+    const res = await adminAPI.quotanet.getTaskEvents(task.task_id)
+    taskEvents.value = res.items || []
+  } catch (err) {
+    appStore.showError(extractApiErrorMessage(err, 'Failed to load QuotaNet task events'))
+  } finally {
+    eventsLoading.value = false
+  }
+}
+
 function resetAndLoadTasks() {
   taskPagination.page = 1
   loadTasks()
@@ -403,6 +449,14 @@ function formatTime(value?: string | null): string {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
   return date.toLocaleString()
+}
+
+function formatJSON(value: unknown): string {
+  try {
+    return JSON.stringify(value ?? {}, null, 2)
+  } catch {
+    return String(value)
+  }
 }
 
 function statusBadgeClass(status?: string): string {
