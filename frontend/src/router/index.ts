@@ -402,6 +402,17 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/admin/quotanet/nodes',
+    name: 'AdminQuotaNetNodes',
+    component: () => import('@/views/admin/QuotaNetNodesView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'QuotaNet Nodes',
+      titleKey: 'nav.quotaNetNodes'
+    }
+  },
+  {
     path: '/admin/users',
     name: 'AdminUsers',
     component: () => import('@/views/admin/UsersView.vue'),
