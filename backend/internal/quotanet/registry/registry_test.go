@@ -54,6 +54,10 @@ func TestRegistryHeartbeatAndUnregister(t *testing.T) {
 		MaxConcurrency:     3,
 		QueueSize:          1,
 		MaxQueueSize:       10,
+		Capabilities: []protocol.Capability{
+			{Provider: " openai ", Models: []string{" gpt-5 ", ""}, MaxConcurrency: 3},
+			{Provider: "", Models: []string{"ignored"}},
+		},
 		Accounts: []protocol.AccountHeartbeat{
 			{Provider: " openai ", Status: " ready ", CurrentConcurrency: 1, MaxConcurrency: 3, Models: []string{" gpt-4.1 ", ""}},
 			{Provider: "", Status: "ready", Models: []string{"ignored"}},
@@ -65,6 +69,12 @@ func TestRegistryHeartbeatAndUnregister(t *testing.T) {
 	session, _ := reg.Get("sess-1")
 	if session.WalletAddress != "wallet-new" || session.CurrentConcurrency != 2 || session.QueueSize != 1 {
 		t.Fatalf("heartbeat not applied: %+v", session)
+	}
+	if len(session.Capabilities) != 1 || session.Capabilities[0].Provider != "openai" || session.Capabilities[0].Models[0] != "gpt-5" {
+		t.Fatalf("capabilities not normalized: %+v", session.Capabilities)
+	}
+	if candidates := reg.Candidates("openai", "gpt-5", time.Minute); len(candidates) != 1 {
+		t.Fatalf("Candidates(gpt-5) = %+v, want updated heartbeat capability", candidates)
 	}
 	if len(session.Accounts) != 1 || session.Accounts[0].Provider != "openai" || session.Accounts[0].Status != "ready" || session.Accounts[0].Models[0] != "gpt-4.1" {
 		t.Fatalf("account heartbeats not normalized: %+v", session.Accounts)

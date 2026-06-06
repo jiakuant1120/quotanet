@@ -137,6 +137,7 @@ type ClientHeartbeat struct {
 	MaxConcurrency     int                `json:"max_concurrency"`
 	QueueSize          int                `json:"queue_size,omitempty"`
 	MaxQueueSize       int                `json:"max_queue_size,omitempty"`
+	Capabilities       []Capability       `json:"capabilities,omitempty"`
 	Accounts           []AccountHeartbeat `json:"accounts,omitempty"`
 }
 

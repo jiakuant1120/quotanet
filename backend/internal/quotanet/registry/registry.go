@@ -163,6 +163,7 @@ func (r *Registry) UpdateHeartbeat(sessionID string, heartbeat protocol.ClientHe
 	session.MaxConcurrency = heartbeat.MaxConcurrency
 	session.QueueSize = heartbeat.QueueSize
 	session.MaxQueueSize = heartbeat.MaxQueueSize
+	session.Capabilities = normalizeCapabilities(heartbeat.Capabilities)
 	session.Accounts = normalizeAccountHeartbeats(heartbeat.Accounts)
 	session.LastHeartbeatAt = r.currentTime()
 	session.DisconnectedAt = nil
@@ -367,6 +368,29 @@ func cloneSession(session Session) Session {
 		session.DisconnectedAt = &disconnectedAt
 	}
 	return session
+}
+
+func normalizeCapabilities(capabilities []protocol.Capability) []protocol.Capability {
+	out := make([]protocol.Capability, 0, len(capabilities))
+	for _, cap := range capabilities {
+		cap.Provider = strings.TrimSpace(cap.Provider)
+		if cap.Provider == "" {
+			continue
+		}
+		models := make([]string, 0, len(cap.Models))
+		for _, model := range cap.Models {
+			model = strings.TrimSpace(model)
+			if model != "" {
+				models = append(models, model)
+			}
+		}
+		cap.Models = models
+		if cap.MaxConcurrency < 0 {
+			cap.MaxConcurrency = 0
+		}
+		out = append(out, cap)
+	}
+	return out
 }
 
 func normalizeAccountHeartbeats(accounts []protocol.AccountHeartbeat) []protocol.AccountHeartbeat {
