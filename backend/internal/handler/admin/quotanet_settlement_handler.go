@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strconv"
@@ -8,46 +9,59 @@ import (
 	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/pkg/response"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
+	"github.com/Wei-Shaw/sub2api/internal/quotanet/registry"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/settlements"
 
 	"github.com/gin-gonic/gin"
 )
 
 type QuotaNetSettlementHandler struct {
-	store *settlements.Store
+	store    *settlements.Store
+	registry *registry.Registry
 }
 
-func NewQuotaNetSettlementHandler(store *settlements.Store) *QuotaNetSettlementHandler {
-	return &QuotaNetSettlementHandler{store: store}
+func NewQuotaNetSettlementHandler(store *settlements.Store, regs ...*registry.Registry) *QuotaNetSettlementHandler {
+	var reg *registry.Registry
+	if len(regs) > 0 {
+		reg = regs[0]
+	}
+	return &QuotaNetSettlementHandler{store: store, registry: reg}
 }
 
 type quotaNetContributionLedgerResponse struct {
-	ID            int64   `json:"id"`
-	TaskID        string  `json:"task_id"`
-	UsageLogID    *int64  `json:"usage_log_id,omitempty"`
-	NodeID        int64   `json:"node_id"`
-	WalletAddress string  `json:"wallet_address"`
-	AccountID     *int64  `json:"account_id,omitempty"`
-	Platform      string  `json:"platform"`
-	Model         string  `json:"model"`
-	TokenFlow     int64   `json:"token_flow"`
-	AmountCxs     float64 `json:"amount_cxs"`
-	Rate          float64 `json:"rate"`
-	Status        string  `json:"status"`
-	PayoutBatchID *int64  `json:"payout_batch_id,omitempty"`
-	SettledAt     *string `json:"settled_at,omitempty"`
-	CreatedAt     string  `json:"created_at,omitempty"`
-	UpdatedAt     string  `json:"updated_at,omitempty"`
+	ID              int64   `json:"id"`
+	TaskID          string  `json:"task_id"`
+	UsageLogID      *int64  `json:"usage_log_id,omitempty"`
+	NodeID          int64   `json:"node_id"`
+	WalletAddress   string  `json:"wallet_address"`
+	AccountID       *int64  `json:"account_id,omitempty"`
+	Platform        string  `json:"platform"`
+	Model           string  `json:"model"`
+	TokenFlow       int64   `json:"token_flow"`
+	StandardCostUSD float64 `json:"standard_cost_usd"`
+	ActualCostUSD   float64 `json:"actual_cost_usd"`
+	ContributionUSD float64 `json:"contribution_usd"`
+	AmountCxs       float64 `json:"amount_cxs"`
+	Rate            float64 `json:"rate"`
+	Status          string  `json:"status"`
+	PayoutBatchID   *int64  `json:"payout_batch_id,omitempty"`
+	SettledAt       *string `json:"settled_at,omitempty"`
+	CreatedAt       string  `json:"created_at,omitempty"`
+	UpdatedAt       string  `json:"updated_at,omitempty"`
 }
 
 type quotaNetPayoutBatchCreateRequest struct {
-	BatchKey    string  `json:"batch_key"`
-	WindowStart string  `json:"window_start" binding:"required"`
-	WindowEnd   string  `json:"window_end" binding:"required"`
-	Network     string  `json:"network"`
-	Rate        float64 `json:"rate" binding:"omitempty,min=0"`
-	CreatedBy   *int64  `json:"created_by"`
-	ApprovedBy  *int64  `json:"approved_by"`
+	BatchKey    string `json:"batch_key"`
+	WindowStart string `json:"window_start" binding:"required"`
+	WindowEnd   string `json:"window_end" binding:"required"`
+	Network     string `json:"network"`
+	CreatedBy   *int64 `json:"created_by"`
+	ApprovedBy  *int64 `json:"approved_by"`
+}
+
+type quotaNetSettlementConfigRequest struct {
+	Network string `json:"network"`
 }
 
 type quotaNetPayoutItemStatusRequest struct {
@@ -57,43 +71,78 @@ type quotaNetPayoutItemStatusRequest struct {
 }
 
 type quotaNetPayoutBatchResponse struct {
-	ID             int64   `json:"id"`
-	BatchKey       string  `json:"batch_key"`
-	WindowStart    string  `json:"window_start,omitempty"`
-	WindowEnd      string  `json:"window_end,omitempty"`
-	Status         string  `json:"status"`
-	Network        string  `json:"network"`
-	TotalTokenFlow int64   `json:"total_token_flow"`
-	TotalAmountCxs float64 `json:"total_amount_cxs"`
-	ItemCount      int     `json:"item_count"`
-	CreatedBy      *int64  `json:"created_by,omitempty"`
-	ApprovedBy     *int64  `json:"approved_by,omitempty"`
-	CreatedAt      string  `json:"created_at,omitempty"`
-	UpdatedAt      string  `json:"updated_at,omitempty"`
+	ID                   int64   `json:"id"`
+	BatchKey             string  `json:"batch_key"`
+	WindowStart          string  `json:"window_start,omitempty"`
+	WindowEnd            string  `json:"window_end,omitempty"`
+	Status               string  `json:"status"`
+	Network              string  `json:"network"`
+	TotalTokenFlow       int64   `json:"total_token_flow"`
+	TotalContributionUSD float64 `json:"total_contribution_usd"`
+	TotalAmountCxs       float64 `json:"total_amount_cxs"`
+	ItemCount            int     `json:"item_count"`
+	CreatedBy            *int64  `json:"created_by,omitempty"`
+	ApprovedBy           *int64  `json:"approved_by,omitempty"`
+	CreatedAt            string  `json:"created_at,omitempty"`
+	UpdatedAt            string  `json:"updated_at,omitempty"`
 }
 
 type quotaNetPayoutItemResponse struct {
-	ID            int64   `json:"id"`
-	ItemKey       string  `json:"item_key"`
-	BatchID       int64   `json:"batch_id"`
-	Network       string  `json:"network,omitempty"`
-	NodeID        *int64  `json:"node_id,omitempty"`
-	WalletAddress string  `json:"wallet_address"`
-	TokenFlow     int64   `json:"token_flow"`
-	AmountCxs     float64 `json:"amount_cxs"`
-	Status        string  `json:"status"`
-	TxHash        *string `json:"tx_hash,omitempty"`
-	TxURL         string  `json:"tx_url,omitempty"`
-	ErrorMessage  *string `json:"error_message,omitempty"`
-	FinalizedAt   *string `json:"finalized_at,omitempty"`
-	CreatedAt     string  `json:"created_at,omitempty"`
-	UpdatedAt     string  `json:"updated_at,omitempty"`
+	ID              int64   `json:"id"`
+	ItemKey         string  `json:"item_key"`
+	BatchID         int64   `json:"batch_id"`
+	Network         string  `json:"network,omitempty"`
+	NodeID          *int64  `json:"node_id,omitempty"`
+	WalletAddress   string  `json:"wallet_address"`
+	TokenFlow       int64   `json:"token_flow"`
+	ContributionUSD float64 `json:"contribution_usd"`
+	AmountCxs       float64 `json:"amount_cxs"`
+	Status          string  `json:"status"`
+	TxHash          *string `json:"tx_hash,omitempty"`
+	TxURL           string  `json:"tx_url,omitempty"`
+	ErrorMessage    *string `json:"error_message,omitempty"`
+	FinalizedAt     *string `json:"finalized_at,omitempty"`
+	CreatedAt       string  `json:"created_at,omitempty"`
+	UpdatedAt       string  `json:"updated_at,omitempty"`
 }
 
 type quotaNetPayoutBatchCreateResponse struct {
 	Batch       *quotaNetPayoutBatchResponse  `json:"batch"`
 	Items       []*quotaNetPayoutItemResponse `json:"items"`
 	LedgerCount int                           `json:"ledger_count"`
+}
+
+func (h *QuotaNetSettlementHandler) Config(c *gin.Context) {
+	if h == nil || h.store == nil {
+		response.Error(c, http.StatusServiceUnavailable, "quotanet settlement service is not initialized")
+		return
+	}
+	cfg, err := h.store.GetConfig(c.Request.Context())
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "quotanet settlement operation failed")
+		return
+	}
+	response.Success(c, cfg)
+}
+
+func (h *QuotaNetSettlementHandler) UpdateConfig(c *gin.Context) {
+	if h == nil || h.store == nil {
+		response.Error(c, http.StatusServiceUnavailable, "quotanet settlement service is not initialized")
+		return
+	}
+	var req quotaNetSettlementConfigRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+	cfg, err := h.store.UpdateConfig(c.Request.Context(), settlements.Config{
+		Network: strings.TrimSpace(req.Network),
+	})
+	if err != nil {
+		quotaNetSettlementError(c, err)
+		return
+	}
+	response.Success(c, cfg)
 }
 
 func (h *QuotaNetSettlementHandler) Ledgers(c *gin.Context) {
@@ -251,7 +300,40 @@ func (h *QuotaNetSettlementHandler) UpdateItemStatus(c *gin.Context) {
 		quotaNetSettlementError(c, err)
 		return
 	}
+	h.notifySettlement(c.Request.Context(), item)
 	response.Success(c, quotaNetPayoutItemToResponse(item))
+}
+
+func (h *QuotaNetSettlementHandler) notifySettlement(ctx context.Context, item *settlements.PayoutItem) {
+	if h == nil || h.registry == nil || item == nil {
+		return
+	}
+	notice := protocol.SettlementNotice{
+		ID:        item.ItemKey,
+		AmountCXS: strconv.FormatFloat(item.AmountCxs, 'f', -1, 64),
+		TokenFlow: item.TokenFlow,
+		Status:    item.Status,
+		CreatedAt: formatQuotaNetTime(item.CreatedAt),
+		UpdatedAt: formatQuotaNetTime(item.UpdatedAt),
+	}
+	if item.TxHash != nil {
+		notice.TxHash = *item.TxHash
+	}
+	envelope, err := protocol.NewEnvelope(protocol.EventSettlementNotice, "qns_"+strconv.FormatInt(item.ID, 10), notice)
+	if err != nil {
+		return
+	}
+	sendCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+	for _, session := range h.registry.Snapshot() {
+		if strings.TrimSpace(session.WalletAddress) != strings.TrimSpace(item.WalletAddress) {
+			continue
+		}
+		if item.NodeID != nil && session.NodeID != *item.NodeID {
+			continue
+		}
+		_ = h.registry.Send(sendCtx, session.SessionID, envelope)
+	}
 }
 
 func quotaNetSettlementListParams(c *gin.Context, page, pageSize int) (settlements.ListParams, bool) {
@@ -303,7 +385,6 @@ func quotaNetPayoutBatchCreateInput(c *gin.Context) (settlements.CreateBatchInpu
 		WindowStart: windowStart,
 		WindowEnd:   windowEnd,
 		Network:     strings.TrimSpace(req.Network),
-		Rate:        req.Rate,
 		CreatedBy:   req.CreatedBy,
 		ApprovedBy:  req.ApprovedBy,
 	}, true
@@ -339,22 +420,25 @@ func quotaNetContributionLedgerToResponse(item *settlements.Ledger) *quotaNetCon
 		return nil
 	}
 	return &quotaNetContributionLedgerResponse{
-		ID:            item.ID,
-		TaskID:        item.TaskID,
-		UsageLogID:    item.UsageLogID,
-		NodeID:        item.NodeID,
-		WalletAddress: item.WalletAddress,
-		AccountID:     item.AccountID,
-		Platform:      item.Platform,
-		Model:         item.Model,
-		TokenFlow:     item.TokenFlow,
-		AmountCxs:     item.AmountCxs,
-		Rate:          item.Rate,
-		Status:        item.Status,
-		PayoutBatchID: item.PayoutBatchID,
-		SettledAt:     quotaNetOptionalTime(item.SettledAt),
-		CreatedAt:     formatQuotaNetTime(item.CreatedAt),
-		UpdatedAt:     formatQuotaNetTime(item.UpdatedAt),
+		ID:              item.ID,
+		TaskID:          item.TaskID,
+		UsageLogID:      item.UsageLogID,
+		NodeID:          item.NodeID,
+		WalletAddress:   item.WalletAddress,
+		AccountID:       item.AccountID,
+		Platform:        item.Platform,
+		Model:           item.Model,
+		TokenFlow:       item.TokenFlow,
+		StandardCostUSD: item.StandardCostUSD,
+		ActualCostUSD:   item.ActualCostUSD,
+		ContributionUSD: item.ContributionUSD,
+		AmountCxs:       item.AmountCxs,
+		Rate:            item.Rate,
+		Status:          item.Status,
+		PayoutBatchID:   item.PayoutBatchID,
+		SettledAt:       quotaNetOptionalTime(item.SettledAt),
+		CreatedAt:       formatQuotaNetTime(item.CreatedAt),
+		UpdatedAt:       formatQuotaNetTime(item.UpdatedAt),
 	}
 }
 
@@ -363,19 +447,20 @@ func quotaNetPayoutBatchToResponse(batch *settlements.PayoutBatch) *quotaNetPayo
 		return nil
 	}
 	return &quotaNetPayoutBatchResponse{
-		ID:             batch.ID,
-		BatchKey:       batch.BatchKey,
-		WindowStart:    formatQuotaNetTime(batch.WindowStart),
-		WindowEnd:      formatQuotaNetTime(batch.WindowEnd),
-		Status:         batch.Status,
-		Network:        batch.Network,
-		TotalTokenFlow: batch.TotalTokenFlow,
-		TotalAmountCxs: batch.TotalAmountCxs,
-		ItemCount:      batch.ItemCount,
-		CreatedBy:      batch.CreatedBy,
-		ApprovedBy:     batch.ApprovedBy,
-		CreatedAt:      formatQuotaNetTime(batch.CreatedAt),
-		UpdatedAt:      formatQuotaNetTime(batch.UpdatedAt),
+		ID:                   batch.ID,
+		BatchKey:             batch.BatchKey,
+		WindowStart:          formatQuotaNetTime(batch.WindowStart),
+		WindowEnd:            formatQuotaNetTime(batch.WindowEnd),
+		Status:               batch.Status,
+		Network:              batch.Network,
+		TotalTokenFlow:       batch.TotalTokenFlow,
+		TotalContributionUSD: batch.TotalContributionUSD,
+		TotalAmountCxs:       batch.TotalAmountCxs,
+		ItemCount:            batch.ItemCount,
+		CreatedBy:            batch.CreatedBy,
+		ApprovedBy:           batch.ApprovedBy,
+		CreatedAt:            formatQuotaNetTime(batch.CreatedAt),
+		UpdatedAt:            formatQuotaNetTime(batch.UpdatedAt),
 	}
 }
 
@@ -384,21 +469,22 @@ func quotaNetPayoutItemToResponse(item *settlements.PayoutItem) *quotaNetPayoutI
 		return nil
 	}
 	return &quotaNetPayoutItemResponse{
-		ID:            item.ID,
-		ItemKey:       item.ItemKey,
-		BatchID:       item.BatchID,
-		Network:       item.Network,
-		NodeID:        item.NodeID,
-		WalletAddress: item.WalletAddress,
-		TokenFlow:     item.TokenFlow,
-		AmountCxs:     item.AmountCxs,
-		Status:        item.Status,
-		TxHash:        item.TxHash,
-		TxURL:         quotaNetPayoutItemTxURL(item),
-		ErrorMessage:  item.ErrorMessage,
-		FinalizedAt:   quotaNetOptionalTime(item.FinalizedAt),
-		CreatedAt:     formatQuotaNetTime(item.CreatedAt),
-		UpdatedAt:     formatQuotaNetTime(item.UpdatedAt),
+		ID:              item.ID,
+		ItemKey:         item.ItemKey,
+		BatchID:         item.BatchID,
+		Network:         item.Network,
+		NodeID:          item.NodeID,
+		WalletAddress:   item.WalletAddress,
+		TokenFlow:       item.TokenFlow,
+		ContributionUSD: item.ContributionUSD,
+		AmountCxs:       item.AmountCxs,
+		Status:          item.Status,
+		TxHash:          item.TxHash,
+		TxURL:           quotaNetPayoutItemTxURL(item),
+		ErrorMessage:    item.ErrorMessage,
+		FinalizedAt:     quotaNetOptionalTime(item.FinalizedAt),
+		CreatedAt:       formatQuotaNetTime(item.CreatedAt),
+		UpdatedAt:       formatQuotaNetTime(item.UpdatedAt),
 	}
 }
 

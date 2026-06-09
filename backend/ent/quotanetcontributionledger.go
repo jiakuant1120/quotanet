@@ -37,6 +37,12 @@ type QuotaNetContributionLedger struct {
 	Model string `json:"model,omitempty"`
 	// TokenFlow holds the value of the "token_flow" field.
 	TokenFlow int64 `json:"token_flow,omitempty"`
+	// Standard Sub2API model cost before user/group multiplier
+	StandardCostUsd float64 `json:"standard_cost_usd,omitempty"`
+	// Actual Sub2API billed cost after user/group multiplier
+	ActualCostUsd float64 `json:"actual_cost_usd,omitempty"`
+	// QuotaNet node contribution amount in USD
+	ContributionUsd float64 `json:"contribution_usd,omitempty"`
 	// AmountCxs holds the value of the "amount_cxs" field.
 	AmountCxs float64 `json:"amount_cxs,omitempty"`
 	// Rate holds the value of the "rate" field.
@@ -55,7 +61,7 @@ func (*QuotaNetContributionLedger) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case quotanetcontributionledger.FieldAmountCxs, quotanetcontributionledger.FieldRate:
+		case quotanetcontributionledger.FieldStandardCostUsd, quotanetcontributionledger.FieldActualCostUsd, quotanetcontributionledger.FieldContributionUsd, quotanetcontributionledger.FieldAmountCxs, quotanetcontributionledger.FieldRate:
 			values[i] = new(sql.NullFloat64)
 		case quotanetcontributionledger.FieldID, quotanetcontributionledger.FieldUsageLogID, quotanetcontributionledger.FieldNodeID, quotanetcontributionledger.FieldAccountID, quotanetcontributionledger.FieldTokenFlow, quotanetcontributionledger.FieldPayoutBatchID:
 			values[i] = new(sql.NullInt64)
@@ -145,6 +151,24 @@ func (_m *QuotaNetContributionLedger) assignValues(columns []string, values []an
 				return fmt.Errorf("unexpected type %T for field token_flow", values[i])
 			} else if value.Valid {
 				_m.TokenFlow = value.Int64
+			}
+		case quotanetcontributionledger.FieldStandardCostUsd:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field standard_cost_usd", values[i])
+			} else if value.Valid {
+				_m.StandardCostUsd = value.Float64
+			}
+		case quotanetcontributionledger.FieldActualCostUsd:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field actual_cost_usd", values[i])
+			} else if value.Valid {
+				_m.ActualCostUsd = value.Float64
+			}
+		case quotanetcontributionledger.FieldContributionUsd:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field contribution_usd", values[i])
+			} else if value.Valid {
+				_m.ContributionUsd = value.Float64
 			}
 		case quotanetcontributionledger.FieldAmountCxs:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
@@ -247,6 +271,15 @@ func (_m *QuotaNetContributionLedger) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("token_flow=")
 	builder.WriteString(fmt.Sprintf("%v", _m.TokenFlow))
+	builder.WriteString(", ")
+	builder.WriteString("standard_cost_usd=")
+	builder.WriteString(fmt.Sprintf("%v", _m.StandardCostUsd))
+	builder.WriteString(", ")
+	builder.WriteString("actual_cost_usd=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ActualCostUsd))
+	builder.WriteString(", ")
+	builder.WriteString("contribution_usd=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ContributionUsd))
 	builder.WriteString(", ")
 	builder.WriteString("amount_cxs=")
 	builder.WriteString(fmt.Sprintf("%v", _m.AmountCxs))

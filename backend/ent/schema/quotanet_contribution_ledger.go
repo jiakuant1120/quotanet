@@ -52,6 +52,18 @@ func (QuotaNetContributionLedger) Fields() []ent.Field {
 			NotEmpty(),
 		field.Int64("token_flow").
 			Default(0),
+		field.Float("standard_cost_usd").
+			Default(0).
+			SchemaType(map[string]string{dialect.Postgres: "decimal(20,10)"}).
+			Comment("Standard Sub2API model cost before user/group multiplier"),
+		field.Float("actual_cost_usd").
+			Default(0).
+			SchemaType(map[string]string{dialect.Postgres: "decimal(20,10)"}).
+			Comment("Actual Sub2API billed cost after user/group multiplier"),
+		field.Float("contribution_usd").
+			Default(0).
+			SchemaType(map[string]string{dialect.Postgres: "decimal(20,10)"}).
+			Comment("QuotaNet node contribution amount in USD"),
 		field.Float("amount_cxs").
 			Default(0).
 			SchemaType(map[string]string{dialect.Postgres: "decimal(30,12)"}),

@@ -89,6 +89,11 @@ func TokenFlow(v int64) predicate.QuotaNetPayoutItem {
 	return predicate.QuotaNetPayoutItem(sql.FieldEQ(FieldTokenFlow, v))
 }
 
+// ContributionUsd applies equality check predicate on the "contribution_usd" field. It's identical to ContributionUsdEQ.
+func ContributionUsd(v float64) predicate.QuotaNetPayoutItem {
+	return predicate.QuotaNetPayoutItem(sql.FieldEQ(FieldContributionUsd, v))
+}
+
 // AmountCxs applies equality check predicate on the "amount_cxs" field. It's identical to AmountCxsEQ.
 func AmountCxs(v float64) predicate.QuotaNetPayoutItem {
 	return predicate.QuotaNetPayoutItem(sql.FieldEQ(FieldAmountCxs, v))
@@ -452,6 +457,46 @@ func TokenFlowLT(v int64) predicate.QuotaNetPayoutItem {
 // TokenFlowLTE applies the LTE predicate on the "token_flow" field.
 func TokenFlowLTE(v int64) predicate.QuotaNetPayoutItem {
 	return predicate.QuotaNetPayoutItem(sql.FieldLTE(FieldTokenFlow, v))
+}
+
+// ContributionUsdEQ applies the EQ predicate on the "contribution_usd" field.
+func ContributionUsdEQ(v float64) predicate.QuotaNetPayoutItem {
+	return predicate.QuotaNetPayoutItem(sql.FieldEQ(FieldContributionUsd, v))
+}
+
+// ContributionUsdNEQ applies the NEQ predicate on the "contribution_usd" field.
+func ContributionUsdNEQ(v float64) predicate.QuotaNetPayoutItem {
+	return predicate.QuotaNetPayoutItem(sql.FieldNEQ(FieldContributionUsd, v))
+}
+
+// ContributionUsdIn applies the In predicate on the "contribution_usd" field.
+func ContributionUsdIn(vs ...float64) predicate.QuotaNetPayoutItem {
+	return predicate.QuotaNetPayoutItem(sql.FieldIn(FieldContributionUsd, vs...))
+}
+
+// ContributionUsdNotIn applies the NotIn predicate on the "contribution_usd" field.
+func ContributionUsdNotIn(vs ...float64) predicate.QuotaNetPayoutItem {
+	return predicate.QuotaNetPayoutItem(sql.FieldNotIn(FieldContributionUsd, vs...))
+}
+
+// ContributionUsdGT applies the GT predicate on the "contribution_usd" field.
+func ContributionUsdGT(v float64) predicate.QuotaNetPayoutItem {
+	return predicate.QuotaNetPayoutItem(sql.FieldGT(FieldContributionUsd, v))
+}
+
+// ContributionUsdGTE applies the GTE predicate on the "contribution_usd" field.
+func ContributionUsdGTE(v float64) predicate.QuotaNetPayoutItem {
+	return predicate.QuotaNetPayoutItem(sql.FieldGTE(FieldContributionUsd, v))
+}
+
+// ContributionUsdLT applies the LT predicate on the "contribution_usd" field.
+func ContributionUsdLT(v float64) predicate.QuotaNetPayoutItem {
+	return predicate.QuotaNetPayoutItem(sql.FieldLT(FieldContributionUsd, v))
+}
+
+// ContributionUsdLTE applies the LTE predicate on the "contribution_usd" field.
+func ContributionUsdLTE(v float64) predicate.QuotaNetPayoutItem {
+	return predicate.QuotaNetPayoutItem(sql.FieldLTE(FieldContributionUsd, v))
 }
 
 // AmountCxsEQ applies the EQ predicate on the "amount_cxs" field.

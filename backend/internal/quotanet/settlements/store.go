@@ -13,6 +13,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/quotanetcontributionledger"
 	"github.com/Wei-Shaw/sub2api/ent/quotanetpayoutbatch"
 	"github.com/Wei-Shaw/sub2api/ent/quotanetpayoutitem"
+	"github.com/Wei-Shaw/sub2api/ent/setting"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
 	"github.com/google/uuid"
 )
@@ -20,6 +21,12 @@ import (
 var (
 	ErrInvalidBatchInput = errors.New("invalid quotanet settlement batch input")
 	ErrNoPendingLedger   = errors.New("no pending quotanet contribution ledger")
+)
+
+const (
+	defaultSettlementNetwork = "manual"
+
+	settingKeySettlementNetwork = "quotanet.settlement.network"
 )
 
 type Store struct {
@@ -31,68 +38,79 @@ func NewStore(client *ent.Client) *Store {
 }
 
 type Ledger struct {
-	ID            int64
-	TaskID        string
-	UsageLogID    *int64
-	NodeID        int64
-	WalletAddress string
-	AccountID     *int64
-	Platform      string
-	Model         string
-	TokenFlow     int64
-	AmountCxs     float64
-	Rate          float64
-	Status        string
-	PayoutBatchID *int64
-	SettledAt     *time.Time
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID              int64
+	TaskID          string
+	UsageLogID      *int64
+	NodeID          int64
+	WalletAddress   string
+	AccountID       *int64
+	Platform        string
+	Model           string
+	TokenFlow       int64
+	StandardCostUSD float64
+	ActualCostUSD   float64
+	ContributionUSD float64
+	AmountCxs       float64
+	Rate            float64
+	Status          string
+	PayoutBatchID   *int64
+	SettledAt       *time.Time
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }
 
 type WalletSummary struct {
-	WalletAddress string  `json:"wallet_address"`
-	LedgerCount   int64   `json:"ledger_count"`
-	TokenFlow     int64   `json:"token_flow"`
-	AmountCxs     float64 `json:"amount_cxs"`
+	WalletAddress   string  `json:"wallet_address"`
+	LedgerCount     int64   `json:"ledger_count"`
+	TokenFlow       int64   `json:"token_flow"`
+	ContributionUSD float64 `json:"contribution_usd"`
+	AmountCxs       float64 `json:"amount_cxs"`
 }
 
 type Summary struct {
-	LedgerCount int64   `json:"ledger_count"`
-	TokenFlow   int64   `json:"token_flow"`
-	AmountCxs   float64 `json:"amount_cxs"`
+	LedgerCount     int64   `json:"ledger_count"`
+	TokenFlow       int64   `json:"token_flow"`
+	ContributionUSD float64 `json:"contribution_usd"`
+	AmountCxs       float64 `json:"amount_cxs"`
+}
+
+type Config struct {
+	Network string `json:"network"`
 }
 
 type PayoutBatch struct {
-	ID             int64
-	BatchKey       string
-	WindowStart    time.Time
-	WindowEnd      time.Time
-	Status         string
-	Network        string
-	TotalTokenFlow int64
-	TotalAmountCxs float64
-	ItemCount      int
-	CreatedBy      *int64
-	ApprovedBy     *int64
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	ID                   int64
+	BatchKey             string
+	WindowStart          time.Time
+	WindowEnd            time.Time
+	Status               string
+	Network              string
+	TotalTokenFlow       int64
+	TotalContributionUSD float64
+	TotalAmountCxs       float64
+	ItemCount            int
+	CreatedBy            *int64
+	ApprovedBy           *int64
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
 }
 
 type PayoutItem struct {
-	ID            int64
-	ItemKey       string
-	BatchID       int64
-	Network       string
-	NodeID        *int64
-	WalletAddress string
-	TokenFlow     int64
-	AmountCxs     float64
-	Status        string
-	TxHash        *string
-	ErrorMessage  *string
-	FinalizedAt   *time.Time
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID              int64
+	ItemKey         string
+	BatchID         int64
+	Network         string
+	NodeID          *int64
+	WalletAddress   string
+	TokenFlow       int64
+	ContributionUSD float64
+	AmountCxs       float64
+	Status          string
+	TxHash          *string
+	ErrorMessage    *string
+	FinalizedAt     *time.Time
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }
 
 type CreateBatchInput struct {
@@ -100,7 +118,6 @@ type CreateBatchInput struct {
 	WindowStart time.Time
 	WindowEnd   time.Time
 	Network     string
-	Rate        float64
 	CreatedBy   *int64
 	ApprovedBy  *int64
 }
@@ -282,12 +299,17 @@ func (s *Store) UpdateItemStatus(ctx context.Context, id int64, input UpdateItem
 			quotanetcontributionledger.WalletAddressEQ(item.WalletAddress),
 		).
 		SetStatus(input.Status)
-	if input.Status == protocol.SettlementStatusPending {
-		ledgerUpdate.ClearSettledAt()
-	} else {
+	switch input.Status {
+	case protocol.SettlementStatusFinalized:
 		ledgerUpdate.SetSettledAt(time.Now().UTC())
+	default:
+		ledgerUpdate.ClearSettledAt()
 	}
 	if _, err := ledgerUpdate.Save(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := updateBatchStatus(ctx, tx, item.BatchID); err != nil {
 		return nil, err
 	}
 
@@ -301,34 +323,70 @@ func (s *Store) UpdateItemStatus(ctx context.Context, id int64, input UpdateItem
 	return out, nil
 }
 
+func (s *Store) GetConfig(ctx context.Context) (*Config, error) {
+	if s == nil || s.client == nil {
+		return defaultConfig(), nil
+	}
+	cfg := defaultConfig()
+	if row, err := s.client.Setting.Query().Where(setting.KeyEQ(settingKeySettlementNetwork)).Only(ctx); err == nil {
+		if v := strings.TrimSpace(row.Value); v != "" {
+			cfg.Network = v
+		}
+	} else if !ent.IsNotFound(err) {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (s *Store) UpdateConfig(ctx context.Context, input Config) (*Config, error) {
+	if s == nil || s.client == nil {
+		return nil, ErrInvalidBatchInput
+	}
+	input.Network = strings.TrimSpace(input.Network)
+	if input.Network == "" {
+		input.Network = defaultSettlementNetwork
+	}
+	now := time.Now().UTC()
+	if err := s.client.Setting.Create().
+		SetKey(settingKeySettlementNetwork).
+		SetValue(input.Network).
+		SetUpdatedAt(now).
+		OnConflictColumns(setting.FieldKey).
+		UpdateNewValues().
+		Exec(ctx); err != nil {
+		return nil, err
+	}
+	return s.GetConfig(ctx)
+}
+
 func (s *Store) Summary(ctx context.Context, params ListParams) (*Summary, error) {
 	if s == nil || s.client == nil {
 		return &Summary{}, nil
 	}
 	params = normalizeListParams(params)
-	var rows []struct {
-		LedgerCount int64   `json:"ledger_count"`
-		TokenFlow   int64   `json:"token_flow"`
-		AmountCxs   float64 `json:"amount_cxs"`
-	}
-	err := applyLedgerFilters(s.client.QuotaNetContributionLedger.Query(), params).
-		Select(
-			sql.As(sql.Count("*"), "ledger_count"),
-			sql.As(sql.Sum(quotanetcontributionledger.FieldTokenFlow), "token_flow"),
-			sql.As(sql.Sum(quotanetcontributionledger.FieldAmountCxs), "amount_cxs"),
-		).
-		Scan(ctx, &rows)
+	where, args := ledgerSQLWhere(params)
+	query := `SELECT
+		COUNT(*) AS ledger_count,
+		COALESCE(SUM(token_flow), 0) AS token_flow,
+		COALESCE(SUM(contribution_usd), 0) AS contribution_usd,
+		COALESCE(SUM(amount_cxs), 0) AS amount_cxs
+	FROM quotanet_contribution_ledger` + where
+	rows, err := s.client.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	if len(rows) == 0 {
+	defer rows.Close()
+	if !rows.Next() {
+		if err := rows.Err(); err != nil {
+			return nil, err
+		}
 		return &Summary{}, nil
 	}
-	return &Summary{
-		LedgerCount: rows[0].LedgerCount,
-		TokenFlow:   rows[0].TokenFlow,
-		AmountCxs:   rows[0].AmountCxs,
-	}, nil
+	var summary Summary
+	if err := rows.Scan(&summary.LedgerCount, &summary.TokenFlow, &summary.ContributionUSD, &summary.AmountCxs); err != nil {
+		return nil, err
+	}
+	return &summary, rows.Err()
 }
 
 func (s *Store) WalletSummaries(ctx context.Context, params ListParams) ([]*WalletSummary, error) {
@@ -342,6 +400,7 @@ func (s *Store) WalletSummaries(ctx context.Context, params ListParams) ([]*Wall
 		Aggregate(
 			ent.As(ent.Count(), "ledger_count"),
 			ent.As(ent.Sum(quotanetcontributionledger.FieldTokenFlow), "token_flow"),
+			ent.As(ent.Sum(quotanetcontributionledger.FieldContributionUsd), "contribution_usd"),
 			ent.As(ent.Sum(quotanetcontributionledger.FieldAmountCxs), "amount_cxs"),
 		).
 		Scan(ctx, &rows)
@@ -356,6 +415,14 @@ func (s *Store) CreateBatch(ctx context.Context, input CreateBatchInput) (*Creat
 		return nil, ErrInvalidBatchInput
 	}
 	input = normalizeCreateBatchInput(input)
+	if strings.TrimSpace(input.Network) == "" || input.Network == defaultSettlementNetwork {
+		cfg, err := s.GetConfig(ctx)
+		if err != nil {
+			return nil, err
+		}
+		input.Network = cfg.Network
+		input = normalizeCreateBatchInput(input)
+	}
 	if err := validateCreateBatchInput(input); err != nil {
 		return nil, err
 	}
@@ -382,11 +449,13 @@ func (s *Store) CreateBatch(ctx context.Context, input CreateBatchInput) (*Creat
 		return nil, ErrNoPendingLedger
 	}
 
-	wallets := buildWalletPayouts(ledgers, input.Rate)
+	wallets := buildWalletPayouts(ledgers)
 	var totalTokenFlow int64
+	var totalContributionUSD float64
 	var totalAmountCxs float64
 	for _, item := range wallets {
 		totalTokenFlow += item.TokenFlow
+		totalContributionUSD += item.ContributionUSD
 		totalAmountCxs += item.AmountCxs
 	}
 
@@ -394,9 +463,10 @@ func (s *Store) CreateBatch(ctx context.Context, input CreateBatchInput) (*Creat
 		SetBatchKey(input.BatchKey).
 		SetWindowStart(input.WindowStart).
 		SetWindowEnd(input.WindowEnd).
-		SetStatus(protocol.SettlementStatusFinalized).
+		SetStatus(protocol.SettlementStatusPending).
 		SetNetwork(input.Network).
 		SetTotalTokenFlow(totalTokenFlow).
+		SetTotalContributionUsd(totalContributionUSD).
 		SetTotalAmountCxs(totalAmountCxs).
 		SetItemCount(len(wallets)).
 		SetNillableCreatedBy(input.CreatedBy).
@@ -407,7 +477,6 @@ func (s *Store) CreateBatch(ctx context.Context, input CreateBatchInput) (*Creat
 	}
 
 	itemBuilders := make([]*ent.QuotaNetPayoutItemCreate, 0, len(wallets))
-	finalizedAt := time.Now().UTC()
 	for _, wallet := range wallets {
 		itemBuilders = append(itemBuilders, tx.QuotaNetPayoutItem.Create().
 			SetItemKey("qni_"+strings.ReplaceAll(uuid.NewString(), "-", "")).
@@ -415,9 +484,9 @@ func (s *Store) CreateBatch(ctx context.Context, input CreateBatchInput) (*Creat
 			SetNillableNodeID(wallet.NodeID).
 			SetWalletAddress(wallet.WalletAddress).
 			SetTokenFlow(wallet.TokenFlow).
+			SetContributionUsd(wallet.ContributionUSD).
 			SetAmountCxs(wallet.AmountCxs).
-			SetStatus(protocol.SettlementStatusFinalized).
-			SetFinalizedAt(finalizedAt))
+			SetStatus(protocol.SettlementStatusPending))
 	}
 	itemRows, err := tx.QuotaNetPayoutItem.CreateBulk(itemBuilders...).Save(ctx)
 	if err != nil {
@@ -431,11 +500,9 @@ func (s *Store) CreateBatch(ctx context.Context, input CreateBatchInput) (*Creat
 				quotanetcontributionledger.StatusEQ(protocol.SettlementStatusPending),
 				quotanetcontributionledger.PayoutBatchIDIsNil(),
 			).
-			SetStatus(protocol.SettlementStatusFinalized).
-			SetAmountCxs(float64(ledger.TokenFlow) * input.Rate).
-			SetRate(input.Rate).
+			SetStatus(protocol.SettlementStatusPending).
 			SetPayoutBatchID(batchRow.ID).
-			SetSettledAt(finalizedAt).
+			ClearSettledAt().
 			Save(ctx)
 		if err != nil {
 			return nil, err
@@ -580,7 +647,7 @@ func normalizeCreateBatchInput(input CreateBatchInput) CreateBatchInput {
 	}
 	input.Network = strings.TrimSpace(input.Network)
 	if input.Network == "" {
-		input.Network = "solana-devnet"
+		input.Network = defaultSettlementNetwork
 	}
 	input.WindowStart = input.WindowStart.UTC()
 	input.WindowEnd = input.WindowEnd.UTC()
@@ -593,9 +660,6 @@ func validateCreateBatchInput(input CreateBatchInput) error {
 	}
 	if input.WindowStart.IsZero() || input.WindowEnd.IsZero() || !input.WindowEnd.After(input.WindowStart) {
 		return fmt.Errorf("%w: invalid settlement window", ErrInvalidBatchInput)
-	}
-	if input.Rate < 0 {
-		return fmt.Errorf("%w: rate must be non-negative", ErrInvalidBatchInput)
 	}
 	if input.Network == "" {
 		return fmt.Errorf("%w: network is required", ErrInvalidBatchInput)
@@ -615,9 +679,6 @@ func validateUpdateItemStatusInput(input UpdateItemStatusInput) error {
 	case protocol.SettlementStatusPending:
 		return nil
 	case protocol.SettlementStatusFinalized:
-		if input.TxHash == "" {
-			return fmt.Errorf("%w: tx_hash is required for finalized item", ErrInvalidBatchInput)
-		}
 		return nil
 	case protocol.SettlementStatusFailed:
 		if input.ErrorMessage == "" {
@@ -648,38 +709,70 @@ func applyLedgerFilters(query *ent.QuotaNetContributionLedgerQuery, params ListP
 	return query
 }
 
+func ledgerSQLWhere(params ListParams) (string, []any) {
+	clauses := make([]string, 0, 5)
+	args := make([]any, 0, 5)
+	add := func(clause string, value any) {
+		args = append(args, value)
+		clauses = append(clauses, fmt.Sprintf(clause, len(args)))
+	}
+	if params.Status != "" {
+		add("status = $%d", params.Status)
+	}
+	if params.WalletAddress != "" {
+		add("wallet_address = $%d", params.WalletAddress)
+	}
+	if params.NodeID != nil {
+		add("node_id = $%d", *params.NodeID)
+	}
+	if params.AccountID != nil {
+		add("account_id = $%d", *params.AccountID)
+	}
+	if params.PayoutBatchID != nil {
+		add("payout_batch_id = $%d", *params.PayoutBatchID)
+	}
+	if len(clauses) == 0 {
+		return "", args
+	}
+	return " WHERE " + strings.Join(clauses, " AND "), args
+}
+
 func ledgerFromEnt(row *ent.QuotaNetContributionLedger) *Ledger {
 	if row == nil {
 		return nil
 	}
 	return &Ledger{
-		ID:            row.ID,
-		TaskID:        row.TaskID,
-		UsageLogID:    row.UsageLogID,
-		NodeID:        row.NodeID,
-		WalletAddress: row.WalletAddress,
-		AccountID:     row.AccountID,
-		Platform:      row.Platform,
-		Model:         row.Model,
-		TokenFlow:     row.TokenFlow,
-		AmountCxs:     row.AmountCxs,
-		Rate:          row.Rate,
-		Status:        row.Status,
-		PayoutBatchID: row.PayoutBatchID,
-		SettledAt:     row.SettledAt,
-		CreatedAt:     row.CreatedAt,
-		UpdatedAt:     row.UpdatedAt,
+		ID:              row.ID,
+		TaskID:          row.TaskID,
+		UsageLogID:      row.UsageLogID,
+		NodeID:          row.NodeID,
+		WalletAddress:   row.WalletAddress,
+		AccountID:       row.AccountID,
+		Platform:        row.Platform,
+		Model:           row.Model,
+		TokenFlow:       row.TokenFlow,
+		StandardCostUSD: row.StandardCostUsd,
+		ActualCostUSD:   row.ActualCostUsd,
+		ContributionUSD: row.ContributionUsd,
+		AmountCxs:       row.AmountCxs,
+		Rate:            row.Rate,
+		Status:          row.Status,
+		PayoutBatchID:   row.PayoutBatchID,
+		SettledAt:       row.SettledAt,
+		CreatedAt:       row.CreatedAt,
+		UpdatedAt:       row.UpdatedAt,
 	}
 }
 
 type walletPayout struct {
-	WalletAddress string
-	NodeID        *int64
-	TokenFlow     int64
-	AmountCxs     float64
+	WalletAddress   string
+	NodeID          *int64
+	TokenFlow       int64
+	ContributionUSD float64
+	AmountCxs       float64
 }
 
-func buildWalletPayouts(ledgers []*ent.QuotaNetContributionLedger, rate float64) []*walletPayout {
+func buildWalletPayouts(ledgers []*ent.QuotaNetContributionLedger) []*walletPayout {
 	byWallet := make(map[string]*walletPayout)
 	order := make([]string, 0)
 	for _, ledger := range ledgers {
@@ -699,7 +792,8 @@ func buildWalletPayouts(ledgers []*ent.QuotaNetContributionLedger, rate float64)
 			item.NodeID = nil
 		}
 		item.TokenFlow += ledger.TokenFlow
-		item.AmountCxs += float64(ledger.TokenFlow) * rate
+		item.ContributionUSD += ledger.ContributionUsd
+		item.AmountCxs += ledger.AmountCxs
 	}
 	out := make([]*walletPayout, 0, len(order))
 	for _, wallet := range order {
@@ -708,24 +802,59 @@ func buildWalletPayouts(ledgers []*ent.QuotaNetContributionLedger, rate float64)
 	return out
 }
 
+func defaultConfig() *Config {
+	return &Config{
+		Network: defaultSettlementNetwork,
+	}
+}
+
+func updateBatchStatus(ctx context.Context, tx *ent.Tx, batchID int64) error {
+	rows, err := tx.QuotaNetPayoutItem.Query().
+		Where(quotanetpayoutitem.BatchIDEQ(batchID)).
+		All(ctx)
+	if err != nil {
+		return err
+	}
+	if len(rows) == 0 {
+		return nil
+	}
+	next := protocol.SettlementStatusFinalized
+	for _, row := range rows {
+		switch row.Status {
+		case protocol.SettlementStatusFailed:
+			next = protocol.SettlementStatusFailed
+		case protocol.SettlementStatusPending:
+			if next != protocol.SettlementStatusFailed {
+				next = protocol.SettlementStatusPending
+			}
+		}
+	}
+	_, err = tx.QuotaNetPayoutBatch.Update().
+		Where(quotanetpayoutbatch.IDEQ(batchID)).
+		SetStatus(next).
+		Save(ctx)
+	return err
+}
+
 func payoutBatchFromEnt(row *ent.QuotaNetPayoutBatch) *PayoutBatch {
 	if row == nil {
 		return nil
 	}
 	return &PayoutBatch{
-		ID:             row.ID,
-		BatchKey:       row.BatchKey,
-		WindowStart:    row.WindowStart,
-		WindowEnd:      row.WindowEnd,
-		Status:         row.Status,
-		Network:        row.Network,
-		TotalTokenFlow: row.TotalTokenFlow,
-		TotalAmountCxs: row.TotalAmountCxs,
-		ItemCount:      row.ItemCount,
-		CreatedBy:      row.CreatedBy,
-		ApprovedBy:     row.ApprovedBy,
-		CreatedAt:      row.CreatedAt,
-		UpdatedAt:      row.UpdatedAt,
+		ID:                   row.ID,
+		BatchKey:             row.BatchKey,
+		WindowStart:          row.WindowStart,
+		WindowEnd:            row.WindowEnd,
+		Status:               row.Status,
+		Network:              row.Network,
+		TotalTokenFlow:       row.TotalTokenFlow,
+		TotalContributionUSD: row.TotalContributionUsd,
+		TotalAmountCxs:       row.TotalAmountCxs,
+		ItemCount:            row.ItemCount,
+		CreatedBy:            row.CreatedBy,
+		ApprovedBy:           row.ApprovedBy,
+		CreatedAt:            row.CreatedAt,
+		UpdatedAt:            row.UpdatedAt,
 	}
 }
 
@@ -734,18 +863,19 @@ func payoutItemFromEnt(row *ent.QuotaNetPayoutItem) *PayoutItem {
 		return nil
 	}
 	return &PayoutItem{
-		ID:            row.ID,
-		ItemKey:       row.ItemKey,
-		BatchID:       row.BatchID,
-		NodeID:        row.NodeID,
-		WalletAddress: row.WalletAddress,
-		TokenFlow:     row.TokenFlow,
-		AmountCxs:     row.AmountCxs,
-		Status:        row.Status,
-		TxHash:        row.TxHash,
-		ErrorMessage:  row.ErrorMessage,
-		FinalizedAt:   row.FinalizedAt,
-		CreatedAt:     row.CreatedAt,
-		UpdatedAt:     row.UpdatedAt,
+		ID:              row.ID,
+		ItemKey:         row.ItemKey,
+		BatchID:         row.BatchID,
+		NodeID:          row.NodeID,
+		WalletAddress:   row.WalletAddress,
+		TokenFlow:       row.TokenFlow,
+		ContributionUSD: row.ContributionUsd,
+		AmountCxs:       row.AmountCxs,
+		Status:          row.Status,
+		TxHash:          row.TxHash,
+		ErrorMessage:    row.ErrorMessage,
+		FinalizedAt:     row.FinalizedAt,
+		CreatedAt:       row.CreatedAt,
+		UpdatedAt:       row.UpdatedAt,
 	}
 }

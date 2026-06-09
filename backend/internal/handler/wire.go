@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/Wei-Shaw/sub2api/ent"
 	"github.com/Wei-Shaw/sub2api/internal/handler/admin"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/nodes"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/registry"
@@ -167,6 +168,10 @@ func ProvideQuotaNetTaskService(dispatcher *tasks.Dispatcher, waiter *tasks.Resp
 	return tasks.NewService(dispatcher, waiter)
 }
 
+func ProvideQuotaNetTaskStore(client *ent.Client, billingService *service.BillingService, pricingResolver *service.ModelPricingResolver) *tasks.EntStore {
+	return tasks.NewEntStore(client).WithContributionBilling(billingService, pricingResolver)
+}
+
 func ProvideQuotaNetSessionManager(nodeStore *nodes.EntStore, responseRecorder *tasks.ResponseRecorder, reg *registry.Registry) *qws.SessionManager {
 	return qws.NewSessionManager(nodes.NewAuthenticator(nodeStore), reg).
 		WithSessionStore(nodeStore).
@@ -196,7 +201,7 @@ var ProviderSet = wire.NewSet(
 	NewPaymentWebhookHandler,
 	NewAvailableChannelHandler,
 	nodes.NewEntStore,
-	tasks.NewEntStore,
+	ProvideQuotaNetTaskStore,
 	settlements.NewStore,
 	nodes.NewManager,
 	ProvideQuotaNetRegistry,

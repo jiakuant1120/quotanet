@@ -13,8 +13,10 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/quotanetcontributionledger"
 	"github.com/Wei-Shaw/sub2api/ent/quotanettask"
 	"github.com/Wei-Shaw/sub2api/ent/quotanettaskevent"
+	"github.com/Wei-Shaw/sub2api/internal/config"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/registry"
+	"github.com/Wei-Shaw/sub2api/internal/service"
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
@@ -188,6 +190,66 @@ func TestEntStoreTaskResponseReceivedSkipsLedgerForFailure(t *testing.T) {
 	}
 }
 
+func TestEntStoreContributionUsesStandardCostNotBuyerMultiplier(t *testing.T) {
+	client := newTaskEntClient(t)
+	billingService := service.NewBillingService(&config.Config{}, nil)
+	store := NewEntStore(client).WithContributionBilling(billingService, nil)
+	ctx := context.Background()
+
+	group, err := client.Group.Create().
+		SetName("quotanet-standard-cost").
+		SetPlatform("openai").
+		SetRateMultiplier(2).
+		Save(ctx)
+	if err != nil {
+		t.Fatalf("create group error = %v", err)
+	}
+	input := validInput()
+	input.UserID = ptrInt64(101)
+	input.GroupID = &group.ID
+	input.Model = "gpt-5.4"
+	if _, err := store.CreateQueued(ctx, input, "task-1"); err != nil {
+		t.Fatalf("CreateQueued() error = %v", err)
+	}
+	node, err := client.QuotaNetNode.Create().
+		SetNodeKey("node-key-1").
+		SetWalletAddress("wallet-1").
+		SetTokenHash("token-hash").
+		Save(ctx)
+	if err != nil {
+		t.Fatalf("create node error = %v", err)
+	}
+	if err := store.MarkDispatched(ctx, "task-1", registry.Candidate{NodeID: node.ID, SessionID: "sess-1"}, time.Unix(100, 0).UTC()); err != nil {
+		t.Fatalf("MarkDispatched() error = %v", err)
+	}
+
+	response := protocol.TaskResponse{
+		TaskID: "task-1",
+		Status: protocol.TaskStatusSuccess,
+		Usage:  protocol.Usage{PromptTokens: 1000, CompletionTokens: 100, TotalTokens: 1100},
+	}
+	if err := store.TaskResponseReceived(ctx, "sess-1", response, time.Unix(200, 0).UTC()); err != nil {
+		t.Fatalf("TaskResponseReceived() error = %v", err)
+	}
+	ledger, err := client.QuotaNetContributionLedger.Query().
+		Where(quotanetcontributionledger.TaskIDEQ("task-1")).
+		Only(ctx)
+	if err != nil {
+		t.Fatalf("query contribution ledger error = %v", err)
+	}
+
+	const wantStandard = 1000*2.5e-6 + 100*1.5e-5
+	if diff := ledger.StandardCostUsd - wantStandard; diff < -1e-12 || diff > 1e-12 {
+		t.Fatalf("standard_cost_usd = %.12f, want %.12f", ledger.StandardCostUsd, wantStandard)
+	}
+	if diff := ledger.ContributionUsd - ledger.StandardCostUsd; diff < -1e-12 || diff > 1e-12 {
+		t.Fatalf("contribution_usd = %.12f, want standard_cost_usd %.12f", ledger.ContributionUsd, ledger.StandardCostUsd)
+	}
+	if diff := ledger.ActualCostUsd - ledger.StandardCostUsd*2; diff < -1e-12 || diff > 1e-12 {
+		t.Fatalf("actual_cost_usd = %.12f, want %.12f", ledger.ActualCostUsd, ledger.StandardCostUsd*2)
+	}
+}
+
 func TestEntStoreMarkRunningTimedOutBefore(t *testing.T) {
 	client := newTaskEntClient(t)
 	store := NewEntStore(client)
@@ -237,10 +299,14 @@ func TestEntStoreMarkRunningTimedOutBefore(t *testing.T) {
 	}
 }
 
+func ptrInt64(v int64) *int64 {
+	return &v
+}
+
 func newTaskEntClient(t *testing.T) *dbent.Client {
 	t.Helper()
 
-	db, err := sql.Open("sqlite", fmt.Sprintf("file:%s?mode=memory&cache=shared&_fk=1", t.Name()))
+	db, err := sql.Open("sqlite", fmt.Sprintf("file:%s?mode=memory&cache=shared&_pragma=foreign_keys(1)", t.Name()))
 	if err != nil {
 		t.Fatalf("open sqlite: %v", err)
 	}
@@ -248,6 +314,14 @@ func newTaskEntClient(t *testing.T) *dbent.Client {
 
 	drv := entsql.OpenDB(dialect.SQLite, db)
 	client := enttest.NewClient(t, enttest.WithOptions(dbent.Driver(drv)))
+	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS user_group_rate_multipliers (
+		user_id INTEGER NOT NULL,
+		group_id INTEGER NOT NULL,
+		rate_multiplier REAL,
+		rpm_override INTEGER
+	)`); err != nil {
+		t.Fatalf("create user_group_rate_multipliers: %v", err)
+	}
 	t.Cleanup(func() { _ = client.Close() })
 	return client
 }

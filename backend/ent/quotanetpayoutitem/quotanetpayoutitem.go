@@ -27,6 +27,8 @@ const (
 	FieldWalletAddress = "wallet_address"
 	// FieldTokenFlow holds the string denoting the token_flow field in the database.
 	FieldTokenFlow = "token_flow"
+	// FieldContributionUsd holds the string denoting the contribution_usd field in the database.
+	FieldContributionUsd = "contribution_usd"
 	// FieldAmountCxs holds the string denoting the amount_cxs field in the database.
 	FieldAmountCxs = "amount_cxs"
 	// FieldStatus holds the string denoting the status field in the database.
@@ -51,6 +53,7 @@ var Columns = []string{
 	FieldNodeID,
 	FieldWalletAddress,
 	FieldTokenFlow,
+	FieldContributionUsd,
 	FieldAmountCxs,
 	FieldStatus,
 	FieldTxHash,
@@ -81,6 +84,8 @@ var (
 	WalletAddressValidator func(string) error
 	// DefaultTokenFlow holds the default value on creation for the "token_flow" field.
 	DefaultTokenFlow int64
+	// DefaultContributionUsd holds the default value on creation for the "contribution_usd" field.
+	DefaultContributionUsd float64
 	// DefaultAmountCxs holds the default value on creation for the "amount_cxs" field.
 	DefaultAmountCxs float64
 	// DefaultStatus holds the default value on creation for the "status" field.
@@ -132,6 +137,11 @@ func ByWalletAddress(opts ...sql.OrderTermOption) OrderOption {
 // ByTokenFlow orders the results by the token_flow field.
 func ByTokenFlow(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTokenFlow, opts...).ToFunc()
+}
+
+// ByContributionUsd orders the results by the contribution_usd field.
+func ByContributionUsd(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldContributionUsd, opts...).ToFunc()
 }
 
 // ByAmountCxs orders the results by the amount_cxs field.

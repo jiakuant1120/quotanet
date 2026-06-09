@@ -94,6 +94,11 @@ func TotalTokenFlow(v int64) predicate.QuotaNetPayoutBatch {
 	return predicate.QuotaNetPayoutBatch(sql.FieldEQ(FieldTotalTokenFlow, v))
 }
 
+// TotalContributionUsd applies equality check predicate on the "total_contribution_usd" field. It's identical to TotalContributionUsdEQ.
+func TotalContributionUsd(v float64) predicate.QuotaNetPayoutBatch {
+	return predicate.QuotaNetPayoutBatch(sql.FieldEQ(FieldTotalContributionUsd, v))
+}
+
 // TotalAmountCxs applies equality check predicate on the "total_amount_cxs" field. It's identical to TotalAmountCxsEQ.
 func TotalAmountCxs(v float64) predicate.QuotaNetPayoutBatch {
 	return predicate.QuotaNetPayoutBatch(sql.FieldEQ(FieldTotalAmountCxs, v))
@@ -507,6 +512,46 @@ func TotalTokenFlowLT(v int64) predicate.QuotaNetPayoutBatch {
 // TotalTokenFlowLTE applies the LTE predicate on the "total_token_flow" field.
 func TotalTokenFlowLTE(v int64) predicate.QuotaNetPayoutBatch {
 	return predicate.QuotaNetPayoutBatch(sql.FieldLTE(FieldTotalTokenFlow, v))
+}
+
+// TotalContributionUsdEQ applies the EQ predicate on the "total_contribution_usd" field.
+func TotalContributionUsdEQ(v float64) predicate.QuotaNetPayoutBatch {
+	return predicate.QuotaNetPayoutBatch(sql.FieldEQ(FieldTotalContributionUsd, v))
+}
+
+// TotalContributionUsdNEQ applies the NEQ predicate on the "total_contribution_usd" field.
+func TotalContributionUsdNEQ(v float64) predicate.QuotaNetPayoutBatch {
+	return predicate.QuotaNetPayoutBatch(sql.FieldNEQ(FieldTotalContributionUsd, v))
+}
+
+// TotalContributionUsdIn applies the In predicate on the "total_contribution_usd" field.
+func TotalContributionUsdIn(vs ...float64) predicate.QuotaNetPayoutBatch {
+	return predicate.QuotaNetPayoutBatch(sql.FieldIn(FieldTotalContributionUsd, vs...))
+}
+
+// TotalContributionUsdNotIn applies the NotIn predicate on the "total_contribution_usd" field.
+func TotalContributionUsdNotIn(vs ...float64) predicate.QuotaNetPayoutBatch {
+	return predicate.QuotaNetPayoutBatch(sql.FieldNotIn(FieldTotalContributionUsd, vs...))
+}
+
+// TotalContributionUsdGT applies the GT predicate on the "total_contribution_usd" field.
+func TotalContributionUsdGT(v float64) predicate.QuotaNetPayoutBatch {
+	return predicate.QuotaNetPayoutBatch(sql.FieldGT(FieldTotalContributionUsd, v))
+}
+
+// TotalContributionUsdGTE applies the GTE predicate on the "total_contribution_usd" field.
+func TotalContributionUsdGTE(v float64) predicate.QuotaNetPayoutBatch {
+	return predicate.QuotaNetPayoutBatch(sql.FieldGTE(FieldTotalContributionUsd, v))
+}
+
+// TotalContributionUsdLT applies the LT predicate on the "total_contribution_usd" field.
+func TotalContributionUsdLT(v float64) predicate.QuotaNetPayoutBatch {
+	return predicate.QuotaNetPayoutBatch(sql.FieldLT(FieldTotalContributionUsd, v))
+}
+
+// TotalContributionUsdLTE applies the LTE predicate on the "total_contribution_usd" field.
+func TotalContributionUsdLTE(v float64) predicate.QuotaNetPayoutBatch {
+	return predicate.QuotaNetPayoutBatch(sql.FieldLTE(FieldTotalContributionUsd, v))
 }
 
 // TotalAmountCxsEQ applies the EQ predicate on the "total_amount_cxs" field.

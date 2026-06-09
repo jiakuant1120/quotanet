@@ -131,6 +131,27 @@ func (_u *QuotaNetPayoutItemUpdate) AddTokenFlow(v int64) *QuotaNetPayoutItemUpd
 	return _u
 }
 
+// SetContributionUsd sets the "contribution_usd" field.
+func (_u *QuotaNetPayoutItemUpdate) SetContributionUsd(v float64) *QuotaNetPayoutItemUpdate {
+	_u.mutation.ResetContributionUsd()
+	_u.mutation.SetContributionUsd(v)
+	return _u
+}
+
+// SetNillableContributionUsd sets the "contribution_usd" field if the given value is not nil.
+func (_u *QuotaNetPayoutItemUpdate) SetNillableContributionUsd(v *float64) *QuotaNetPayoutItemUpdate {
+	if v != nil {
+		_u.SetContributionUsd(*v)
+	}
+	return _u
+}
+
+// AddContributionUsd adds value to the "contribution_usd" field.
+func (_u *QuotaNetPayoutItemUpdate) AddContributionUsd(v float64) *QuotaNetPayoutItemUpdate {
+	_u.mutation.AddContributionUsd(v)
+	return _u
+}
+
 // SetAmountCxs sets the "amount_cxs" field.
 func (_u *QuotaNetPayoutItemUpdate) SetAmountCxs(v float64) *QuotaNetPayoutItemUpdate {
 	_u.mutation.ResetAmountCxs()
@@ -334,6 +355,12 @@ func (_u *QuotaNetPayoutItemUpdate) sqlSave(ctx context.Context) (_node int, err
 	if value, ok := _u.mutation.AddedTokenFlow(); ok {
 		_spec.AddField(quotanetpayoutitem.FieldTokenFlow, field.TypeInt64, value)
 	}
+	if value, ok := _u.mutation.ContributionUsd(); ok {
+		_spec.SetField(quotanetpayoutitem.FieldContributionUsd, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedContributionUsd(); ok {
+		_spec.AddField(quotanetpayoutitem.FieldContributionUsd, field.TypeFloat64, value)
+	}
 	if value, ok := _u.mutation.AmountCxs(); ok {
 		_spec.SetField(quotanetpayoutitem.FieldAmountCxs, field.TypeFloat64, value)
 	}
@@ -481,6 +508,27 @@ func (_u *QuotaNetPayoutItemUpdateOne) SetNillableTokenFlow(v *int64) *QuotaNetP
 // AddTokenFlow adds value to the "token_flow" field.
 func (_u *QuotaNetPayoutItemUpdateOne) AddTokenFlow(v int64) *QuotaNetPayoutItemUpdateOne {
 	_u.mutation.AddTokenFlow(v)
+	return _u
+}
+
+// SetContributionUsd sets the "contribution_usd" field.
+func (_u *QuotaNetPayoutItemUpdateOne) SetContributionUsd(v float64) *QuotaNetPayoutItemUpdateOne {
+	_u.mutation.ResetContributionUsd()
+	_u.mutation.SetContributionUsd(v)
+	return _u
+}
+
+// SetNillableContributionUsd sets the "contribution_usd" field if the given value is not nil.
+func (_u *QuotaNetPayoutItemUpdateOne) SetNillableContributionUsd(v *float64) *QuotaNetPayoutItemUpdateOne {
+	if v != nil {
+		_u.SetContributionUsd(*v)
+	}
+	return _u
+}
+
+// AddContributionUsd adds value to the "contribution_usd" field.
+func (_u *QuotaNetPayoutItemUpdateOne) AddContributionUsd(v float64) *QuotaNetPayoutItemUpdateOne {
+	_u.mutation.AddContributionUsd(v)
 	return _u
 }
 
@@ -716,6 +764,12 @@ func (_u *QuotaNetPayoutItemUpdateOne) sqlSave(ctx context.Context) (_node *Quot
 	}
 	if value, ok := _u.mutation.AddedTokenFlow(); ok {
 		_spec.AddField(quotanetpayoutitem.FieldTokenFlow, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.ContributionUsd(); ok {
+		_spec.SetField(quotanetpayoutitem.FieldContributionUsd, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedContributionUsd(); ok {
+		_spec.AddField(quotanetpayoutitem.FieldContributionUsd, field.TypeFloat64, value)
 	}
 	if value, ok := _u.mutation.AmountCxs(); ok {
 		_spec.SetField(quotanetpayoutitem.FieldAmountCxs, field.TypeFloat64, value)

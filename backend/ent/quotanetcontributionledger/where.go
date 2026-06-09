@@ -104,6 +104,21 @@ func TokenFlow(v int64) predicate.QuotaNetContributionLedger {
 	return predicate.QuotaNetContributionLedger(sql.FieldEQ(FieldTokenFlow, v))
 }
 
+// StandardCostUsd applies equality check predicate on the "standard_cost_usd" field. It's identical to StandardCostUsdEQ.
+func StandardCostUsd(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldEQ(FieldStandardCostUsd, v))
+}
+
+// ActualCostUsd applies equality check predicate on the "actual_cost_usd" field. It's identical to ActualCostUsdEQ.
+func ActualCostUsd(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldEQ(FieldActualCostUsd, v))
+}
+
+// ContributionUsd applies equality check predicate on the "contribution_usd" field. It's identical to ContributionUsdEQ.
+func ContributionUsd(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldEQ(FieldContributionUsd, v))
+}
+
 // AmountCxs applies equality check predicate on the "amount_cxs" field. It's identical to AmountCxsEQ.
 func AmountCxs(v float64) predicate.QuotaNetContributionLedger {
 	return predicate.QuotaNetContributionLedger(sql.FieldEQ(FieldAmountCxs, v))
@@ -647,6 +662,126 @@ func TokenFlowLT(v int64) predicate.QuotaNetContributionLedger {
 // TokenFlowLTE applies the LTE predicate on the "token_flow" field.
 func TokenFlowLTE(v int64) predicate.QuotaNetContributionLedger {
 	return predicate.QuotaNetContributionLedger(sql.FieldLTE(FieldTokenFlow, v))
+}
+
+// StandardCostUsdEQ applies the EQ predicate on the "standard_cost_usd" field.
+func StandardCostUsdEQ(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldEQ(FieldStandardCostUsd, v))
+}
+
+// StandardCostUsdNEQ applies the NEQ predicate on the "standard_cost_usd" field.
+func StandardCostUsdNEQ(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldNEQ(FieldStandardCostUsd, v))
+}
+
+// StandardCostUsdIn applies the In predicate on the "standard_cost_usd" field.
+func StandardCostUsdIn(vs ...float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldIn(FieldStandardCostUsd, vs...))
+}
+
+// StandardCostUsdNotIn applies the NotIn predicate on the "standard_cost_usd" field.
+func StandardCostUsdNotIn(vs ...float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldNotIn(FieldStandardCostUsd, vs...))
+}
+
+// StandardCostUsdGT applies the GT predicate on the "standard_cost_usd" field.
+func StandardCostUsdGT(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldGT(FieldStandardCostUsd, v))
+}
+
+// StandardCostUsdGTE applies the GTE predicate on the "standard_cost_usd" field.
+func StandardCostUsdGTE(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldGTE(FieldStandardCostUsd, v))
+}
+
+// StandardCostUsdLT applies the LT predicate on the "standard_cost_usd" field.
+func StandardCostUsdLT(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldLT(FieldStandardCostUsd, v))
+}
+
+// StandardCostUsdLTE applies the LTE predicate on the "standard_cost_usd" field.
+func StandardCostUsdLTE(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldLTE(FieldStandardCostUsd, v))
+}
+
+// ActualCostUsdEQ applies the EQ predicate on the "actual_cost_usd" field.
+func ActualCostUsdEQ(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldEQ(FieldActualCostUsd, v))
+}
+
+// ActualCostUsdNEQ applies the NEQ predicate on the "actual_cost_usd" field.
+func ActualCostUsdNEQ(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldNEQ(FieldActualCostUsd, v))
+}
+
+// ActualCostUsdIn applies the In predicate on the "actual_cost_usd" field.
+func ActualCostUsdIn(vs ...float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldIn(FieldActualCostUsd, vs...))
+}
+
+// ActualCostUsdNotIn applies the NotIn predicate on the "actual_cost_usd" field.
+func ActualCostUsdNotIn(vs ...float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldNotIn(FieldActualCostUsd, vs...))
+}
+
+// ActualCostUsdGT applies the GT predicate on the "actual_cost_usd" field.
+func ActualCostUsdGT(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldGT(FieldActualCostUsd, v))
+}
+
+// ActualCostUsdGTE applies the GTE predicate on the "actual_cost_usd" field.
+func ActualCostUsdGTE(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldGTE(FieldActualCostUsd, v))
+}
+
+// ActualCostUsdLT applies the LT predicate on the "actual_cost_usd" field.
+func ActualCostUsdLT(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldLT(FieldActualCostUsd, v))
+}
+
+// ActualCostUsdLTE applies the LTE predicate on the "actual_cost_usd" field.
+func ActualCostUsdLTE(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldLTE(FieldActualCostUsd, v))
+}
+
+// ContributionUsdEQ applies the EQ predicate on the "contribution_usd" field.
+func ContributionUsdEQ(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldEQ(FieldContributionUsd, v))
+}
+
+// ContributionUsdNEQ applies the NEQ predicate on the "contribution_usd" field.
+func ContributionUsdNEQ(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldNEQ(FieldContributionUsd, v))
+}
+
+// ContributionUsdIn applies the In predicate on the "contribution_usd" field.
+func ContributionUsdIn(vs ...float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldIn(FieldContributionUsd, vs...))
+}
+
+// ContributionUsdNotIn applies the NotIn predicate on the "contribution_usd" field.
+func ContributionUsdNotIn(vs ...float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldNotIn(FieldContributionUsd, vs...))
+}
+
+// ContributionUsdGT applies the GT predicate on the "contribution_usd" field.
+func ContributionUsdGT(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldGT(FieldContributionUsd, v))
+}
+
+// ContributionUsdGTE applies the GTE predicate on the "contribution_usd" field.
+func ContributionUsdGTE(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldGTE(FieldContributionUsd, v))
+}
+
+// ContributionUsdLT applies the LT predicate on the "contribution_usd" field.
+func ContributionUsdLT(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldLT(FieldContributionUsd, v))
+}
+
+// ContributionUsdLTE applies the LTE predicate on the "contribution_usd" field.
+func ContributionUsdLTE(v float64) predicate.QuotaNetContributionLedger {
+	return predicate.QuotaNetContributionLedger(sql.FieldLTE(FieldContributionUsd, v))
 }
 
 // AmountCxsEQ applies the EQ predicate on the "amount_cxs" field.

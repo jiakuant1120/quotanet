@@ -33,6 +33,12 @@ const (
 	FieldModel = "model"
 	// FieldTokenFlow holds the string denoting the token_flow field in the database.
 	FieldTokenFlow = "token_flow"
+	// FieldStandardCostUsd holds the string denoting the standard_cost_usd field in the database.
+	FieldStandardCostUsd = "standard_cost_usd"
+	// FieldActualCostUsd holds the string denoting the actual_cost_usd field in the database.
+	FieldActualCostUsd = "actual_cost_usd"
+	// FieldContributionUsd holds the string denoting the contribution_usd field in the database.
+	FieldContributionUsd = "contribution_usd"
 	// FieldAmountCxs holds the string denoting the amount_cxs field in the database.
 	FieldAmountCxs = "amount_cxs"
 	// FieldRate holds the string denoting the rate field in the database.
@@ -60,6 +66,9 @@ var Columns = []string{
 	FieldPlatform,
 	FieldModel,
 	FieldTokenFlow,
+	FieldStandardCostUsd,
+	FieldActualCostUsd,
+	FieldContributionUsd,
 	FieldAmountCxs,
 	FieldRate,
 	FieldStatus,
@@ -94,6 +103,12 @@ var (
 	ModelValidator func(string) error
 	// DefaultTokenFlow holds the default value on creation for the "token_flow" field.
 	DefaultTokenFlow int64
+	// DefaultStandardCostUsd holds the default value on creation for the "standard_cost_usd" field.
+	DefaultStandardCostUsd float64
+	// DefaultActualCostUsd holds the default value on creation for the "actual_cost_usd" field.
+	DefaultActualCostUsd float64
+	// DefaultContributionUsd holds the default value on creation for the "contribution_usd" field.
+	DefaultContributionUsd float64
 	// DefaultAmountCxs holds the default value on creation for the "amount_cxs" field.
 	DefaultAmountCxs float64
 	// DefaultRate holds the default value on creation for the "rate" field.
@@ -160,6 +175,21 @@ func ByModel(opts ...sql.OrderTermOption) OrderOption {
 // ByTokenFlow orders the results by the token_flow field.
 func ByTokenFlow(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTokenFlow, opts...).ToFunc()
+}
+
+// ByStandardCostUsd orders the results by the standard_cost_usd field.
+func ByStandardCostUsd(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStandardCostUsd, opts...).ToFunc()
+}
+
+// ByActualCostUsd orders the results by the actual_cost_usd field.
+func ByActualCostUsd(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldActualCostUsd, opts...).ToFunc()
+}
+
+// ByContributionUsd orders the results by the contribution_usd field.
+func ByContributionUsd(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldContributionUsd, opts...).ToFunc()
 }
 
 // ByAmountCxs orders the results by the amount_cxs field.

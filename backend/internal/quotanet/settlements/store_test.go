@@ -10,22 +10,22 @@ import (
 
 func TestBuildWalletPayoutsAggregatesByWallet(t *testing.T) {
 	ledgers := []*ent.QuotaNetContributionLedger{
-		{WalletAddress: "wallet-1", NodeID: 11, TokenFlow: 100},
-		{WalletAddress: "wallet-2", NodeID: 22, TokenFlow: 300},
-		{WalletAddress: "wallet-1", NodeID: 11, TokenFlow: 200},
+		{WalletAddress: "wallet-1", NodeID: 11, TokenFlow: 100, ContributionUsd: 1},
+		{WalletAddress: "wallet-2", NodeID: 22, TokenFlow: 300, ContributionUsd: 3},
+		{WalletAddress: "wallet-1", NodeID: 11, TokenFlow: 200, ContributionUsd: 2},
 	}
 
-	items := buildWalletPayouts(ledgers, 0.01)
+	items := buildWalletPayouts(ledgers)
 	if len(items) != 2 {
 		t.Fatalf("items len = %d, want 2", len(items))
 	}
-	if items[0].WalletAddress != "wallet-1" || items[0].TokenFlow != 300 || items[0].AmountCxs != 3 {
+	if items[0].WalletAddress != "wallet-1" || items[0].TokenFlow != 300 || items[0].ContributionUSD != 3 {
 		t.Fatalf("wallet-1 item = %+v", items[0])
 	}
 	if items[0].NodeID == nil || *items[0].NodeID != 11 {
 		t.Fatalf("wallet-1 node_id = %v, want 11", items[0].NodeID)
 	}
-	if items[1].WalletAddress != "wallet-2" || items[1].TokenFlow != 300 || items[1].AmountCxs != 3 {
+	if items[1].WalletAddress != "wallet-2" || items[1].TokenFlow != 300 || items[1].ContributionUSD != 3 {
 		t.Fatalf("wallet-2 item = %+v", items[1])
 	}
 }
@@ -36,7 +36,7 @@ func TestBuildWalletPayoutsClearsNodeIDForMultiNodeWallet(t *testing.T) {
 		{WalletAddress: "wallet-1", NodeID: 12, TokenFlow: 200},
 	}
 
-	items := buildWalletPayouts(ledgers, 0)
+	items := buildWalletPayouts(ledgers)
 	if len(items) != 1 {
 		t.Fatalf("items len = %d, want 1", len(items))
 	}
@@ -59,9 +59,8 @@ func TestValidateUpdateItemStatusInput(t *testing.T) {
 			input: UpdateItemStatusInput{Status: protocol.SettlementStatusPending},
 		},
 		{
-			name:    "finalized requires tx hash",
-			input:   UpdateItemStatusInput{Status: protocol.SettlementStatusFinalized},
-			wantErr: true,
+			name:  "finalized allows manual settlement without tx hash",
+			input: UpdateItemStatusInput{Status: protocol.SettlementStatusFinalized},
 		},
 		{
 			name:  "finalized accepts tx hash",

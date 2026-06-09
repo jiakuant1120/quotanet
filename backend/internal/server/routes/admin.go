@@ -141,6 +141,8 @@ func registerQuotaNetTaskRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 func registerQuotaNetSettlementRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 	settlements := admin.Group("/quotanet/settlements")
 	{
+		settlements.GET("/config", h.Admin.QuotaNetSettlement.Config)
+		settlements.PUT("/config", h.Admin.QuotaNetSettlement.UpdateConfig)
 		settlements.GET("/ledgers", h.Admin.QuotaNetSettlement.Ledgers)
 		settlements.GET("/summary", h.Admin.QuotaNetSettlement.Summary)
 		settlements.GET("/wallets", h.Admin.QuotaNetSettlement.WalletSummaries)

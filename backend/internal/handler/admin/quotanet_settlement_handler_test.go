@@ -56,8 +56,7 @@ func TestQuotaNetPayoutBatchCreateInputParsesRFC3339Window(t *testing.T) {
 		"batch_key":"batch-1",
 		"window_start":"2026-06-01T00:00:00Z",
 		"window_end":"2026-06-02T00:00:00Z",
-		"network":"solana-devnet",
-		"rate":0.001
+		"network":"manual"
 	}`)))
 	c.Request.Header.Set("Content-Type", "application/json")
 
@@ -65,14 +64,11 @@ func TestQuotaNetPayoutBatchCreateInputParsesRFC3339Window(t *testing.T) {
 	if !ok {
 		t.Fatal("quotaNetPayoutBatchCreateInput() ok = false")
 	}
-	if input.BatchKey != "batch-1" || input.Network != "solana-devnet" {
+	if input.BatchKey != "batch-1" || input.Network != "manual" {
 		t.Fatalf("input strings = %+v", input)
 	}
 	if input.WindowStart.IsZero() || input.WindowEnd.IsZero() || !input.WindowEnd.After(input.WindowStart) {
 		t.Fatalf("input window = %s - %s", input.WindowStart, input.WindowEnd)
-	}
-	if input.Rate != 0.001 {
-		t.Fatalf("rate = %v, want 0.001", input.Rate)
 	}
 }
 

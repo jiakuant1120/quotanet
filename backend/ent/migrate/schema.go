@@ -1136,6 +1136,9 @@ var (
 		{Name: "platform", Type: field.TypeString, Size: 50},
 		{Name: "model", Type: field.TypeString, Size: 100},
 		{Name: "token_flow", Type: field.TypeInt64, Default: 0},
+		{Name: "standard_cost_usd", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,10)"}},
+		{Name: "actual_cost_usd", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,10)"}},
+		{Name: "contribution_usd", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,10)"}},
 		{Name: "amount_cxs", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(30,12)"}},
 		{Name: "rate", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,10)"}},
 		{Name: "status", Type: field.TypeString, Size: 20, Default: "pending"},
@@ -1161,17 +1164,17 @@ var (
 			{
 				Name:    "quotanetcontributionledger_wallet_address_status",
 				Unique:  false,
-				Columns: []*schema.Column{QuotanetContributionLedgerColumns[6], QuotanetContributionLedgerColumns[13]},
+				Columns: []*schema.Column{QuotanetContributionLedgerColumns[6], QuotanetContributionLedgerColumns[16]},
 			},
 			{
 				Name:    "quotanetcontributionledger_payout_batch_id",
 				Unique:  false,
-				Columns: []*schema.Column{QuotanetContributionLedgerColumns[14]},
+				Columns: []*schema.Column{QuotanetContributionLedgerColumns[17]},
 			},
 			{
 				Name:    "quotanetcontributionledger_status_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{QuotanetContributionLedgerColumns[13], QuotanetContributionLedgerColumns[1]},
+				Columns: []*schema.Column{QuotanetContributionLedgerColumns[16], QuotanetContributionLedgerColumns[1]},
 			},
 		},
 	}
@@ -1288,6 +1291,7 @@ var (
 		{Name: "status", Type: field.TypeString, Size: 20, Default: "draft"},
 		{Name: "network", Type: field.TypeString, Size: 40, Default: "solana-devnet"},
 		{Name: "total_token_flow", Type: field.TypeInt64, Default: 0},
+		{Name: "total_contribution_usd", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,10)"}},
 		{Name: "total_amount_cxs", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(30,12)"}},
 		{Name: "item_count", Type: field.TypeInt, Default: 0},
 		{Name: "created_by", Type: field.TypeInt64, Nullable: true},
@@ -1326,6 +1330,7 @@ var (
 		{Name: "node_id", Type: field.TypeInt64, Nullable: true},
 		{Name: "wallet_address", Type: field.TypeString, Size: 128},
 		{Name: "token_flow", Type: field.TypeInt64, Default: 0},
+		{Name: "contribution_usd", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,10)"}},
 		{Name: "amount_cxs", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(30,12)"}},
 		{Name: "status", Type: field.TypeString, Size: 20, Default: "pending"},
 		{Name: "tx_hash", Type: field.TypeString, Nullable: true, Size: 128},
@@ -1351,12 +1356,12 @@ var (
 			{
 				Name:    "quotanetpayoutitem_wallet_address_status",
 				Unique:  false,
-				Columns: []*schema.Column{QuotanetPayoutItemsColumns[6], QuotanetPayoutItemsColumns[9]},
+				Columns: []*schema.Column{QuotanetPayoutItemsColumns[6], QuotanetPayoutItemsColumns[10]},
 			},
 			{
 				Name:    "quotanetpayoutitem_tx_hash",
 				Unique:  false,
-				Columns: []*schema.Column{QuotanetPayoutItemsColumns[10]},
+				Columns: []*schema.Column{QuotanetPayoutItemsColumns[11]},
 			},
 		},
 	}

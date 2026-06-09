@@ -125,6 +125,27 @@ func (_u *QuotaNetPayoutBatchUpdate) AddTotalTokenFlow(v int64) *QuotaNetPayoutB
 	return _u
 }
 
+// SetTotalContributionUsd sets the "total_contribution_usd" field.
+func (_u *QuotaNetPayoutBatchUpdate) SetTotalContributionUsd(v float64) *QuotaNetPayoutBatchUpdate {
+	_u.mutation.ResetTotalContributionUsd()
+	_u.mutation.SetTotalContributionUsd(v)
+	return _u
+}
+
+// SetNillableTotalContributionUsd sets the "total_contribution_usd" field if the given value is not nil.
+func (_u *QuotaNetPayoutBatchUpdate) SetNillableTotalContributionUsd(v *float64) *QuotaNetPayoutBatchUpdate {
+	if v != nil {
+		_u.SetTotalContributionUsd(*v)
+	}
+	return _u
+}
+
+// AddTotalContributionUsd adds value to the "total_contribution_usd" field.
+func (_u *QuotaNetPayoutBatchUpdate) AddTotalContributionUsd(v float64) *QuotaNetPayoutBatchUpdate {
+	_u.mutation.AddTotalContributionUsd(v)
+	return _u
+}
+
 // SetTotalAmountCxs sets the "total_amount_cxs" field.
 func (_u *QuotaNetPayoutBatchUpdate) SetTotalAmountCxs(v float64) *QuotaNetPayoutBatchUpdate {
 	_u.mutation.ResetTotalAmountCxs()
@@ -318,6 +339,12 @@ func (_u *QuotaNetPayoutBatchUpdate) sqlSave(ctx context.Context) (_node int, er
 	if value, ok := _u.mutation.AddedTotalTokenFlow(); ok {
 		_spec.AddField(quotanetpayoutbatch.FieldTotalTokenFlow, field.TypeInt64, value)
 	}
+	if value, ok := _u.mutation.TotalContributionUsd(); ok {
+		_spec.SetField(quotanetpayoutbatch.FieldTotalContributionUsd, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedTotalContributionUsd(); ok {
+		_spec.AddField(quotanetpayoutbatch.FieldTotalContributionUsd, field.TypeFloat64, value)
+	}
 	if value, ok := _u.mutation.TotalAmountCxs(); ok {
 		_spec.SetField(quotanetpayoutbatch.FieldTotalAmountCxs, field.TypeFloat64, value)
 	}
@@ -462,6 +489,27 @@ func (_u *QuotaNetPayoutBatchUpdateOne) SetNillableTotalTokenFlow(v *int64) *Quo
 // AddTotalTokenFlow adds value to the "total_token_flow" field.
 func (_u *QuotaNetPayoutBatchUpdateOne) AddTotalTokenFlow(v int64) *QuotaNetPayoutBatchUpdateOne {
 	_u.mutation.AddTotalTokenFlow(v)
+	return _u
+}
+
+// SetTotalContributionUsd sets the "total_contribution_usd" field.
+func (_u *QuotaNetPayoutBatchUpdateOne) SetTotalContributionUsd(v float64) *QuotaNetPayoutBatchUpdateOne {
+	_u.mutation.ResetTotalContributionUsd()
+	_u.mutation.SetTotalContributionUsd(v)
+	return _u
+}
+
+// SetNillableTotalContributionUsd sets the "total_contribution_usd" field if the given value is not nil.
+func (_u *QuotaNetPayoutBatchUpdateOne) SetNillableTotalContributionUsd(v *float64) *QuotaNetPayoutBatchUpdateOne {
+	if v != nil {
+		_u.SetTotalContributionUsd(*v)
+	}
+	return _u
+}
+
+// AddTotalContributionUsd adds value to the "total_contribution_usd" field.
+func (_u *QuotaNetPayoutBatchUpdateOne) AddTotalContributionUsd(v float64) *QuotaNetPayoutBatchUpdateOne {
+	_u.mutation.AddTotalContributionUsd(v)
 	return _u
 }
 
@@ -687,6 +735,12 @@ func (_u *QuotaNetPayoutBatchUpdateOne) sqlSave(ctx context.Context) (_node *Quo
 	}
 	if value, ok := _u.mutation.AddedTotalTokenFlow(); ok {
 		_spec.AddField(quotanetpayoutbatch.FieldTotalTokenFlow, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.TotalContributionUsd(); ok {
+		_spec.SetField(quotanetpayoutbatch.FieldTotalContributionUsd, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedTotalContributionUsd(); ok {
+		_spec.AddField(quotanetpayoutbatch.FieldTotalContributionUsd, field.TypeFloat64, value)
 	}
 	if value, ok := _u.mutation.TotalAmountCxs(); ok {
 		_spec.SetField(quotanetpayoutbatch.FieldTotalAmountCxs, field.TypeFloat64, value)

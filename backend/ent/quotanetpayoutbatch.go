@@ -33,6 +33,8 @@ type QuotaNetPayoutBatch struct {
 	Network string `json:"network,omitempty"`
 	// TotalTokenFlow holds the value of the "total_token_flow" field.
 	TotalTokenFlow int64 `json:"total_token_flow,omitempty"`
+	// Total QuotaNet contribution amount in USD
+	TotalContributionUsd float64 `json:"total_contribution_usd,omitempty"`
 	// TotalAmountCxs holds the value of the "total_amount_cxs" field.
 	TotalAmountCxs float64 `json:"total_amount_cxs,omitempty"`
 	// ItemCount holds the value of the "item_count" field.
@@ -49,7 +51,7 @@ func (*QuotaNetPayoutBatch) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case quotanetpayoutbatch.FieldTotalAmountCxs:
+		case quotanetpayoutbatch.FieldTotalContributionUsd, quotanetpayoutbatch.FieldTotalAmountCxs:
 			values[i] = new(sql.NullFloat64)
 		case quotanetpayoutbatch.FieldID, quotanetpayoutbatch.FieldTotalTokenFlow, quotanetpayoutbatch.FieldItemCount, quotanetpayoutbatch.FieldCreatedBy, quotanetpayoutbatch.FieldApprovedBy:
 			values[i] = new(sql.NullInt64)
@@ -125,6 +127,12 @@ func (_m *QuotaNetPayoutBatch) assignValues(columns []string, values []any) erro
 				return fmt.Errorf("unexpected type %T for field total_token_flow", values[i])
 			} else if value.Valid {
 				_m.TotalTokenFlow = value.Int64
+			}
+		case quotanetpayoutbatch.FieldTotalContributionUsd:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field total_contribution_usd", values[i])
+			} else if value.Valid {
+				_m.TotalContributionUsd = value.Float64
 			}
 		case quotanetpayoutbatch.FieldTotalAmountCxs:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
@@ -211,6 +219,9 @@ func (_m *QuotaNetPayoutBatch) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("total_token_flow=")
 	builder.WriteString(fmt.Sprintf("%v", _m.TotalTokenFlow))
+	builder.WriteString(", ")
+	builder.WriteString("total_contribution_usd=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TotalContributionUsd))
 	builder.WriteString(", ")
 	builder.WriteString("total_amount_cxs=")
 	builder.WriteString(fmt.Sprintf("%v", _m.TotalAmountCxs))

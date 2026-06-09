@@ -96,6 +96,20 @@ func (_c *QuotaNetPayoutItemCreate) SetNillableTokenFlow(v *int64) *QuotaNetPayo
 	return _c
 }
 
+// SetContributionUsd sets the "contribution_usd" field.
+func (_c *QuotaNetPayoutItemCreate) SetContributionUsd(v float64) *QuotaNetPayoutItemCreate {
+	_c.mutation.SetContributionUsd(v)
+	return _c
+}
+
+// SetNillableContributionUsd sets the "contribution_usd" field if the given value is not nil.
+func (_c *QuotaNetPayoutItemCreate) SetNillableContributionUsd(v *float64) *QuotaNetPayoutItemCreate {
+	if v != nil {
+		_c.SetContributionUsd(*v)
+	}
+	return _c
+}
+
 // SetAmountCxs sets the "amount_cxs" field.
 func (_c *QuotaNetPayoutItemCreate) SetAmountCxs(v float64) *QuotaNetPayoutItemCreate {
 	_c.mutation.SetAmountCxs(v)
@@ -213,6 +227,10 @@ func (_c *QuotaNetPayoutItemCreate) defaults() {
 		v := quotanetpayoutitem.DefaultTokenFlow
 		_c.mutation.SetTokenFlow(v)
 	}
+	if _, ok := _c.mutation.ContributionUsd(); !ok {
+		v := quotanetpayoutitem.DefaultContributionUsd
+		_c.mutation.SetContributionUsd(v)
+	}
 	if _, ok := _c.mutation.AmountCxs(); !ok {
 		v := quotanetpayoutitem.DefaultAmountCxs
 		_c.mutation.SetAmountCxs(v)
@@ -252,6 +270,9 @@ func (_c *QuotaNetPayoutItemCreate) check() error {
 	}
 	if _, ok := _c.mutation.TokenFlow(); !ok {
 		return &ValidationError{Name: "token_flow", err: errors.New(`ent: missing required field "QuotaNetPayoutItem.token_flow"`)}
+	}
+	if _, ok := _c.mutation.ContributionUsd(); !ok {
+		return &ValidationError{Name: "contribution_usd", err: errors.New(`ent: missing required field "QuotaNetPayoutItem.contribution_usd"`)}
 	}
 	if _, ok := _c.mutation.AmountCxs(); !ok {
 		return &ValidationError{Name: "amount_cxs", err: errors.New(`ent: missing required field "QuotaNetPayoutItem.amount_cxs"`)}
@@ -323,6 +344,10 @@ func (_c *QuotaNetPayoutItemCreate) createSpec() (*QuotaNetPayoutItem, *sqlgraph
 	if value, ok := _c.mutation.TokenFlow(); ok {
 		_spec.SetField(quotanetpayoutitem.FieldTokenFlow, field.TypeInt64, value)
 		_node.TokenFlow = value
+	}
+	if value, ok := _c.mutation.ContributionUsd(); ok {
+		_spec.SetField(quotanetpayoutitem.FieldContributionUsd, field.TypeFloat64, value)
+		_node.ContributionUsd = value
 	}
 	if value, ok := _c.mutation.AmountCxs(); ok {
 		_spec.SetField(quotanetpayoutitem.FieldAmountCxs, field.TypeFloat64, value)
@@ -489,6 +514,24 @@ func (u *QuotaNetPayoutItemUpsert) UpdateTokenFlow() *QuotaNetPayoutItemUpsert {
 // AddTokenFlow adds v to the "token_flow" field.
 func (u *QuotaNetPayoutItemUpsert) AddTokenFlow(v int64) *QuotaNetPayoutItemUpsert {
 	u.Add(quotanetpayoutitem.FieldTokenFlow, v)
+	return u
+}
+
+// SetContributionUsd sets the "contribution_usd" field.
+func (u *QuotaNetPayoutItemUpsert) SetContributionUsd(v float64) *QuotaNetPayoutItemUpsert {
+	u.Set(quotanetpayoutitem.FieldContributionUsd, v)
+	return u
+}
+
+// UpdateContributionUsd sets the "contribution_usd" field to the value that was provided on create.
+func (u *QuotaNetPayoutItemUpsert) UpdateContributionUsd() *QuotaNetPayoutItemUpsert {
+	u.SetExcluded(quotanetpayoutitem.FieldContributionUsd)
+	return u
+}
+
+// AddContributionUsd adds v to the "contribution_usd" field.
+func (u *QuotaNetPayoutItemUpsert) AddContributionUsd(v float64) *QuotaNetPayoutItemUpsert {
+	u.Add(quotanetpayoutitem.FieldContributionUsd, v)
 	return u
 }
 
@@ -730,6 +773,27 @@ func (u *QuotaNetPayoutItemUpsertOne) AddTokenFlow(v int64) *QuotaNetPayoutItemU
 func (u *QuotaNetPayoutItemUpsertOne) UpdateTokenFlow() *QuotaNetPayoutItemUpsertOne {
 	return u.Update(func(s *QuotaNetPayoutItemUpsert) {
 		s.UpdateTokenFlow()
+	})
+}
+
+// SetContributionUsd sets the "contribution_usd" field.
+func (u *QuotaNetPayoutItemUpsertOne) SetContributionUsd(v float64) *QuotaNetPayoutItemUpsertOne {
+	return u.Update(func(s *QuotaNetPayoutItemUpsert) {
+		s.SetContributionUsd(v)
+	})
+}
+
+// AddContributionUsd adds v to the "contribution_usd" field.
+func (u *QuotaNetPayoutItemUpsertOne) AddContributionUsd(v float64) *QuotaNetPayoutItemUpsertOne {
+	return u.Update(func(s *QuotaNetPayoutItemUpsert) {
+		s.AddContributionUsd(v)
+	})
+}
+
+// UpdateContributionUsd sets the "contribution_usd" field to the value that was provided on create.
+func (u *QuotaNetPayoutItemUpsertOne) UpdateContributionUsd() *QuotaNetPayoutItemUpsertOne {
+	return u.Update(func(s *QuotaNetPayoutItemUpsert) {
+		s.UpdateContributionUsd()
 	})
 }
 
@@ -1151,6 +1215,27 @@ func (u *QuotaNetPayoutItemUpsertBulk) AddTokenFlow(v int64) *QuotaNetPayoutItem
 func (u *QuotaNetPayoutItemUpsertBulk) UpdateTokenFlow() *QuotaNetPayoutItemUpsertBulk {
 	return u.Update(func(s *QuotaNetPayoutItemUpsert) {
 		s.UpdateTokenFlow()
+	})
+}
+
+// SetContributionUsd sets the "contribution_usd" field.
+func (u *QuotaNetPayoutItemUpsertBulk) SetContributionUsd(v float64) *QuotaNetPayoutItemUpsertBulk {
+	return u.Update(func(s *QuotaNetPayoutItemUpsert) {
+		s.SetContributionUsd(v)
+	})
+}
+
+// AddContributionUsd adds v to the "contribution_usd" field.
+func (u *QuotaNetPayoutItemUpsertBulk) AddContributionUsd(v float64) *QuotaNetPayoutItemUpsertBulk {
+	return u.Update(func(s *QuotaNetPayoutItemUpsert) {
+		s.AddContributionUsd(v)
+	})
+}
+
+// UpdateContributionUsd sets the "contribution_usd" field to the value that was provided on create.
+func (u *QuotaNetPayoutItemUpsertBulk) UpdateContributionUsd() *QuotaNetPayoutItemUpsertBulk {
+	return u.Update(func(s *QuotaNetPayoutItemUpsert) {
+		s.UpdateContributionUsd()
 	})
 }
 

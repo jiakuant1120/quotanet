@@ -28769,35 +28769,41 @@ func (m *ProxyMutation) ResetEdge(name string) error {
 // QuotaNetContributionLedgerMutation represents an operation that mutates the QuotaNetContributionLedger nodes in the graph.
 type QuotaNetContributionLedgerMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *int64
-	created_at         *time.Time
-	updated_at         *time.Time
-	task_id            *string
-	usage_log_id       *int64
-	addusage_log_id    *int64
-	node_id            *int64
-	addnode_id         *int64
-	wallet_address     *string
-	account_id         *int64
-	addaccount_id      *int64
-	platform           *string
-	model              *string
-	token_flow         *int64
-	addtoken_flow      *int64
-	amount_cxs         *float64
-	addamount_cxs      *float64
-	rate               *float64
-	addrate            *float64
-	status             *string
-	payout_batch_id    *int64
-	addpayout_batch_id *int64
-	settled_at         *time.Time
-	clearedFields      map[string]struct{}
-	done               bool
-	oldValue           func(context.Context) (*QuotaNetContributionLedger, error)
-	predicates         []predicate.QuotaNetContributionLedger
+	op                   Op
+	typ                  string
+	id                   *int64
+	created_at           *time.Time
+	updated_at           *time.Time
+	task_id              *string
+	usage_log_id         *int64
+	addusage_log_id      *int64
+	node_id              *int64
+	addnode_id           *int64
+	wallet_address       *string
+	account_id           *int64
+	addaccount_id        *int64
+	platform             *string
+	model                *string
+	token_flow           *int64
+	addtoken_flow        *int64
+	standard_cost_usd    *float64
+	addstandard_cost_usd *float64
+	actual_cost_usd      *float64
+	addactual_cost_usd   *float64
+	contribution_usd     *float64
+	addcontribution_usd  *float64
+	amount_cxs           *float64
+	addamount_cxs        *float64
+	rate                 *float64
+	addrate              *float64
+	status               *string
+	payout_batch_id      *int64
+	addpayout_batch_id   *int64
+	settled_at           *time.Time
+	clearedFields        map[string]struct{}
+	done                 bool
+	oldValue             func(context.Context) (*QuotaNetContributionLedger, error)
+	predicates           []predicate.QuotaNetContributionLedger
 }
 
 var _ ent.Mutation = (*QuotaNetContributionLedgerMutation)(nil)
@@ -29366,6 +29372,174 @@ func (m *QuotaNetContributionLedgerMutation) ResetTokenFlow() {
 	m.addtoken_flow = nil
 }
 
+// SetStandardCostUsd sets the "standard_cost_usd" field.
+func (m *QuotaNetContributionLedgerMutation) SetStandardCostUsd(f float64) {
+	m.standard_cost_usd = &f
+	m.addstandard_cost_usd = nil
+}
+
+// StandardCostUsd returns the value of the "standard_cost_usd" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) StandardCostUsd() (r float64, exists bool) {
+	v := m.standard_cost_usd
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStandardCostUsd returns the old "standard_cost_usd" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldStandardCostUsd(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStandardCostUsd is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStandardCostUsd requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStandardCostUsd: %w", err)
+	}
+	return oldValue.StandardCostUsd, nil
+}
+
+// AddStandardCostUsd adds f to the "standard_cost_usd" field.
+func (m *QuotaNetContributionLedgerMutation) AddStandardCostUsd(f float64) {
+	if m.addstandard_cost_usd != nil {
+		*m.addstandard_cost_usd += f
+	} else {
+		m.addstandard_cost_usd = &f
+	}
+}
+
+// AddedStandardCostUsd returns the value that was added to the "standard_cost_usd" field in this mutation.
+func (m *QuotaNetContributionLedgerMutation) AddedStandardCostUsd() (r float64, exists bool) {
+	v := m.addstandard_cost_usd
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetStandardCostUsd resets all changes to the "standard_cost_usd" field.
+func (m *QuotaNetContributionLedgerMutation) ResetStandardCostUsd() {
+	m.standard_cost_usd = nil
+	m.addstandard_cost_usd = nil
+}
+
+// SetActualCostUsd sets the "actual_cost_usd" field.
+func (m *QuotaNetContributionLedgerMutation) SetActualCostUsd(f float64) {
+	m.actual_cost_usd = &f
+	m.addactual_cost_usd = nil
+}
+
+// ActualCostUsd returns the value of the "actual_cost_usd" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) ActualCostUsd() (r float64, exists bool) {
+	v := m.actual_cost_usd
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActualCostUsd returns the old "actual_cost_usd" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldActualCostUsd(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActualCostUsd is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActualCostUsd requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActualCostUsd: %w", err)
+	}
+	return oldValue.ActualCostUsd, nil
+}
+
+// AddActualCostUsd adds f to the "actual_cost_usd" field.
+func (m *QuotaNetContributionLedgerMutation) AddActualCostUsd(f float64) {
+	if m.addactual_cost_usd != nil {
+		*m.addactual_cost_usd += f
+	} else {
+		m.addactual_cost_usd = &f
+	}
+}
+
+// AddedActualCostUsd returns the value that was added to the "actual_cost_usd" field in this mutation.
+func (m *QuotaNetContributionLedgerMutation) AddedActualCostUsd() (r float64, exists bool) {
+	v := m.addactual_cost_usd
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetActualCostUsd resets all changes to the "actual_cost_usd" field.
+func (m *QuotaNetContributionLedgerMutation) ResetActualCostUsd() {
+	m.actual_cost_usd = nil
+	m.addactual_cost_usd = nil
+}
+
+// SetContributionUsd sets the "contribution_usd" field.
+func (m *QuotaNetContributionLedgerMutation) SetContributionUsd(f float64) {
+	m.contribution_usd = &f
+	m.addcontribution_usd = nil
+}
+
+// ContributionUsd returns the value of the "contribution_usd" field in the mutation.
+func (m *QuotaNetContributionLedgerMutation) ContributionUsd() (r float64, exists bool) {
+	v := m.contribution_usd
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContributionUsd returns the old "contribution_usd" field's value of the QuotaNetContributionLedger entity.
+// If the QuotaNetContributionLedger object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetContributionLedgerMutation) OldContributionUsd(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContributionUsd is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContributionUsd requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContributionUsd: %w", err)
+	}
+	return oldValue.ContributionUsd, nil
+}
+
+// AddContributionUsd adds f to the "contribution_usd" field.
+func (m *QuotaNetContributionLedgerMutation) AddContributionUsd(f float64) {
+	if m.addcontribution_usd != nil {
+		*m.addcontribution_usd += f
+	} else {
+		m.addcontribution_usd = &f
+	}
+}
+
+// AddedContributionUsd returns the value that was added to the "contribution_usd" field in this mutation.
+func (m *QuotaNetContributionLedgerMutation) AddedContributionUsd() (r float64, exists bool) {
+	v := m.addcontribution_usd
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetContributionUsd resets all changes to the "contribution_usd" field.
+func (m *QuotaNetContributionLedgerMutation) ResetContributionUsd() {
+	m.contribution_usd = nil
+	m.addcontribution_usd = nil
+}
+
 // SetAmountCxs sets the "amount_cxs" field.
 func (m *QuotaNetContributionLedgerMutation) SetAmountCxs(f float64) {
 	m.amount_cxs = &f
@@ -29667,7 +29841,7 @@ func (m *QuotaNetContributionLedgerMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *QuotaNetContributionLedgerMutation) Fields() []string {
-	fields := make([]string, 0, 15)
+	fields := make([]string, 0, 18)
 	if m.created_at != nil {
 		fields = append(fields, quotanetcontributionledger.FieldCreatedAt)
 	}
@@ -29697,6 +29871,15 @@ func (m *QuotaNetContributionLedgerMutation) Fields() []string {
 	}
 	if m.token_flow != nil {
 		fields = append(fields, quotanetcontributionledger.FieldTokenFlow)
+	}
+	if m.standard_cost_usd != nil {
+		fields = append(fields, quotanetcontributionledger.FieldStandardCostUsd)
+	}
+	if m.actual_cost_usd != nil {
+		fields = append(fields, quotanetcontributionledger.FieldActualCostUsd)
+	}
+	if m.contribution_usd != nil {
+		fields = append(fields, quotanetcontributionledger.FieldContributionUsd)
 	}
 	if m.amount_cxs != nil {
 		fields = append(fields, quotanetcontributionledger.FieldAmountCxs)
@@ -29741,6 +29924,12 @@ func (m *QuotaNetContributionLedgerMutation) Field(name string) (ent.Value, bool
 		return m.Model()
 	case quotanetcontributionledger.FieldTokenFlow:
 		return m.TokenFlow()
+	case quotanetcontributionledger.FieldStandardCostUsd:
+		return m.StandardCostUsd()
+	case quotanetcontributionledger.FieldActualCostUsd:
+		return m.ActualCostUsd()
+	case quotanetcontributionledger.FieldContributionUsd:
+		return m.ContributionUsd()
 	case quotanetcontributionledger.FieldAmountCxs:
 		return m.AmountCxs()
 	case quotanetcontributionledger.FieldRate:
@@ -29780,6 +29969,12 @@ func (m *QuotaNetContributionLedgerMutation) OldField(ctx context.Context, name 
 		return m.OldModel(ctx)
 	case quotanetcontributionledger.FieldTokenFlow:
 		return m.OldTokenFlow(ctx)
+	case quotanetcontributionledger.FieldStandardCostUsd:
+		return m.OldStandardCostUsd(ctx)
+	case quotanetcontributionledger.FieldActualCostUsd:
+		return m.OldActualCostUsd(ctx)
+	case quotanetcontributionledger.FieldContributionUsd:
+		return m.OldContributionUsd(ctx)
 	case quotanetcontributionledger.FieldAmountCxs:
 		return m.OldAmountCxs(ctx)
 	case quotanetcontributionledger.FieldRate:
@@ -29869,6 +30064,27 @@ func (m *QuotaNetContributionLedgerMutation) SetField(name string, value ent.Val
 		}
 		m.SetTokenFlow(v)
 		return nil
+	case quotanetcontributionledger.FieldStandardCostUsd:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStandardCostUsd(v)
+		return nil
+	case quotanetcontributionledger.FieldActualCostUsd:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActualCostUsd(v)
+		return nil
+	case quotanetcontributionledger.FieldContributionUsd:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContributionUsd(v)
+		return nil
 	case quotanetcontributionledger.FieldAmountCxs:
 		v, ok := value.(float64)
 		if !ok {
@@ -29924,6 +30140,15 @@ func (m *QuotaNetContributionLedgerMutation) AddedFields() []string {
 	if m.addtoken_flow != nil {
 		fields = append(fields, quotanetcontributionledger.FieldTokenFlow)
 	}
+	if m.addstandard_cost_usd != nil {
+		fields = append(fields, quotanetcontributionledger.FieldStandardCostUsd)
+	}
+	if m.addactual_cost_usd != nil {
+		fields = append(fields, quotanetcontributionledger.FieldActualCostUsd)
+	}
+	if m.addcontribution_usd != nil {
+		fields = append(fields, quotanetcontributionledger.FieldContributionUsd)
+	}
 	if m.addamount_cxs != nil {
 		fields = append(fields, quotanetcontributionledger.FieldAmountCxs)
 	}
@@ -29949,6 +30174,12 @@ func (m *QuotaNetContributionLedgerMutation) AddedField(name string) (ent.Value,
 		return m.AddedAccountID()
 	case quotanetcontributionledger.FieldTokenFlow:
 		return m.AddedTokenFlow()
+	case quotanetcontributionledger.FieldStandardCostUsd:
+		return m.AddedStandardCostUsd()
+	case quotanetcontributionledger.FieldActualCostUsd:
+		return m.AddedActualCostUsd()
+	case quotanetcontributionledger.FieldContributionUsd:
+		return m.AddedContributionUsd()
 	case quotanetcontributionledger.FieldAmountCxs:
 		return m.AddedAmountCxs()
 	case quotanetcontributionledger.FieldRate:
@@ -29991,6 +30222,27 @@ func (m *QuotaNetContributionLedgerMutation) AddField(name string, value ent.Val
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddTokenFlow(v)
+		return nil
+	case quotanetcontributionledger.FieldStandardCostUsd:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStandardCostUsd(v)
+		return nil
+	case quotanetcontributionledger.FieldActualCostUsd:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddActualCostUsd(v)
+		return nil
+	case quotanetcontributionledger.FieldContributionUsd:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddContributionUsd(v)
 		return nil
 	case quotanetcontributionledger.FieldAmountCxs:
 		v, ok := value.(float64)
@@ -30096,6 +30348,15 @@ func (m *QuotaNetContributionLedgerMutation) ResetField(name string) error {
 		return nil
 	case quotanetcontributionledger.FieldTokenFlow:
 		m.ResetTokenFlow()
+		return nil
+	case quotanetcontributionledger.FieldStandardCostUsd:
+		m.ResetStandardCostUsd()
+		return nil
+	case quotanetcontributionledger.FieldActualCostUsd:
+		m.ResetActualCostUsd()
+		return nil
+	case quotanetcontributionledger.FieldContributionUsd:
+		m.ResetContributionUsd()
 		return nil
 	case quotanetcontributionledger.FieldAmountCxs:
 		m.ResetAmountCxs()
@@ -32605,30 +32866,32 @@ func (m *QuotaNetNodeSessionMutation) ResetEdge(name string) error {
 // QuotaNetPayoutBatchMutation represents an operation that mutates the QuotaNetPayoutBatch nodes in the graph.
 type QuotaNetPayoutBatchMutation struct {
 	config
-	op                  Op
-	typ                 string
-	id                  *int64
-	created_at          *time.Time
-	updated_at          *time.Time
-	batch_key           *string
-	window_start        *time.Time
-	window_end          *time.Time
-	status              *string
-	network             *string
-	total_token_flow    *int64
-	addtotal_token_flow *int64
-	total_amount_cxs    *float64
-	addtotal_amount_cxs *float64
-	item_count          *int
-	additem_count       *int
-	created_by          *int64
-	addcreated_by       *int64
-	approved_by         *int64
-	addapproved_by      *int64
-	clearedFields       map[string]struct{}
-	done                bool
-	oldValue            func(context.Context) (*QuotaNetPayoutBatch, error)
-	predicates          []predicate.QuotaNetPayoutBatch
+	op                        Op
+	typ                       string
+	id                        *int64
+	created_at                *time.Time
+	updated_at                *time.Time
+	batch_key                 *string
+	window_start              *time.Time
+	window_end                *time.Time
+	status                    *string
+	network                   *string
+	total_token_flow          *int64
+	addtotal_token_flow       *int64
+	total_contribution_usd    *float64
+	addtotal_contribution_usd *float64
+	total_amount_cxs          *float64
+	addtotal_amount_cxs       *float64
+	item_count                *int
+	additem_count             *int
+	created_by                *int64
+	addcreated_by             *int64
+	approved_by               *int64
+	addapproved_by            *int64
+	clearedFields             map[string]struct{}
+	done                      bool
+	oldValue                  func(context.Context) (*QuotaNetPayoutBatch, error)
+	predicates                []predicate.QuotaNetPayoutBatch
 }
 
 var _ ent.Mutation = (*QuotaNetPayoutBatchMutation)(nil)
@@ -33037,6 +33300,62 @@ func (m *QuotaNetPayoutBatchMutation) ResetTotalTokenFlow() {
 	m.addtotal_token_flow = nil
 }
 
+// SetTotalContributionUsd sets the "total_contribution_usd" field.
+func (m *QuotaNetPayoutBatchMutation) SetTotalContributionUsd(f float64) {
+	m.total_contribution_usd = &f
+	m.addtotal_contribution_usd = nil
+}
+
+// TotalContributionUsd returns the value of the "total_contribution_usd" field in the mutation.
+func (m *QuotaNetPayoutBatchMutation) TotalContributionUsd() (r float64, exists bool) {
+	v := m.total_contribution_usd
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTotalContributionUsd returns the old "total_contribution_usd" field's value of the QuotaNetPayoutBatch entity.
+// If the QuotaNetPayoutBatch object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutBatchMutation) OldTotalContributionUsd(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTotalContributionUsd is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTotalContributionUsd requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTotalContributionUsd: %w", err)
+	}
+	return oldValue.TotalContributionUsd, nil
+}
+
+// AddTotalContributionUsd adds f to the "total_contribution_usd" field.
+func (m *QuotaNetPayoutBatchMutation) AddTotalContributionUsd(f float64) {
+	if m.addtotal_contribution_usd != nil {
+		*m.addtotal_contribution_usd += f
+	} else {
+		m.addtotal_contribution_usd = &f
+	}
+}
+
+// AddedTotalContributionUsd returns the value that was added to the "total_contribution_usd" field in this mutation.
+func (m *QuotaNetPayoutBatchMutation) AddedTotalContributionUsd() (r float64, exists bool) {
+	v := m.addtotal_contribution_usd
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTotalContributionUsd resets all changes to the "total_contribution_usd" field.
+func (m *QuotaNetPayoutBatchMutation) ResetTotalContributionUsd() {
+	m.total_contribution_usd = nil
+	m.addtotal_contribution_usd = nil
+}
+
 // SetTotalAmountCxs sets the "total_amount_cxs" field.
 func (m *QuotaNetPayoutBatchMutation) SetTotalAmountCxs(f float64) {
 	m.total_amount_cxs = &f
@@ -33323,7 +33642,7 @@ func (m *QuotaNetPayoutBatchMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *QuotaNetPayoutBatchMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
 		fields = append(fields, quotanetpayoutbatch.FieldCreatedAt)
 	}
@@ -33347,6 +33666,9 @@ func (m *QuotaNetPayoutBatchMutation) Fields() []string {
 	}
 	if m.total_token_flow != nil {
 		fields = append(fields, quotanetpayoutbatch.FieldTotalTokenFlow)
+	}
+	if m.total_contribution_usd != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldTotalContributionUsd)
 	}
 	if m.total_amount_cxs != nil {
 		fields = append(fields, quotanetpayoutbatch.FieldTotalAmountCxs)
@@ -33384,6 +33706,8 @@ func (m *QuotaNetPayoutBatchMutation) Field(name string) (ent.Value, bool) {
 		return m.Network()
 	case quotanetpayoutbatch.FieldTotalTokenFlow:
 		return m.TotalTokenFlow()
+	case quotanetpayoutbatch.FieldTotalContributionUsd:
+		return m.TotalContributionUsd()
 	case quotanetpayoutbatch.FieldTotalAmountCxs:
 		return m.TotalAmountCxs()
 	case quotanetpayoutbatch.FieldItemCount:
@@ -33417,6 +33741,8 @@ func (m *QuotaNetPayoutBatchMutation) OldField(ctx context.Context, name string)
 		return m.OldNetwork(ctx)
 	case quotanetpayoutbatch.FieldTotalTokenFlow:
 		return m.OldTotalTokenFlow(ctx)
+	case quotanetpayoutbatch.FieldTotalContributionUsd:
+		return m.OldTotalContributionUsd(ctx)
 	case quotanetpayoutbatch.FieldTotalAmountCxs:
 		return m.OldTotalAmountCxs(ctx)
 	case quotanetpayoutbatch.FieldItemCount:
@@ -33490,6 +33816,13 @@ func (m *QuotaNetPayoutBatchMutation) SetField(name string, value ent.Value) err
 		}
 		m.SetTotalTokenFlow(v)
 		return nil
+	case quotanetpayoutbatch.FieldTotalContributionUsd:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTotalContributionUsd(v)
+		return nil
 	case quotanetpayoutbatch.FieldTotalAmountCxs:
 		v, ok := value.(float64)
 		if !ok {
@@ -33529,6 +33862,9 @@ func (m *QuotaNetPayoutBatchMutation) AddedFields() []string {
 	if m.addtotal_token_flow != nil {
 		fields = append(fields, quotanetpayoutbatch.FieldTotalTokenFlow)
 	}
+	if m.addtotal_contribution_usd != nil {
+		fields = append(fields, quotanetpayoutbatch.FieldTotalContributionUsd)
+	}
 	if m.addtotal_amount_cxs != nil {
 		fields = append(fields, quotanetpayoutbatch.FieldTotalAmountCxs)
 	}
@@ -33551,6 +33887,8 @@ func (m *QuotaNetPayoutBatchMutation) AddedField(name string) (ent.Value, bool) 
 	switch name {
 	case quotanetpayoutbatch.FieldTotalTokenFlow:
 		return m.AddedTotalTokenFlow()
+	case quotanetpayoutbatch.FieldTotalContributionUsd:
+		return m.AddedTotalContributionUsd()
 	case quotanetpayoutbatch.FieldTotalAmountCxs:
 		return m.AddedTotalAmountCxs()
 	case quotanetpayoutbatch.FieldItemCount:
@@ -33574,6 +33912,13 @@ func (m *QuotaNetPayoutBatchMutation) AddField(name string, value ent.Value) err
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddTotalTokenFlow(v)
+		return nil
+	case quotanetpayoutbatch.FieldTotalContributionUsd:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTotalContributionUsd(v)
 		return nil
 	case quotanetpayoutbatch.FieldTotalAmountCxs:
 		v, ok := value.(float64)
@@ -33669,6 +34014,9 @@ func (m *QuotaNetPayoutBatchMutation) ResetField(name string) error {
 	case quotanetpayoutbatch.FieldTotalTokenFlow:
 		m.ResetTotalTokenFlow()
 		return nil
+	case quotanetpayoutbatch.FieldTotalContributionUsd:
+		m.ResetTotalContributionUsd()
+		return nil
 	case quotanetpayoutbatch.FieldTotalAmountCxs:
 		m.ResetTotalAmountCxs()
 		return nil
@@ -33736,29 +34084,31 @@ func (m *QuotaNetPayoutBatchMutation) ResetEdge(name string) error {
 // QuotaNetPayoutItemMutation represents an operation that mutates the QuotaNetPayoutItem nodes in the graph.
 type QuotaNetPayoutItemMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *int64
-	created_at     *time.Time
-	updated_at     *time.Time
-	item_key       *string
-	batch_id       *int64
-	addbatch_id    *int64
-	node_id        *int64
-	addnode_id     *int64
-	wallet_address *string
-	token_flow     *int64
-	addtoken_flow  *int64
-	amount_cxs     *float64
-	addamount_cxs  *float64
-	status         *string
-	tx_hash        *string
-	error_message  *string
-	finalized_at   *time.Time
-	clearedFields  map[string]struct{}
-	done           bool
-	oldValue       func(context.Context) (*QuotaNetPayoutItem, error)
-	predicates     []predicate.QuotaNetPayoutItem
+	op                  Op
+	typ                 string
+	id                  *int64
+	created_at          *time.Time
+	updated_at          *time.Time
+	item_key            *string
+	batch_id            *int64
+	addbatch_id         *int64
+	node_id             *int64
+	addnode_id          *int64
+	wallet_address      *string
+	token_flow          *int64
+	addtoken_flow       *int64
+	contribution_usd    *float64
+	addcontribution_usd *float64
+	amount_cxs          *float64
+	addamount_cxs       *float64
+	status              *string
+	tx_hash             *string
+	error_message       *string
+	finalized_at        *time.Time
+	clearedFields       map[string]struct{}
+	done                bool
+	oldValue            func(context.Context) (*QuotaNetPayoutItem, error)
+	predicates          []predicate.QuotaNetPayoutItem
 }
 
 var _ ent.Mutation = (*QuotaNetPayoutItemMutation)(nil)
@@ -34185,6 +34535,62 @@ func (m *QuotaNetPayoutItemMutation) ResetTokenFlow() {
 	m.addtoken_flow = nil
 }
 
+// SetContributionUsd sets the "contribution_usd" field.
+func (m *QuotaNetPayoutItemMutation) SetContributionUsd(f float64) {
+	m.contribution_usd = &f
+	m.addcontribution_usd = nil
+}
+
+// ContributionUsd returns the value of the "contribution_usd" field in the mutation.
+func (m *QuotaNetPayoutItemMutation) ContributionUsd() (r float64, exists bool) {
+	v := m.contribution_usd
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContributionUsd returns the old "contribution_usd" field's value of the QuotaNetPayoutItem entity.
+// If the QuotaNetPayoutItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *QuotaNetPayoutItemMutation) OldContributionUsd(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContributionUsd is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContributionUsd requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContributionUsd: %w", err)
+	}
+	return oldValue.ContributionUsd, nil
+}
+
+// AddContributionUsd adds f to the "contribution_usd" field.
+func (m *QuotaNetPayoutItemMutation) AddContributionUsd(f float64) {
+	if m.addcontribution_usd != nil {
+		*m.addcontribution_usd += f
+	} else {
+		m.addcontribution_usd = &f
+	}
+}
+
+// AddedContributionUsd returns the value that was added to the "contribution_usd" field in this mutation.
+func (m *QuotaNetPayoutItemMutation) AddedContributionUsd() (r float64, exists bool) {
+	v := m.addcontribution_usd
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetContributionUsd resets all changes to the "contribution_usd" field.
+func (m *QuotaNetPayoutItemMutation) ResetContributionUsd() {
+	m.contribution_usd = nil
+	m.addcontribution_usd = nil
+}
+
 // SetAmountCxs sets the "amount_cxs" field.
 func (m *QuotaNetPayoutItemMutation) SetAmountCxs(f float64) {
 	m.amount_cxs = &f
@@ -34458,7 +34864,7 @@ func (m *QuotaNetPayoutItemMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *QuotaNetPayoutItemMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
 		fields = append(fields, quotanetpayoutitem.FieldCreatedAt)
 	}
@@ -34479,6 +34885,9 @@ func (m *QuotaNetPayoutItemMutation) Fields() []string {
 	}
 	if m.token_flow != nil {
 		fields = append(fields, quotanetpayoutitem.FieldTokenFlow)
+	}
+	if m.contribution_usd != nil {
+		fields = append(fields, quotanetpayoutitem.FieldContributionUsd)
 	}
 	if m.amount_cxs != nil {
 		fields = append(fields, quotanetpayoutitem.FieldAmountCxs)
@@ -34517,6 +34926,8 @@ func (m *QuotaNetPayoutItemMutation) Field(name string) (ent.Value, bool) {
 		return m.WalletAddress()
 	case quotanetpayoutitem.FieldTokenFlow:
 		return m.TokenFlow()
+	case quotanetpayoutitem.FieldContributionUsd:
+		return m.ContributionUsd()
 	case quotanetpayoutitem.FieldAmountCxs:
 		return m.AmountCxs()
 	case quotanetpayoutitem.FieldStatus:
@@ -34550,6 +34961,8 @@ func (m *QuotaNetPayoutItemMutation) OldField(ctx context.Context, name string) 
 		return m.OldWalletAddress(ctx)
 	case quotanetpayoutitem.FieldTokenFlow:
 		return m.OldTokenFlow(ctx)
+	case quotanetpayoutitem.FieldContributionUsd:
+		return m.OldContributionUsd(ctx)
 	case quotanetpayoutitem.FieldAmountCxs:
 		return m.OldAmountCxs(ctx)
 	case quotanetpayoutitem.FieldStatus:
@@ -34618,6 +35031,13 @@ func (m *QuotaNetPayoutItemMutation) SetField(name string, value ent.Value) erro
 		}
 		m.SetTokenFlow(v)
 		return nil
+	case quotanetpayoutitem.FieldContributionUsd:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContributionUsd(v)
+		return nil
 	case quotanetpayoutitem.FieldAmountCxs:
 		v, ok := value.(float64)
 		if !ok {
@@ -34670,6 +35090,9 @@ func (m *QuotaNetPayoutItemMutation) AddedFields() []string {
 	if m.addtoken_flow != nil {
 		fields = append(fields, quotanetpayoutitem.FieldTokenFlow)
 	}
+	if m.addcontribution_usd != nil {
+		fields = append(fields, quotanetpayoutitem.FieldContributionUsd)
+	}
 	if m.addamount_cxs != nil {
 		fields = append(fields, quotanetpayoutitem.FieldAmountCxs)
 	}
@@ -34687,6 +35110,8 @@ func (m *QuotaNetPayoutItemMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedNodeID()
 	case quotanetpayoutitem.FieldTokenFlow:
 		return m.AddedTokenFlow()
+	case quotanetpayoutitem.FieldContributionUsd:
+		return m.AddedContributionUsd()
 	case quotanetpayoutitem.FieldAmountCxs:
 		return m.AddedAmountCxs()
 	}
@@ -34718,6 +35143,13 @@ func (m *QuotaNetPayoutItemMutation) AddField(name string, value ent.Value) erro
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddTokenFlow(v)
+		return nil
+	case quotanetpayoutitem.FieldContributionUsd:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddContributionUsd(v)
 		return nil
 	case quotanetpayoutitem.FieldAmountCxs:
 		v, ok := value.(float64)
@@ -34800,6 +35232,9 @@ func (m *QuotaNetPayoutItemMutation) ResetField(name string) error {
 		return nil
 	case quotanetpayoutitem.FieldTokenFlow:
 		m.ResetTokenFlow()
+		return nil
+	case quotanetpayoutitem.FieldContributionUsd:
+		m.ResetContributionUsd()
 		return nil
 	case quotanetpayoutitem.FieldAmountCxs:
 		m.ResetAmountCxs()

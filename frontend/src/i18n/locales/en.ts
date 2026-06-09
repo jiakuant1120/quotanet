@@ -367,6 +367,7 @@ export default {
     redeemCodes: 'Redeem Codes',
     ops: 'Ops',
     quotaNetNodes: 'QuotaNet Nodes',
+    quotaNetSettlements: 'QuotaNet Settlements',
     promoCodes: 'Promo Codes',
     settings: 'Settings',
     myAccount: 'My Account',

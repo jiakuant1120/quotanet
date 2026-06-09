@@ -2,25 +2,39 @@ package tasks
 
 import (
 	"context"
+	stdsql "database/sql"
 	"fmt"
 	"strings"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/Wei-Shaw/sub2api/ent"
+	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/quotanetcontributionledger"
 	"github.com/Wei-Shaw/sub2api/ent/quotanettask"
 	"github.com/Wei-Shaw/sub2api/ent/quotanettaskevent"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/protocol"
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/registry"
+	"github.com/Wei-Shaw/sub2api/internal/service"
 )
 
 type EntStore struct {
-	client *ent.Client
+	client          *ent.Client
+	billingService  *service.BillingService
+	pricingResolver *service.ModelPricingResolver
 }
 
 func NewEntStore(client *ent.Client) *EntStore {
 	return &EntStore{client: client}
+}
+
+func (s *EntStore) WithContributionBilling(billingService *service.BillingService, pricingResolver *service.ModelPricingResolver) *EntStore {
+	if s == nil {
+		return s
+	}
+	s.billingService = billingService
+	s.pricingResolver = pricingResolver
+	return s
 }
 
 func (s *EntStore) List(ctx context.Context, params ListParams) ([]*Task, int64, error) {
@@ -362,6 +376,10 @@ func (s *EntStore) recordSuccessfulContributionLedger(ctx context.Context, tx *e
 	if err != nil {
 		return err
 	}
+	contribution, err := s.calculateContributionUSD(ctx, tx, row, response)
+	if err != nil {
+		return err
+	}
 	return tx.QuotaNetContributionLedger.Create().
 		SetTaskID(taskID).
 		SetNodeID(*row.NodeID).
@@ -370,12 +388,96 @@ func (s *EntStore) recordSuccessfulContributionLedger(ctx context.Context, tx *e
 		SetPlatform(row.Platform).
 		SetModel(row.Model).
 		SetTokenFlow(int64(response.Usage.TotalTokens)).
+		SetStandardCostUsd(contribution.StandardCostUSD).
+		SetActualCostUsd(contribution.ActualCostUSD).
+		SetContributionUsd(contribution.ContributionUSD).
 		SetAmountCxs(0).
-		SetRate(0).
+		SetRate(contribution.RateMultiplier).
 		SetStatus(protocol.SettlementStatusPending).
 		OnConflictColumns(quotanetcontributionledger.FieldTaskID).
 		DoNothing().
 		Exec(ctx)
+}
+
+type contributionCost struct {
+	StandardCostUSD float64
+	ActualCostUSD   float64
+	ContributionUSD float64
+	RateMultiplier  float64
+}
+
+func (s *EntStore) calculateContributionUSD(ctx context.Context, tx *ent.Tx, row *ent.QuotaNetTask, response protocol.TaskResponse) (contributionCost, error) {
+	multiplier := 1.0
+	var groupID *int64
+	if row != nil && row.GroupID != nil {
+		groupID = row.GroupID
+		if groupRow, err := tx.Group.Query().
+			Where(group.IDEQ(*row.GroupID)).
+			Only(ctx); err == nil {
+			multiplier = groupRow.RateMultiplier
+		} else if !ent.IsNotFound(err) {
+			return contributionCost{}, err
+		}
+		if row.UserID != nil {
+			if userRate, ok, err := lookupUserGroupRateMultiplier(ctx, tx, *row.UserID, *row.GroupID); err != nil {
+				return contributionCost{}, err
+			} else if ok {
+				multiplier = userRate
+			}
+		}
+	}
+	if multiplier < 0 {
+		multiplier = 0
+	}
+	out := contributionCost{RateMultiplier: multiplier}
+	if s == nil || s.billingService == nil || row == nil {
+		return out, nil
+	}
+	tokens := service.UsageTokens{
+		InputTokens:  response.Usage.PromptTokens,
+		OutputTokens: response.Usage.CompletionTokens,
+	}
+	cost, err := s.billingService.CalculateCostUnified(service.CostInput{
+		Ctx:            ctx,
+		Model:          row.Model,
+		GroupID:        groupID,
+		Tokens:         tokens,
+		RequestCount:   1,
+		RateMultiplier: 1,
+		Resolver:       s.pricingResolver,
+	})
+	if err != nil {
+		return out, err
+	}
+	if cost == nil {
+		return out, nil
+	}
+	out.StandardCostUSD = cost.TotalCost
+	out.ActualCostUSD = cost.TotalCost * multiplier
+	out.ContributionUSD = cost.TotalCost
+	return out, nil
+}
+
+func lookupUserGroupRateMultiplier(ctx context.Context, tx *ent.Tx, userID, groupID int64) (float64, bool, error) {
+	rows, err := tx.QueryContext(ctx, "SELECT rate_multiplier FROM user_group_rate_multipliers WHERE user_id = $1 AND group_id = $2 AND rate_multiplier IS NOT NULL", userID, groupID)
+	if err != nil {
+		return 0, false, err
+	}
+	defer rows.Close()
+	if !rows.Next() {
+		if err := rows.Err(); err != nil {
+			return 0, false, err
+		}
+		return 0, false, nil
+	}
+	var rate stdsql.NullFloat64
+	if err := rows.Scan(&rate); err != nil {
+		return 0, false, err
+	}
+	if !rate.Valid {
+		return 0, false, nil
+	}
+	return rate.Float64, true, rows.Err()
 }
 
 func taskResponseEventPayload(sessionID string, response protocol.TaskResponse) map[string]any {

@@ -122,6 +122,48 @@ func (_c *QuotaNetContributionLedgerCreate) SetNillableTokenFlow(v *int64) *Quot
 	return _c
 }
 
+// SetStandardCostUsd sets the "standard_cost_usd" field.
+func (_c *QuotaNetContributionLedgerCreate) SetStandardCostUsd(v float64) *QuotaNetContributionLedgerCreate {
+	_c.mutation.SetStandardCostUsd(v)
+	return _c
+}
+
+// SetNillableStandardCostUsd sets the "standard_cost_usd" field if the given value is not nil.
+func (_c *QuotaNetContributionLedgerCreate) SetNillableStandardCostUsd(v *float64) *QuotaNetContributionLedgerCreate {
+	if v != nil {
+		_c.SetStandardCostUsd(*v)
+	}
+	return _c
+}
+
+// SetActualCostUsd sets the "actual_cost_usd" field.
+func (_c *QuotaNetContributionLedgerCreate) SetActualCostUsd(v float64) *QuotaNetContributionLedgerCreate {
+	_c.mutation.SetActualCostUsd(v)
+	return _c
+}
+
+// SetNillableActualCostUsd sets the "actual_cost_usd" field if the given value is not nil.
+func (_c *QuotaNetContributionLedgerCreate) SetNillableActualCostUsd(v *float64) *QuotaNetContributionLedgerCreate {
+	if v != nil {
+		_c.SetActualCostUsd(*v)
+	}
+	return _c
+}
+
+// SetContributionUsd sets the "contribution_usd" field.
+func (_c *QuotaNetContributionLedgerCreate) SetContributionUsd(v float64) *QuotaNetContributionLedgerCreate {
+	_c.mutation.SetContributionUsd(v)
+	return _c
+}
+
+// SetNillableContributionUsd sets the "contribution_usd" field if the given value is not nil.
+func (_c *QuotaNetContributionLedgerCreate) SetNillableContributionUsd(v *float64) *QuotaNetContributionLedgerCreate {
+	if v != nil {
+		_c.SetContributionUsd(*v)
+	}
+	return _c
+}
+
 // SetAmountCxs sets the "amount_cxs" field.
 func (_c *QuotaNetContributionLedgerCreate) SetAmountCxs(v float64) *QuotaNetContributionLedgerCreate {
 	_c.mutation.SetAmountCxs(v)
@@ -239,6 +281,18 @@ func (_c *QuotaNetContributionLedgerCreate) defaults() {
 		v := quotanetcontributionledger.DefaultTokenFlow
 		_c.mutation.SetTokenFlow(v)
 	}
+	if _, ok := _c.mutation.StandardCostUsd(); !ok {
+		v := quotanetcontributionledger.DefaultStandardCostUsd
+		_c.mutation.SetStandardCostUsd(v)
+	}
+	if _, ok := _c.mutation.ActualCostUsd(); !ok {
+		v := quotanetcontributionledger.DefaultActualCostUsd
+		_c.mutation.SetActualCostUsd(v)
+	}
+	if _, ok := _c.mutation.ContributionUsd(); !ok {
+		v := quotanetcontributionledger.DefaultContributionUsd
+		_c.mutation.SetContributionUsd(v)
+	}
 	if _, ok := _c.mutation.AmountCxs(); !ok {
 		v := quotanetcontributionledger.DefaultAmountCxs
 		_c.mutation.SetAmountCxs(v)
@@ -298,6 +352,15 @@ func (_c *QuotaNetContributionLedgerCreate) check() error {
 	}
 	if _, ok := _c.mutation.TokenFlow(); !ok {
 		return &ValidationError{Name: "token_flow", err: errors.New(`ent: missing required field "QuotaNetContributionLedger.token_flow"`)}
+	}
+	if _, ok := _c.mutation.StandardCostUsd(); !ok {
+		return &ValidationError{Name: "standard_cost_usd", err: errors.New(`ent: missing required field "QuotaNetContributionLedger.standard_cost_usd"`)}
+	}
+	if _, ok := _c.mutation.ActualCostUsd(); !ok {
+		return &ValidationError{Name: "actual_cost_usd", err: errors.New(`ent: missing required field "QuotaNetContributionLedger.actual_cost_usd"`)}
+	}
+	if _, ok := _c.mutation.ContributionUsd(); !ok {
+		return &ValidationError{Name: "contribution_usd", err: errors.New(`ent: missing required field "QuotaNetContributionLedger.contribution_usd"`)}
 	}
 	if _, ok := _c.mutation.AmountCxs(); !ok {
 		return &ValidationError{Name: "amount_cxs", err: errors.New(`ent: missing required field "QuotaNetContributionLedger.amount_cxs"`)}
@@ -379,6 +442,18 @@ func (_c *QuotaNetContributionLedgerCreate) createSpec() (*QuotaNetContributionL
 	if value, ok := _c.mutation.TokenFlow(); ok {
 		_spec.SetField(quotanetcontributionledger.FieldTokenFlow, field.TypeInt64, value)
 		_node.TokenFlow = value
+	}
+	if value, ok := _c.mutation.StandardCostUsd(); ok {
+		_spec.SetField(quotanetcontributionledger.FieldStandardCostUsd, field.TypeFloat64, value)
+		_node.StandardCostUsd = value
+	}
+	if value, ok := _c.mutation.ActualCostUsd(); ok {
+		_spec.SetField(quotanetcontributionledger.FieldActualCostUsd, field.TypeFloat64, value)
+		_node.ActualCostUsd = value
+	}
+	if value, ok := _c.mutation.ContributionUsd(); ok {
+		_spec.SetField(quotanetcontributionledger.FieldContributionUsd, field.TypeFloat64, value)
+		_node.ContributionUsd = value
 	}
 	if value, ok := _c.mutation.AmountCxs(); ok {
 		_spec.SetField(quotanetcontributionledger.FieldAmountCxs, field.TypeFloat64, value)
@@ -593,6 +668,60 @@ func (u *QuotaNetContributionLedgerUpsert) UpdateTokenFlow() *QuotaNetContributi
 // AddTokenFlow adds v to the "token_flow" field.
 func (u *QuotaNetContributionLedgerUpsert) AddTokenFlow(v int64) *QuotaNetContributionLedgerUpsert {
 	u.Add(quotanetcontributionledger.FieldTokenFlow, v)
+	return u
+}
+
+// SetStandardCostUsd sets the "standard_cost_usd" field.
+func (u *QuotaNetContributionLedgerUpsert) SetStandardCostUsd(v float64) *QuotaNetContributionLedgerUpsert {
+	u.Set(quotanetcontributionledger.FieldStandardCostUsd, v)
+	return u
+}
+
+// UpdateStandardCostUsd sets the "standard_cost_usd" field to the value that was provided on create.
+func (u *QuotaNetContributionLedgerUpsert) UpdateStandardCostUsd() *QuotaNetContributionLedgerUpsert {
+	u.SetExcluded(quotanetcontributionledger.FieldStandardCostUsd)
+	return u
+}
+
+// AddStandardCostUsd adds v to the "standard_cost_usd" field.
+func (u *QuotaNetContributionLedgerUpsert) AddStandardCostUsd(v float64) *QuotaNetContributionLedgerUpsert {
+	u.Add(quotanetcontributionledger.FieldStandardCostUsd, v)
+	return u
+}
+
+// SetActualCostUsd sets the "actual_cost_usd" field.
+func (u *QuotaNetContributionLedgerUpsert) SetActualCostUsd(v float64) *QuotaNetContributionLedgerUpsert {
+	u.Set(quotanetcontributionledger.FieldActualCostUsd, v)
+	return u
+}
+
+// UpdateActualCostUsd sets the "actual_cost_usd" field to the value that was provided on create.
+func (u *QuotaNetContributionLedgerUpsert) UpdateActualCostUsd() *QuotaNetContributionLedgerUpsert {
+	u.SetExcluded(quotanetcontributionledger.FieldActualCostUsd)
+	return u
+}
+
+// AddActualCostUsd adds v to the "actual_cost_usd" field.
+func (u *QuotaNetContributionLedgerUpsert) AddActualCostUsd(v float64) *QuotaNetContributionLedgerUpsert {
+	u.Add(quotanetcontributionledger.FieldActualCostUsd, v)
+	return u
+}
+
+// SetContributionUsd sets the "contribution_usd" field.
+func (u *QuotaNetContributionLedgerUpsert) SetContributionUsd(v float64) *QuotaNetContributionLedgerUpsert {
+	u.Set(quotanetcontributionledger.FieldContributionUsd, v)
+	return u
+}
+
+// UpdateContributionUsd sets the "contribution_usd" field to the value that was provided on create.
+func (u *QuotaNetContributionLedgerUpsert) UpdateContributionUsd() *QuotaNetContributionLedgerUpsert {
+	u.SetExcluded(quotanetcontributionledger.FieldContributionUsd)
+	return u
+}
+
+// AddContributionUsd adds v to the "contribution_usd" field.
+func (u *QuotaNetContributionLedgerUpsert) AddContributionUsd(v float64) *QuotaNetContributionLedgerUpsert {
+	u.Add(quotanetcontributionledger.FieldContributionUsd, v)
 	return u
 }
 
@@ -896,6 +1025,69 @@ func (u *QuotaNetContributionLedgerUpsertOne) AddTokenFlow(v int64) *QuotaNetCon
 func (u *QuotaNetContributionLedgerUpsertOne) UpdateTokenFlow() *QuotaNetContributionLedgerUpsertOne {
 	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
 		s.UpdateTokenFlow()
+	})
+}
+
+// SetStandardCostUsd sets the "standard_cost_usd" field.
+func (u *QuotaNetContributionLedgerUpsertOne) SetStandardCostUsd(v float64) *QuotaNetContributionLedgerUpsertOne {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.SetStandardCostUsd(v)
+	})
+}
+
+// AddStandardCostUsd adds v to the "standard_cost_usd" field.
+func (u *QuotaNetContributionLedgerUpsertOne) AddStandardCostUsd(v float64) *QuotaNetContributionLedgerUpsertOne {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.AddStandardCostUsd(v)
+	})
+}
+
+// UpdateStandardCostUsd sets the "standard_cost_usd" field to the value that was provided on create.
+func (u *QuotaNetContributionLedgerUpsertOne) UpdateStandardCostUsd() *QuotaNetContributionLedgerUpsertOne {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.UpdateStandardCostUsd()
+	})
+}
+
+// SetActualCostUsd sets the "actual_cost_usd" field.
+func (u *QuotaNetContributionLedgerUpsertOne) SetActualCostUsd(v float64) *QuotaNetContributionLedgerUpsertOne {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.SetActualCostUsd(v)
+	})
+}
+
+// AddActualCostUsd adds v to the "actual_cost_usd" field.
+func (u *QuotaNetContributionLedgerUpsertOne) AddActualCostUsd(v float64) *QuotaNetContributionLedgerUpsertOne {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.AddActualCostUsd(v)
+	})
+}
+
+// UpdateActualCostUsd sets the "actual_cost_usd" field to the value that was provided on create.
+func (u *QuotaNetContributionLedgerUpsertOne) UpdateActualCostUsd() *QuotaNetContributionLedgerUpsertOne {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.UpdateActualCostUsd()
+	})
+}
+
+// SetContributionUsd sets the "contribution_usd" field.
+func (u *QuotaNetContributionLedgerUpsertOne) SetContributionUsd(v float64) *QuotaNetContributionLedgerUpsertOne {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.SetContributionUsd(v)
+	})
+}
+
+// AddContributionUsd adds v to the "contribution_usd" field.
+func (u *QuotaNetContributionLedgerUpsertOne) AddContributionUsd(v float64) *QuotaNetContributionLedgerUpsertOne {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.AddContributionUsd(v)
+	})
+}
+
+// UpdateContributionUsd sets the "contribution_usd" field to the value that was provided on create.
+func (u *QuotaNetContributionLedgerUpsertOne) UpdateContributionUsd() *QuotaNetContributionLedgerUpsertOne {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.UpdateContributionUsd()
 	})
 }
 
@@ -1380,6 +1572,69 @@ func (u *QuotaNetContributionLedgerUpsertBulk) AddTokenFlow(v int64) *QuotaNetCo
 func (u *QuotaNetContributionLedgerUpsertBulk) UpdateTokenFlow() *QuotaNetContributionLedgerUpsertBulk {
 	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
 		s.UpdateTokenFlow()
+	})
+}
+
+// SetStandardCostUsd sets the "standard_cost_usd" field.
+func (u *QuotaNetContributionLedgerUpsertBulk) SetStandardCostUsd(v float64) *QuotaNetContributionLedgerUpsertBulk {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.SetStandardCostUsd(v)
+	})
+}
+
+// AddStandardCostUsd adds v to the "standard_cost_usd" field.
+func (u *QuotaNetContributionLedgerUpsertBulk) AddStandardCostUsd(v float64) *QuotaNetContributionLedgerUpsertBulk {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.AddStandardCostUsd(v)
+	})
+}
+
+// UpdateStandardCostUsd sets the "standard_cost_usd" field to the value that was provided on create.
+func (u *QuotaNetContributionLedgerUpsertBulk) UpdateStandardCostUsd() *QuotaNetContributionLedgerUpsertBulk {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.UpdateStandardCostUsd()
+	})
+}
+
+// SetActualCostUsd sets the "actual_cost_usd" field.
+func (u *QuotaNetContributionLedgerUpsertBulk) SetActualCostUsd(v float64) *QuotaNetContributionLedgerUpsertBulk {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.SetActualCostUsd(v)
+	})
+}
+
+// AddActualCostUsd adds v to the "actual_cost_usd" field.
+func (u *QuotaNetContributionLedgerUpsertBulk) AddActualCostUsd(v float64) *QuotaNetContributionLedgerUpsertBulk {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.AddActualCostUsd(v)
+	})
+}
+
+// UpdateActualCostUsd sets the "actual_cost_usd" field to the value that was provided on create.
+func (u *QuotaNetContributionLedgerUpsertBulk) UpdateActualCostUsd() *QuotaNetContributionLedgerUpsertBulk {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.UpdateActualCostUsd()
+	})
+}
+
+// SetContributionUsd sets the "contribution_usd" field.
+func (u *QuotaNetContributionLedgerUpsertBulk) SetContributionUsd(v float64) *QuotaNetContributionLedgerUpsertBulk {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.SetContributionUsd(v)
+	})
+}
+
+// AddContributionUsd adds v to the "contribution_usd" field.
+func (u *QuotaNetContributionLedgerUpsertBulk) AddContributionUsd(v float64) *QuotaNetContributionLedgerUpsertBulk {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.AddContributionUsd(v)
+	})
+}
+
+// UpdateContributionUsd sets the "contribution_usd" field to the value that was provided on create.
+func (u *QuotaNetContributionLedgerUpsertBulk) UpdateContributionUsd() *QuotaNetContributionLedgerUpsertBulk {
+	return u.Update(func(s *QuotaNetContributionLedgerUpsert) {
+		s.UpdateContributionUsd()
 	})
 }
 

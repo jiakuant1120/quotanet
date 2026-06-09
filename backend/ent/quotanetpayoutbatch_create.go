@@ -110,6 +110,20 @@ func (_c *QuotaNetPayoutBatchCreate) SetNillableTotalTokenFlow(v *int64) *QuotaN
 	return _c
 }
 
+// SetTotalContributionUsd sets the "total_contribution_usd" field.
+func (_c *QuotaNetPayoutBatchCreate) SetTotalContributionUsd(v float64) *QuotaNetPayoutBatchCreate {
+	_c.mutation.SetTotalContributionUsd(v)
+	return _c
+}
+
+// SetNillableTotalContributionUsd sets the "total_contribution_usd" field if the given value is not nil.
+func (_c *QuotaNetPayoutBatchCreate) SetNillableTotalContributionUsd(v *float64) *QuotaNetPayoutBatchCreate {
+	if v != nil {
+		_c.SetTotalContributionUsd(*v)
+	}
+	return _c
+}
+
 // SetTotalAmountCxs sets the "total_amount_cxs" field.
 func (_c *QuotaNetPayoutBatchCreate) SetTotalAmountCxs(v float64) *QuotaNetPayoutBatchCreate {
 	_c.mutation.SetTotalAmountCxs(v)
@@ -221,6 +235,10 @@ func (_c *QuotaNetPayoutBatchCreate) defaults() {
 		v := quotanetpayoutbatch.DefaultTotalTokenFlow
 		_c.mutation.SetTotalTokenFlow(v)
 	}
+	if _, ok := _c.mutation.TotalContributionUsd(); !ok {
+		v := quotanetpayoutbatch.DefaultTotalContributionUsd
+		_c.mutation.SetTotalContributionUsd(v)
+	}
 	if _, ok := _c.mutation.TotalAmountCxs(); !ok {
 		v := quotanetpayoutbatch.DefaultTotalAmountCxs
 		_c.mutation.SetTotalAmountCxs(v)
@@ -271,6 +289,9 @@ func (_c *QuotaNetPayoutBatchCreate) check() error {
 	}
 	if _, ok := _c.mutation.TotalTokenFlow(); !ok {
 		return &ValidationError{Name: "total_token_flow", err: errors.New(`ent: missing required field "QuotaNetPayoutBatch.total_token_flow"`)}
+	}
+	if _, ok := _c.mutation.TotalContributionUsd(); !ok {
+		return &ValidationError{Name: "total_contribution_usd", err: errors.New(`ent: missing required field "QuotaNetPayoutBatch.total_contribution_usd"`)}
 	}
 	if _, ok := _c.mutation.TotalAmountCxs(); !ok {
 		return &ValidationError{Name: "total_amount_cxs", err: errors.New(`ent: missing required field "QuotaNetPayoutBatch.total_amount_cxs"`)}
@@ -336,6 +357,10 @@ func (_c *QuotaNetPayoutBatchCreate) createSpec() (*QuotaNetPayoutBatch, *sqlgra
 	if value, ok := _c.mutation.TotalTokenFlow(); ok {
 		_spec.SetField(quotanetpayoutbatch.FieldTotalTokenFlow, field.TypeInt64, value)
 		_node.TotalTokenFlow = value
+	}
+	if value, ok := _c.mutation.TotalContributionUsd(); ok {
+		_spec.SetField(quotanetpayoutbatch.FieldTotalContributionUsd, field.TypeFloat64, value)
+		_node.TotalContributionUsd = value
 	}
 	if value, ok := _c.mutation.TotalAmountCxs(); ok {
 		_spec.SetField(quotanetpayoutbatch.FieldTotalAmountCxs, field.TypeFloat64, value)
@@ -492,6 +517,24 @@ func (u *QuotaNetPayoutBatchUpsert) UpdateTotalTokenFlow() *QuotaNetPayoutBatchU
 // AddTotalTokenFlow adds v to the "total_token_flow" field.
 func (u *QuotaNetPayoutBatchUpsert) AddTotalTokenFlow(v int64) *QuotaNetPayoutBatchUpsert {
 	u.Add(quotanetpayoutbatch.FieldTotalTokenFlow, v)
+	return u
+}
+
+// SetTotalContributionUsd sets the "total_contribution_usd" field.
+func (u *QuotaNetPayoutBatchUpsert) SetTotalContributionUsd(v float64) *QuotaNetPayoutBatchUpsert {
+	u.Set(quotanetpayoutbatch.FieldTotalContributionUsd, v)
+	return u
+}
+
+// UpdateTotalContributionUsd sets the "total_contribution_usd" field to the value that was provided on create.
+func (u *QuotaNetPayoutBatchUpsert) UpdateTotalContributionUsd() *QuotaNetPayoutBatchUpsert {
+	u.SetExcluded(quotanetpayoutbatch.FieldTotalContributionUsd)
+	return u
+}
+
+// AddTotalContributionUsd adds v to the "total_contribution_usd" field.
+func (u *QuotaNetPayoutBatchUpsert) AddTotalContributionUsd(v float64) *QuotaNetPayoutBatchUpsert {
+	u.Add(quotanetpayoutbatch.FieldTotalContributionUsd, v)
 	return u
 }
 
@@ -726,6 +769,27 @@ func (u *QuotaNetPayoutBatchUpsertOne) AddTotalTokenFlow(v int64) *QuotaNetPayou
 func (u *QuotaNetPayoutBatchUpsertOne) UpdateTotalTokenFlow() *QuotaNetPayoutBatchUpsertOne {
 	return u.Update(func(s *QuotaNetPayoutBatchUpsert) {
 		s.UpdateTotalTokenFlow()
+	})
+}
+
+// SetTotalContributionUsd sets the "total_contribution_usd" field.
+func (u *QuotaNetPayoutBatchUpsertOne) SetTotalContributionUsd(v float64) *QuotaNetPayoutBatchUpsertOne {
+	return u.Update(func(s *QuotaNetPayoutBatchUpsert) {
+		s.SetTotalContributionUsd(v)
+	})
+}
+
+// AddTotalContributionUsd adds v to the "total_contribution_usd" field.
+func (u *QuotaNetPayoutBatchUpsertOne) AddTotalContributionUsd(v float64) *QuotaNetPayoutBatchUpsertOne {
+	return u.Update(func(s *QuotaNetPayoutBatchUpsert) {
+		s.AddTotalContributionUsd(v)
+	})
+}
+
+// UpdateTotalContributionUsd sets the "total_contribution_usd" field to the value that was provided on create.
+func (u *QuotaNetPayoutBatchUpsertOne) UpdateTotalContributionUsd() *QuotaNetPayoutBatchUpsertOne {
+	return u.Update(func(s *QuotaNetPayoutBatchUpsert) {
+		s.UpdateTotalContributionUsd()
 	})
 }
 
@@ -1140,6 +1204,27 @@ func (u *QuotaNetPayoutBatchUpsertBulk) AddTotalTokenFlow(v int64) *QuotaNetPayo
 func (u *QuotaNetPayoutBatchUpsertBulk) UpdateTotalTokenFlow() *QuotaNetPayoutBatchUpsertBulk {
 	return u.Update(func(s *QuotaNetPayoutBatchUpsert) {
 		s.UpdateTotalTokenFlow()
+	})
+}
+
+// SetTotalContributionUsd sets the "total_contribution_usd" field.
+func (u *QuotaNetPayoutBatchUpsertBulk) SetTotalContributionUsd(v float64) *QuotaNetPayoutBatchUpsertBulk {
+	return u.Update(func(s *QuotaNetPayoutBatchUpsert) {
+		s.SetTotalContributionUsd(v)
+	})
+}
+
+// AddTotalContributionUsd adds v to the "total_contribution_usd" field.
+func (u *QuotaNetPayoutBatchUpsertBulk) AddTotalContributionUsd(v float64) *QuotaNetPayoutBatchUpsertBulk {
+	return u.Update(func(s *QuotaNetPayoutBatchUpsert) {
+		s.AddTotalContributionUsd(v)
+	})
+}
+
+// UpdateTotalContributionUsd sets the "total_contribution_usd" field to the value that was provided on create.
+func (u *QuotaNetPayoutBatchUpsertBulk) UpdateTotalContributionUsd() *QuotaNetPayoutBatchUpsertBulk {
+	return u.Update(func(s *QuotaNetPayoutBatchUpsert) {
+		s.UpdateTotalContributionUsd()
 	})
 }
 

@@ -29,6 +29,8 @@ const (
 	FieldNetwork = "network"
 	// FieldTotalTokenFlow holds the string denoting the total_token_flow field in the database.
 	FieldTotalTokenFlow = "total_token_flow"
+	// FieldTotalContributionUsd holds the string denoting the total_contribution_usd field in the database.
+	FieldTotalContributionUsd = "total_contribution_usd"
 	// FieldTotalAmountCxs holds the string denoting the total_amount_cxs field in the database.
 	FieldTotalAmountCxs = "total_amount_cxs"
 	// FieldItemCount holds the string denoting the item_count field in the database.
@@ -52,6 +54,7 @@ var Columns = []string{
 	FieldStatus,
 	FieldNetwork,
 	FieldTotalTokenFlow,
+	FieldTotalContributionUsd,
 	FieldTotalAmountCxs,
 	FieldItemCount,
 	FieldCreatedBy,
@@ -87,6 +90,8 @@ var (
 	NetworkValidator func(string) error
 	// DefaultTotalTokenFlow holds the default value on creation for the "total_token_flow" field.
 	DefaultTotalTokenFlow int64
+	// DefaultTotalContributionUsd holds the default value on creation for the "total_contribution_usd" field.
+	DefaultTotalContributionUsd float64
 	// DefaultTotalAmountCxs holds the default value on creation for the "total_amount_cxs" field.
 	DefaultTotalAmountCxs float64
 	// DefaultItemCount holds the default value on creation for the "item_count" field.
@@ -139,6 +144,11 @@ func ByNetwork(opts ...sql.OrderTermOption) OrderOption {
 // ByTotalTokenFlow orders the results by the total_token_flow field.
 func ByTotalTokenFlow(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTotalTokenFlow, opts...).ToFunc()
+}
+
+// ByTotalContributionUsd orders the results by the total_contribution_usd field.
+func ByTotalContributionUsd(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTotalContributionUsd, opts...).ToFunc()
 }
 
 // ByTotalAmountCxs orders the results by the total_amount_cxs field.

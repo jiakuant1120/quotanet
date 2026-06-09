@@ -46,6 +46,10 @@ func (QuotaNetPayoutBatch) Fields() []ent.Field {
 			Default("solana-devnet"),
 		field.Int64("total_token_flow").
 			Default(0),
+		field.Float("total_contribution_usd").
+			Default(0).
+			SchemaType(map[string]string{dialect.Postgres: "decimal(20,10)"}).
+			Comment("Total QuotaNet contribution amount in USD"),
 		field.Float("total_amount_cxs").
 			Default(0).
 			SchemaType(map[string]string{dialect.Postgres: "decimal(30,12)"}),

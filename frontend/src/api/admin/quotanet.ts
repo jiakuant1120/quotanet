@@ -160,6 +160,123 @@ export interface QuotaNetTaskListParams {
   search?: string
 }
 
+export interface QuotaNetSettlementConfig {
+  network: string
+}
+
+export interface QuotaNetContributionLedger {
+  id: number
+  task_id: string
+  usage_log_id?: number | null
+  node_id: number
+  wallet_address: string
+  account_id?: number | null
+  platform: string
+  model: string
+  token_flow: number
+  standard_cost_usd: number
+  actual_cost_usd: number
+  contribution_usd: number
+  amount_cxs: number
+  rate: number
+  status: string
+  payout_batch_id?: number | null
+  settled_at?: string | null
+  created_at?: string
+  updated_at?: string
+}
+
+export interface QuotaNetSettlementSummary {
+  ledger_count: number
+  token_flow: number
+  contribution_usd: number
+  amount_cxs: number
+}
+
+export interface QuotaNetWalletSummary extends QuotaNetSettlementSummary {
+  wallet_address: string
+}
+
+export interface QuotaNetPayoutBatch {
+  id: number
+  batch_key: string
+  window_start?: string
+  window_end?: string
+  status: string
+  network: string
+  total_token_flow: number
+  total_contribution_usd: number
+  total_amount_cxs: number
+  item_count: number
+  created_by?: number | null
+  approved_by?: number | null
+  created_at?: string
+  updated_at?: string
+}
+
+export interface QuotaNetPayoutItem {
+  id: number
+  item_key: string
+  batch_id: number
+  network?: string
+  node_id?: number | null
+  wallet_address: string
+  token_flow: number
+  contribution_usd: number
+  amount_cxs: number
+  status: string
+  tx_hash?: string | null
+  tx_url?: string
+  error_message?: string | null
+  finalized_at?: string | null
+  created_at?: string
+  updated_at?: string
+}
+
+export interface QuotaNetLedgerListParams {
+  page?: number
+  page_size?: number
+  status?: string
+  wallet_address?: string
+  node_id?: number
+  account_id?: number
+  payout_batch_id?: number
+}
+
+export interface QuotaNetBatchListParams {
+  page?: number
+  page_size?: number
+  status?: string
+}
+
+export interface QuotaNetBatchItemListParams {
+  page?: number
+  page_size?: number
+  status?: string
+  wallet_address?: string
+  tx_hash?: string
+}
+
+export interface QuotaNetCreateBatchRequest {
+  batch_key?: string
+  window_start: string
+  window_end: string
+  network?: string
+  rate?: number
+}
+
+export interface QuotaNetCreateBatchResponse {
+  batch: QuotaNetPayoutBatch
+  items: QuotaNetPayoutItem[]
+  ledger_count: number
+}
+
+export interface QuotaNetUpdateItemStatusRequest {
+  status: string
+  tx_hash?: string
+  error_message?: string
+}
+
 export async function getNodeOverview(options?: FetchOptions): Promise<QuotaNetNodeOverview> {
   const { data } = await apiClient.get<QuotaNetNodeOverview>('/admin/quotanet/overview', {
     signal: options?.signal
@@ -230,6 +347,68 @@ export async function getTaskEvents(taskID: string, options?: FetchOptions): Pro
   return data
 }
 
+export async function getSettlementConfig(options?: FetchOptions): Promise<QuotaNetSettlementConfig> {
+  const { data } = await apiClient.get<QuotaNetSettlementConfig>('/admin/quotanet/settlements/config', {
+    signal: options?.signal
+  })
+  return data
+}
+
+export async function updateSettlementConfig(req: QuotaNetSettlementConfig): Promise<QuotaNetSettlementConfig> {
+  const { data } = await apiClient.put<QuotaNetSettlementConfig>('/admin/quotanet/settlements/config', req)
+  return data
+}
+
+export async function listLedgers(params?: QuotaNetLedgerListParams, options?: FetchOptions): Promise<BasePaginationResponse<QuotaNetContributionLedger>> {
+  const { data } = await apiClient.get<BasePaginationResponse<QuotaNetContributionLedger>>('/admin/quotanet/settlements/ledgers', {
+    params,
+    signal: options?.signal
+  })
+  return data
+}
+
+export async function getSettlementSummary(params?: QuotaNetLedgerListParams, options?: FetchOptions): Promise<QuotaNetSettlementSummary> {
+  const { data } = await apiClient.get<QuotaNetSettlementSummary>('/admin/quotanet/settlements/summary', {
+    params,
+    signal: options?.signal
+  })
+  return data
+}
+
+export async function listWalletSummaries(params?: QuotaNetLedgerListParams, options?: FetchOptions): Promise<{ items: QuotaNetWalletSummary[] }> {
+  const { data } = await apiClient.get<{ items: QuotaNetWalletSummary[] }>('/admin/quotanet/settlements/wallets', {
+    params,
+    signal: options?.signal
+  })
+  return data
+}
+
+export async function listBatches(params?: QuotaNetBatchListParams, options?: FetchOptions): Promise<BasePaginationResponse<QuotaNetPayoutBatch>> {
+  const { data } = await apiClient.get<BasePaginationResponse<QuotaNetPayoutBatch>>('/admin/quotanet/settlements/batches', {
+    params,
+    signal: options?.signal
+  })
+  return data
+}
+
+export async function createBatch(req: QuotaNetCreateBatchRequest): Promise<QuotaNetCreateBatchResponse> {
+  const { data } = await apiClient.post<QuotaNetCreateBatchResponse>('/admin/quotanet/settlements/batches', req)
+  return data
+}
+
+export async function listBatchItems(batchID: number, params?: QuotaNetBatchItemListParams, options?: FetchOptions): Promise<BasePaginationResponse<QuotaNetPayoutItem>> {
+  const { data } = await apiClient.get<BasePaginationResponse<QuotaNetPayoutItem>>(`/admin/quotanet/settlements/batches/${batchID}/items`, {
+    params,
+    signal: options?.signal
+  })
+  return data
+}
+
+export async function updatePayoutItemStatus(itemID: number, req: QuotaNetUpdateItemStatusRequest): Promise<QuotaNetPayoutItem> {
+  const { data } = await apiClient.put<QuotaNetPayoutItem>(`/admin/quotanet/settlements/items/${itemID}/status`, req)
+  return data
+}
+
 const quotanetAPI = {
   getNodeOverview,
   listNodes,
@@ -241,7 +420,16 @@ const quotanetAPI = {
   dispatchTask,
   dispatchTaskSync,
   timeoutSweep,
-  getTaskEvents
+  getTaskEvents,
+  getSettlementConfig,
+  updateSettlementConfig,
+  listLedgers,
+  getSettlementSummary,
+  listWalletSummaries,
+  listBatches,
+  createBatch,
+  listBatchItems,
+  updatePayoutItemStatus
 }
 
 export default quotanetAPI

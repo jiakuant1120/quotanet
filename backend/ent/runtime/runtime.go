@@ -1460,16 +1460,28 @@ func init() {
 	quotanetcontributionledgerDescTokenFlow := quotanetcontributionledgerFields[7].Descriptor()
 	// quotanetcontributionledger.DefaultTokenFlow holds the default value on creation for the token_flow field.
 	quotanetcontributionledger.DefaultTokenFlow = quotanetcontributionledgerDescTokenFlow.Default.(int64)
+	// quotanetcontributionledgerDescStandardCostUsd is the schema descriptor for standard_cost_usd field.
+	quotanetcontributionledgerDescStandardCostUsd := quotanetcontributionledgerFields[8].Descriptor()
+	// quotanetcontributionledger.DefaultStandardCostUsd holds the default value on creation for the standard_cost_usd field.
+	quotanetcontributionledger.DefaultStandardCostUsd = quotanetcontributionledgerDescStandardCostUsd.Default.(float64)
+	// quotanetcontributionledgerDescActualCostUsd is the schema descriptor for actual_cost_usd field.
+	quotanetcontributionledgerDescActualCostUsd := quotanetcontributionledgerFields[9].Descriptor()
+	// quotanetcontributionledger.DefaultActualCostUsd holds the default value on creation for the actual_cost_usd field.
+	quotanetcontributionledger.DefaultActualCostUsd = quotanetcontributionledgerDescActualCostUsd.Default.(float64)
+	// quotanetcontributionledgerDescContributionUsd is the schema descriptor for contribution_usd field.
+	quotanetcontributionledgerDescContributionUsd := quotanetcontributionledgerFields[10].Descriptor()
+	// quotanetcontributionledger.DefaultContributionUsd holds the default value on creation for the contribution_usd field.
+	quotanetcontributionledger.DefaultContributionUsd = quotanetcontributionledgerDescContributionUsd.Default.(float64)
 	// quotanetcontributionledgerDescAmountCxs is the schema descriptor for amount_cxs field.
-	quotanetcontributionledgerDescAmountCxs := quotanetcontributionledgerFields[8].Descriptor()
+	quotanetcontributionledgerDescAmountCxs := quotanetcontributionledgerFields[11].Descriptor()
 	// quotanetcontributionledger.DefaultAmountCxs holds the default value on creation for the amount_cxs field.
 	quotanetcontributionledger.DefaultAmountCxs = quotanetcontributionledgerDescAmountCxs.Default.(float64)
 	// quotanetcontributionledgerDescRate is the schema descriptor for rate field.
-	quotanetcontributionledgerDescRate := quotanetcontributionledgerFields[9].Descriptor()
+	quotanetcontributionledgerDescRate := quotanetcontributionledgerFields[12].Descriptor()
 	// quotanetcontributionledger.DefaultRate holds the default value on creation for the rate field.
 	quotanetcontributionledger.DefaultRate = quotanetcontributionledgerDescRate.Default.(float64)
 	// quotanetcontributionledgerDescStatus is the schema descriptor for status field.
-	quotanetcontributionledgerDescStatus := quotanetcontributionledgerFields[10].Descriptor()
+	quotanetcontributionledgerDescStatus := quotanetcontributionledgerFields[13].Descriptor()
 	// quotanetcontributionledger.DefaultStatus holds the default value on creation for the status field.
 	quotanetcontributionledger.DefaultStatus = quotanetcontributionledgerDescStatus.Default.(string)
 	// quotanetcontributionledger.StatusValidator is a validator for the "status" field. It is called by the builders before save.
@@ -1697,12 +1709,16 @@ func init() {
 	quotanetpayoutbatchDescTotalTokenFlow := quotanetpayoutbatchFields[5].Descriptor()
 	// quotanetpayoutbatch.DefaultTotalTokenFlow holds the default value on creation for the total_token_flow field.
 	quotanetpayoutbatch.DefaultTotalTokenFlow = quotanetpayoutbatchDescTotalTokenFlow.Default.(int64)
+	// quotanetpayoutbatchDescTotalContributionUsd is the schema descriptor for total_contribution_usd field.
+	quotanetpayoutbatchDescTotalContributionUsd := quotanetpayoutbatchFields[6].Descriptor()
+	// quotanetpayoutbatch.DefaultTotalContributionUsd holds the default value on creation for the total_contribution_usd field.
+	quotanetpayoutbatch.DefaultTotalContributionUsd = quotanetpayoutbatchDescTotalContributionUsd.Default.(float64)
 	// quotanetpayoutbatchDescTotalAmountCxs is the schema descriptor for total_amount_cxs field.
-	quotanetpayoutbatchDescTotalAmountCxs := quotanetpayoutbatchFields[6].Descriptor()
+	quotanetpayoutbatchDescTotalAmountCxs := quotanetpayoutbatchFields[7].Descriptor()
 	// quotanetpayoutbatch.DefaultTotalAmountCxs holds the default value on creation for the total_amount_cxs field.
 	quotanetpayoutbatch.DefaultTotalAmountCxs = quotanetpayoutbatchDescTotalAmountCxs.Default.(float64)
 	// quotanetpayoutbatchDescItemCount is the schema descriptor for item_count field.
-	quotanetpayoutbatchDescItemCount := quotanetpayoutbatchFields[7].Descriptor()
+	quotanetpayoutbatchDescItemCount := quotanetpayoutbatchFields[8].Descriptor()
 	// quotanetpayoutbatch.DefaultItemCount holds the default value on creation for the item_count field.
 	quotanetpayoutbatch.DefaultItemCount = quotanetpayoutbatchDescItemCount.Default.(int)
 	quotanetpayoutitemMixin := schema.QuotaNetPayoutItem{}.Mixin()
@@ -1760,18 +1776,22 @@ func init() {
 	quotanetpayoutitemDescTokenFlow := quotanetpayoutitemFields[4].Descriptor()
 	// quotanetpayoutitem.DefaultTokenFlow holds the default value on creation for the token_flow field.
 	quotanetpayoutitem.DefaultTokenFlow = quotanetpayoutitemDescTokenFlow.Default.(int64)
+	// quotanetpayoutitemDescContributionUsd is the schema descriptor for contribution_usd field.
+	quotanetpayoutitemDescContributionUsd := quotanetpayoutitemFields[5].Descriptor()
+	// quotanetpayoutitem.DefaultContributionUsd holds the default value on creation for the contribution_usd field.
+	quotanetpayoutitem.DefaultContributionUsd = quotanetpayoutitemDescContributionUsd.Default.(float64)
 	// quotanetpayoutitemDescAmountCxs is the schema descriptor for amount_cxs field.
-	quotanetpayoutitemDescAmountCxs := quotanetpayoutitemFields[5].Descriptor()
+	quotanetpayoutitemDescAmountCxs := quotanetpayoutitemFields[6].Descriptor()
 	// quotanetpayoutitem.DefaultAmountCxs holds the default value on creation for the amount_cxs field.
 	quotanetpayoutitem.DefaultAmountCxs = quotanetpayoutitemDescAmountCxs.Default.(float64)
 	// quotanetpayoutitemDescStatus is the schema descriptor for status field.
-	quotanetpayoutitemDescStatus := quotanetpayoutitemFields[6].Descriptor()
+	quotanetpayoutitemDescStatus := quotanetpayoutitemFields[7].Descriptor()
 	// quotanetpayoutitem.DefaultStatus holds the default value on creation for the status field.
 	quotanetpayoutitem.DefaultStatus = quotanetpayoutitemDescStatus.Default.(string)
 	// quotanetpayoutitem.StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	quotanetpayoutitem.StatusValidator = quotanetpayoutitemDescStatus.Validators[0].(func(string) error)
 	// quotanetpayoutitemDescTxHash is the schema descriptor for tx_hash field.
-	quotanetpayoutitemDescTxHash := quotanetpayoutitemFields[7].Descriptor()
+	quotanetpayoutitemDescTxHash := quotanetpayoutitemFields[8].Descriptor()
 	// quotanetpayoutitem.TxHashValidator is a validator for the "tx_hash" field. It is called by the builders before save.
 	quotanetpayoutitem.TxHashValidator = quotanetpayoutitemDescTxHash.Validators[0].(func(string) error)
 	quotanettaskMixin := schema.QuotaNetTask{}.Mixin()
