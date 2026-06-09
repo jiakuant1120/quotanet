@@ -18,6 +18,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/internal/quotanet/tasks"
 	qws "github.com/Wei-Shaw/sub2api/internal/quotanet/ws"
 	"github.com/Wei-Shaw/sub2api/internal/server/middleware"
+	"github.com/Wei-Shaw/sub2api/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -34,16 +35,21 @@ type QuotaNetHandler struct {
 	sessionManager      *qws.SessionManager
 	nodeManager         *nodes.Manager
 	taskService         quotaNetTaskService
+	groupCounter        QuotaNetGroupAccountCounter
 	registry            *registry.Registry
 	upgrader            websocket.Upgrader
 	registrationEnabled func() bool
+}
+
+type QuotaNetGroupAccountCounter interface {
+	GetAccountCount(ctx context.Context, groupID int64) (total int64, active int64, err error)
 }
 
 type quotaNetTaskService interface {
 	DispatchAndWait(ctx context.Context, input tasks.CreateTaskInput) (*tasks.DispatchResult, error)
 }
 
-func NewQuotaNetHandler(sessionManager *qws.SessionManager, nodeManager *nodes.Manager, taskService *tasks.Service) *QuotaNetHandler {
+func NewQuotaNetHandler(sessionManager *qws.SessionManager, nodeManager *nodes.Manager, taskService *tasks.Service, groupCounter ...QuotaNetGroupAccountCounter) *QuotaNetHandler {
 	var reg *registry.Registry
 	if sessionManager != nil {
 		reg = sessionManager.Registry()
@@ -56,6 +62,7 @@ func NewQuotaNetHandler(sessionManager *qws.SessionManager, nodeManager *nodes.M
 		sessionManager: sessionManager,
 		nodeManager:    nodeManager,
 		taskService:    taskSvc,
+		groupCounter:   firstQuotaNetGroupCounter(groupCounter),
 		registry:       reg,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(*http.Request) bool {
@@ -64,6 +71,31 @@ func NewQuotaNetHandler(sessionManager *qws.SessionManager, nodeManager *nodes.M
 		},
 		registrationEnabled: quotanetDevelopmentRegistrationEnabled,
 	}
+}
+
+func firstQuotaNetGroupCounter(counters []QuotaNetGroupAccountCounter) QuotaNetGroupAccountCounter {
+	if len(counters) == 0 {
+		return nil
+	}
+	return counters[0]
+}
+
+func (h *QuotaNetHandler) ShouldUseOpenAIFallback(c *gin.Context) bool {
+	if h == nil || h.groupCounter == nil || c == nil || c.Request == nil {
+		return false
+	}
+	apiKey, ok := middleware.GetAPIKeyFromContext(c)
+	if !ok || apiKey == nil || apiKey.Group == nil || apiKey.GroupID == nil {
+		return false
+	}
+	if apiKey.Group.Platform != service.PlatformOpenAI {
+		return false
+	}
+	total, _, err := h.groupCounter.GetAccountCount(c.Request.Context(), *apiKey.GroupID)
+	if err != nil {
+		return false
+	}
+	return total == 0
 }
 
 type quotaNetNodeRegisterRequest struct {

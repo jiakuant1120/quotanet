@@ -64,7 +64,7 @@ func RegisterGatewayRoutes(
 			h.Gateway.CountTokens(c)
 		})
 		gateway.GET("/models", func(c *gin.Context) {
-			if getGroupPlatform(c) == service.PlatformQuotaNet {
+			if useQuotaNetOpenAIFallback(c, h) {
 				h.QuotaNet.Models(c)
 				return
 			}
@@ -73,29 +73,29 @@ func RegisterGatewayRoutes(
 		gateway.GET("/usage", h.Gateway.Usage)
 		// OpenAI Responses API: auto-route based on group platform
 		gateway.POST("/responses", func(c *gin.Context) {
-			switch getGroupPlatform(c) {
-			case service.PlatformQuotaNet:
+			if useQuotaNetOpenAIFallback(c, h) {
 				h.QuotaNet.Responses(c)
 				return
-			case service.PlatformOpenAI:
+			}
+			if getGroupPlatform(c) == service.PlatformOpenAI {
 				h.OpenAIGateway.Responses(c)
 				return
 			}
 			h.Gateway.Responses(c)
 		})
 		gateway.POST("/responses/*subpath", func(c *gin.Context) {
-			switch getGroupPlatform(c) {
-			case service.PlatformQuotaNet:
+			if useQuotaNetOpenAIFallback(c, h) {
 				h.QuotaNet.Responses(c)
 				return
-			case service.PlatformOpenAI:
+			}
+			if getGroupPlatform(c) == service.PlatformOpenAI {
 				h.OpenAIGateway.Responses(c)
 				return
 			}
 			h.Gateway.Responses(c)
 		})
 		gateway.GET("/responses", func(c *gin.Context) {
-			if getGroupPlatform(c) == service.PlatformQuotaNet {
+			if useQuotaNetOpenAIFallback(c, h) {
 				quotaNetResponsesWebSocketUnavailable(c)
 				return
 			}
@@ -103,6 +103,10 @@ func RegisterGatewayRoutes(
 		})
 		// OpenAI Chat Completions API: auto-route based on group platform
 		gateway.POST("/chat/completions", func(c *gin.Context) {
+			if useQuotaNetOpenAIFallback(c, h) {
+				h.QuotaNet.OpenAIChatCompletions(c)
+				return
+			}
 			if getGroupPlatform(c) == service.PlatformOpenAI {
 				h.OpenAIGateway.ChatCompletions(c)
 				return
@@ -167,11 +171,11 @@ func RegisterGatewayRoutes(
 
 	// OpenAI Responses API（不带v1前缀的别名）— auto-route based on group platform
 	responsesHandler := func(c *gin.Context) {
-		switch getGroupPlatform(c) {
-		case service.PlatformQuotaNet:
+		if useQuotaNetOpenAIFallback(c, h) {
 			h.QuotaNet.Responses(c)
 			return
-		case service.PlatformOpenAI:
+		}
+		if getGroupPlatform(c) == service.PlatformOpenAI {
 			h.OpenAIGateway.Responses(c)
 			return
 		}
@@ -180,7 +184,7 @@ func RegisterGatewayRoutes(
 	r.POST("/responses", bodyLimit, clientRequestID, opsErrorLogger, endpointNorm, gin.HandlerFunc(apiKeyAuth), requireGroupAnthropic, responsesHandler)
 	r.POST("/responses/*subpath", bodyLimit, clientRequestID, opsErrorLogger, endpointNorm, gin.HandlerFunc(apiKeyAuth), requireGroupAnthropic, responsesHandler)
 	responsesWebSocketHandler := func(c *gin.Context) {
-		if getGroupPlatform(c) == service.PlatformQuotaNet {
+		if useQuotaNetOpenAIFallback(c, h) {
 			quotaNetResponsesWebSocketUnavailable(c)
 			return
 		}
@@ -196,6 +200,10 @@ func RegisterGatewayRoutes(
 	}
 	// OpenAI Chat Completions API（不带v1前缀的别名）— auto-route based on group platform
 	r.POST("/chat/completions", bodyLimit, clientRequestID, opsErrorLogger, endpointNorm, gin.HandlerFunc(apiKeyAuth), requireGroupAnthropic, func(c *gin.Context) {
+		if useQuotaNetOpenAIFallback(c, h) {
+			h.QuotaNet.OpenAIChatCompletions(c)
+			return
+		}
 		if getGroupPlatform(c) == service.PlatformOpenAI {
 			h.OpenAIGateway.ChatCompletions(c)
 			return
@@ -286,9 +294,13 @@ func getGroupPlatform(c *gin.Context) string {
 	return apiKey.Group.Platform
 }
 
+func useQuotaNetOpenAIFallback(c *gin.Context, h *handler.Handlers) bool {
+	return h != nil && h.QuotaNet != nil && h.QuotaNet.ShouldUseOpenAIFallback(c)
+}
+
 func quotaNetResponsesWebSocketUnavailable(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"error": gin.H{
 		"code":    "unsupported_endpoint",
-		"message": "QuotaNet groups do not support Responses WebSocket ingress yet",
+		"message": "QuotaNet fallback does not support Responses WebSocket ingress yet",
 	}})
 }

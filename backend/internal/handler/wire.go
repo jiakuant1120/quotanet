@@ -173,8 +173,8 @@ func ProvideQuotaNetSessionManager(nodeStore *nodes.EntStore, responseRecorder *
 		WithTaskStore(responseRecorder)
 }
 
-func ProvideQuotaNetHandler(sessionManager *qws.SessionManager, nodeManager *nodes.Manager, taskService *tasks.Service) *QuotaNetHandler {
-	return NewQuotaNetHandler(sessionManager, nodeManager, taskService)
+func ProvideQuotaNetHandler(sessionManager *qws.SessionManager, nodeManager *nodes.Manager, taskService *tasks.Service, groupRepo service.GroupRepository) *QuotaNetHandler {
+	return NewQuotaNetHandler(sessionManager, nodeManager, taskService, groupRepo)
 }
 
 // ProviderSet is the Wire provider set for all handlers

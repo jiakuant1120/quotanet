@@ -54,9 +54,25 @@ var AllowedQuotaPlatforms = []string{
 	PlatformAntigravity,
 }
 
+var AllowedGroupPlatforms = []string{
+	PlatformAnthropic,
+	PlatformOpenAI,
+	PlatformGemini,
+	PlatformAntigravity,
+}
+
 // IsAllowedQuotaPlatform 报告 s 是否为合法的 quota platform 标识。
 func IsAllowedQuotaPlatform(s string) bool {
 	for _, p := range AllowedQuotaPlatforms {
+		if p == s {
+			return true
+		}
+	}
+	return false
+}
+
+func IsAllowedGroupPlatform(s string) bool {
+	for _, p := range AllowedGroupPlatforms {
 		if p == s {
 			return true
 		}

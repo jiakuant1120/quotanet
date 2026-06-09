@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -41,7 +42,7 @@ func newGatewayRoutesTestRouter() *gin.Engine {
 	return router
 }
 
-func newQuotaNetGatewayRoutesTestRouter() *gin.Engine {
+func newQuotaNetFallbackGatewayRoutesTestRouter(total, active int64) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 
@@ -50,13 +51,13 @@ func newQuotaNetGatewayRoutesTestRouter() *gin.Engine {
 		&handler.Handlers{
 			Gateway:       &handler.GatewayHandler{},
 			OpenAIGateway: &handler.OpenAIGatewayHandler{},
-			QuotaNet:      handler.NewQuotaNetHandler(nil, nil, nil),
+			QuotaNet:      handler.NewQuotaNetHandler(nil, nil, nil, stubQuotaNetGroupCounter{total: total, active: active}),
 		},
 		servermiddleware.APIKeyAuthMiddleware(func(c *gin.Context) {
 			groupID := int64(1)
 			c.Set(string(servermiddleware.ContextKeyAPIKey), &service.APIKey{
 				GroupID: &groupID,
-				Group:   &service.Group{Platform: service.PlatformQuotaNet},
+				Group:   &service.Group{Platform: service.PlatformOpenAI},
 			})
 			c.Next()
 		}),
@@ -68,6 +69,15 @@ func newQuotaNetGatewayRoutesTestRouter() *gin.Engine {
 	)
 
 	return router
+}
+
+type stubQuotaNetGroupCounter struct {
+	total  int64
+	active int64
+}
+
+func (s stubQuotaNetGroupCounter) GetAccountCount(context.Context, int64) (int64, int64, error) {
+	return s.total, s.active, nil
 }
 
 func TestGatewayRoutesOpenAIResponsesCompactPathIsRegistered(t *testing.T) {
@@ -90,8 +100,8 @@ func TestGatewayRoutesOpenAIResponsesCompactPathIsRegistered(t *testing.T) {
 	}
 }
 
-func TestGatewayRoutesQuotaNetGroupResponsesPathsRouteToQuotaNet(t *testing.T) {
-	router := newQuotaNetGatewayRoutesTestRouter()
+func TestGatewayRoutesOpenAIEmptyGroupResponsesPathsRouteToQuotaNet(t *testing.T) {
+	router := newQuotaNetFallbackGatewayRoutesTestRouter(0, 0)
 
 	for _, path := range []string{
 		"/v1/responses",
@@ -115,8 +125,29 @@ func TestGatewayRoutesQuotaNetGroupResponsesPathsRouteToQuotaNet(t *testing.T) {
 	}
 }
 
-func TestGatewayRoutesQuotaNetGroupResponsesWebSocketIsExplicitlyUnsupported(t *testing.T) {
-	router := newQuotaNetGatewayRoutesTestRouter()
+func TestGatewayRoutesOpenAIEmptyGroupChatCompletionsPathsRouteToQuotaNet(t *testing.T) {
+	router := newQuotaNetFallbackGatewayRoutesTestRouter(0, 0)
+
+	for _, path := range []string{
+		"/v1/chat/completions",
+		"/chat/completions",
+	} {
+		req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(`{"model":"gpt-5","messages":[{"role":"user","content":"ping"}]}`))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, req)
+		if w.Code != http.StatusServiceUnavailable {
+			t.Fatalf("path=%s status=%d want %d body=%s", path, w.Code, http.StatusServiceUnavailable, w.Body.String())
+		}
+		if !strings.Contains(w.Body.String(), "quotanet task service is not initialized") {
+			t.Fatalf("path=%s body=%s should contain quotanet task service error", path, w.Body.String())
+		}
+	}
+}
+
+func TestGatewayRoutesOpenAIEmptyGroupResponsesWebSocketIsExplicitlyUnsupported(t *testing.T) {
+	router := newQuotaNetFallbackGatewayRoutesTestRouter(0, 0)
 
 	for _, path := range []string{
 		"/v1/responses",
@@ -133,6 +164,19 @@ func TestGatewayRoutesQuotaNetGroupResponsesWebSocketIsExplicitlyUnsupported(t *
 		if !strings.Contains(w.Body.String(), "Responses WebSocket ingress") {
 			t.Fatalf("path=%s body=%s should explain unsupported quotanet websocket ingress", path, w.Body.String())
 		}
+	}
+}
+
+func TestGatewayRoutesOpenAIGroupWithOnlyUnavailableAccountsDoesNotRouteToQuotaNet(t *testing.T) {
+	router := newQuotaNetFallbackGatewayRoutesTestRouter(1, 0)
+
+	req := httptest.NewRequest(http.MethodPost, "/responses", strings.NewReader(`{"model":"gpt-5","input":"ping"}`))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+	if strings.Contains(w.Body.String(), "quotanet task service is not initialized") {
+		t.Fatalf("body=%s should not route to quotanet when total accounts > 0", w.Body.String())
 	}
 }
 
@@ -153,105 +197,5 @@ func TestGatewayRoutesOpenAIImagesPathsAreRegistered(t *testing.T) {
 		if w.Code == http.StatusNotFound {
 			t.Fatalf("path=%s should hit OpenAI images handler", path)
 		}
-	}
-}
-
-func TestQuotaNetOpenAIRouteRequiresAPIKey(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	router := gin.New()
-	v1 := router.Group("/api/v1")
-
-	RegisterQuotaNetGatewayRoutes(
-		v1,
-		&handler.Handlers{QuotaNet: handler.NewQuotaNetHandler(nil, nil, nil)},
-		servermiddleware.APIKeyAuthMiddleware(func(c *gin.Context) {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "api key required"})
-			c.Abort()
-		}),
-		nil,
-		nil,
-		&config.Config{Gateway: config.GatewayConfig{MaxBodySize: 1 << 20}},
-	)
-
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/quotanet/openai/v1/chat/completions", strings.NewReader(`{"model":"gpt-4.1"}`))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-
-	router.ServeHTTP(w, req)
-
-	if w.Code != http.StatusUnauthorized {
-		t.Fatalf("status=%d want %d body=%s", w.Code, http.StatusUnauthorized, w.Body.String())
-	}
-	if !strings.Contains(w.Body.String(), "api key required") {
-		t.Fatalf("body=%s should contain api key required", w.Body.String())
-	}
-}
-
-func TestQuotaNetOpenAIRouteUsesAuthenticatedOpenAIGroup(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	router := gin.New()
-	v1 := router.Group("/api/v1")
-
-	RegisterQuotaNetGatewayRoutes(
-		v1,
-		&handler.Handlers{QuotaNet: handler.NewQuotaNetHandler(nil, nil, nil)},
-		servermiddleware.APIKeyAuthMiddleware(func(c *gin.Context) {
-			groupID := int64(1)
-			c.Set(string(servermiddleware.ContextKeyAPIKey), &service.APIKey{
-				GroupID: &groupID,
-				Group:   &service.Group{Platform: service.PlatformOpenAI},
-			})
-			c.Next()
-		}),
-		nil,
-		nil,
-		&config.Config{Gateway: config.GatewayConfig{MaxBodySize: 1 << 20}},
-	)
-
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/quotanet/openai/v1/chat/completions", strings.NewReader(`{"model":"gpt-4.1"}`))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-
-	router.ServeHTTP(w, req)
-
-	if w.Code != http.StatusServiceUnavailable {
-		t.Fatalf("status=%d want %d body=%s", w.Code, http.StatusServiceUnavailable, w.Body.String())
-	}
-	if !strings.Contains(w.Body.String(), "quotanet task service is not initialized") {
-		t.Fatalf("body=%s should contain quotanet handler error", w.Body.String())
-	}
-}
-
-func TestQuotaNetOpenAIModelsRouteUsesAuthenticatedOpenAIGroup(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	router := gin.New()
-	v1 := router.Group("/api/v1")
-
-	RegisterQuotaNetGatewayRoutes(
-		v1,
-		&handler.Handlers{QuotaNet: handler.NewQuotaNetHandler(nil, nil, nil)},
-		servermiddleware.APIKeyAuthMiddleware(func(c *gin.Context) {
-			groupID := int64(1)
-			c.Set(string(servermiddleware.ContextKeyAPIKey), &service.APIKey{
-				GroupID: &groupID,
-				Group:   &service.Group{Platform: service.PlatformOpenAI},
-			})
-			c.Next()
-		}),
-		nil,
-		nil,
-		&config.Config{Gateway: config.GatewayConfig{MaxBodySize: 1 << 20}},
-	)
-
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/quotanet/openai/v1/models", nil)
-	w := httptest.NewRecorder()
-
-	router.ServeHTTP(w, req)
-
-	if w.Code != http.StatusServiceUnavailable {
-		t.Fatalf("status=%d want %d body=%s", w.Code, http.StatusServiceUnavailable, w.Body.String())
-	}
-	if !strings.Contains(w.Body.String(), "quotanet registry is not initialized") {
-		t.Fatalf("body=%s should contain registry unavailable message", w.Body.String())
 	}
 }

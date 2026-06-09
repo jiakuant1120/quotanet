@@ -1651,7 +1651,7 @@ func (s *adminServiceImpl) GetGroupModelsListCandidates(ctx context.Context, id 
 
 func defaultModelsListCandidateIDs(platform string) []string {
 	switch platform {
-	case PlatformOpenAI, PlatformQuotaNet:
+	case PlatformOpenAI:
 		return openai.DefaultModelIDs()
 	case PlatformGemini:
 		ids := make([]string, 0, len(geminicli.DefaultModels))
@@ -1683,6 +1683,9 @@ func (s *adminServiceImpl) CreateGroup(ctx context.Context, input *CreateGroupIn
 	platform := input.Platform
 	if platform == "" {
 		platform = PlatformAnthropic
+	}
+	if !IsAllowedGroupPlatform(platform) {
+		return nil, fmt.Errorf("unsupported group platform: %s", platform)
 	}
 
 	subscriptionType := input.SubscriptionType
@@ -1928,6 +1931,9 @@ func (s *adminServiceImpl) UpdateGroup(ctx context.Context, id int64, input *Upd
 		group.Description = input.Description
 	}
 	if input.Platform != "" {
+		if !IsAllowedGroupPlatform(input.Platform) {
+			return nil, fmt.Errorf("unsupported group platform: %s", input.Platform)
+		}
 		group.Platform = input.Platform
 	}
 	if input.RateMultiplier != nil {
