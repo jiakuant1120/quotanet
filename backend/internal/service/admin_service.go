@@ -1651,7 +1651,7 @@ func (s *adminServiceImpl) GetGroupModelsListCandidates(ctx context.Context, id 
 
 func defaultModelsListCandidateIDs(platform string) []string {
 	switch platform {
-	case PlatformOpenAI:
+	case PlatformOpenAI, PlatformQuotaNet:
 		return openai.DefaultModelIDs()
 	case PlatformGemini:
 		ids := make([]string, 0, len(geminicli.DefaultModels))
@@ -1793,7 +1793,7 @@ func (s *adminServiceImpl) CreateGroup(ctx context.Context, input *CreateGroupIn
 		ModelsListConfig:                normalizeGroupModelsListConfig(input.ModelsListConfig),
 		RPMLimit:                        input.RPMLimit,
 	}
-	sanitizeGroupMessagesDispatchFields(group)
+	sanitizeGroupPlatformFields(group)
 	if err := s.groupRepo.Create(ctx, group); err != nil {
 		return nil, err
 	}
@@ -2044,7 +2044,7 @@ func (s *adminServiceImpl) UpdateGroup(ctx context.Context, id int64, input *Upd
 	if input.RPMLimit != nil {
 		group.RPMLimit = *input.RPMLimit
 	}
-	sanitizeGroupMessagesDispatchFields(group)
+	sanitizeGroupPlatformFields(group)
 
 	if err := s.groupRepo.Update(ctx, group); err != nil {
 		return nil, err

@@ -63,24 +63,44 @@ func RegisterGatewayRoutes(
 			}
 			h.Gateway.CountTokens(c)
 		})
-		gateway.GET("/models", h.Gateway.Models)
+		gateway.GET("/models", func(c *gin.Context) {
+			if getGroupPlatform(c) == service.PlatformQuotaNet {
+				h.QuotaNet.Models(c)
+				return
+			}
+			h.Gateway.Models(c)
+		})
 		gateway.GET("/usage", h.Gateway.Usage)
 		// OpenAI Responses API: auto-route based on group platform
 		gateway.POST("/responses", func(c *gin.Context) {
-			if getGroupPlatform(c) == service.PlatformOpenAI {
+			switch getGroupPlatform(c) {
+			case service.PlatformQuotaNet:
+				h.QuotaNet.Responses(c)
+				return
+			case service.PlatformOpenAI:
 				h.OpenAIGateway.Responses(c)
 				return
 			}
 			h.Gateway.Responses(c)
 		})
 		gateway.POST("/responses/*subpath", func(c *gin.Context) {
-			if getGroupPlatform(c) == service.PlatformOpenAI {
+			switch getGroupPlatform(c) {
+			case service.PlatformQuotaNet:
+				h.QuotaNet.Responses(c)
+				return
+			case service.PlatformOpenAI:
 				h.OpenAIGateway.Responses(c)
 				return
 			}
 			h.Gateway.Responses(c)
 		})
-		gateway.GET("/responses", h.OpenAIGateway.ResponsesWebSocket)
+		gateway.GET("/responses", func(c *gin.Context) {
+			if getGroupPlatform(c) == service.PlatformQuotaNet {
+				quotaNetResponsesWebSocketUnavailable(c)
+				return
+			}
+			h.OpenAIGateway.ResponsesWebSocket(c)
+		})
 		// OpenAI Chat Completions API: auto-route based on group platform
 		gateway.POST("/chat/completions", func(c *gin.Context) {
 			if getGroupPlatform(c) == service.PlatformOpenAI {
@@ -147,7 +167,11 @@ func RegisterGatewayRoutes(
 
 	// OpenAI Responses API（不带v1前缀的别名）— auto-route based on group platform
 	responsesHandler := func(c *gin.Context) {
-		if getGroupPlatform(c) == service.PlatformOpenAI {
+		switch getGroupPlatform(c) {
+		case service.PlatformQuotaNet:
+			h.QuotaNet.Responses(c)
+			return
+		case service.PlatformOpenAI:
 			h.OpenAIGateway.Responses(c)
 			return
 		}
@@ -155,13 +179,20 @@ func RegisterGatewayRoutes(
 	}
 	r.POST("/responses", bodyLimit, clientRequestID, opsErrorLogger, endpointNorm, gin.HandlerFunc(apiKeyAuth), requireGroupAnthropic, responsesHandler)
 	r.POST("/responses/*subpath", bodyLimit, clientRequestID, opsErrorLogger, endpointNorm, gin.HandlerFunc(apiKeyAuth), requireGroupAnthropic, responsesHandler)
-	r.GET("/responses", bodyLimit, clientRequestID, opsErrorLogger, endpointNorm, gin.HandlerFunc(apiKeyAuth), requireGroupAnthropic, h.OpenAIGateway.ResponsesWebSocket)
+	responsesWebSocketHandler := func(c *gin.Context) {
+		if getGroupPlatform(c) == service.PlatformQuotaNet {
+			quotaNetResponsesWebSocketUnavailable(c)
+			return
+		}
+		h.OpenAIGateway.ResponsesWebSocket(c)
+	}
+	r.GET("/responses", bodyLimit, clientRequestID, opsErrorLogger, endpointNorm, gin.HandlerFunc(apiKeyAuth), requireGroupAnthropic, responsesWebSocketHandler)
 	codexDirect := r.Group("/backend-api/codex")
 	codexDirect.Use(bodyLimit, clientRequestID, opsErrorLogger, endpointNorm, gin.HandlerFunc(apiKeyAuth), requireGroupAnthropic)
 	{
 		codexDirect.POST("/responses", responsesHandler)
 		codexDirect.POST("/responses/*subpath", responsesHandler)
-		codexDirect.GET("/responses", h.OpenAIGateway.ResponsesWebSocket)
+		codexDirect.GET("/responses", responsesWebSocketHandler)
 	}
 	// OpenAI Chat Completions API（不带v1前缀的别名）— auto-route based on group platform
 	r.POST("/chat/completions", bodyLimit, clientRequestID, opsErrorLogger, endpointNorm, gin.HandlerFunc(apiKeyAuth), requireGroupAnthropic, func(c *gin.Context) {
@@ -253,4 +284,11 @@ func getGroupPlatform(c *gin.Context) string {
 		return ""
 	}
 	return apiKey.Group.Platform
+}
+
+func quotaNetResponsesWebSocketUnavailable(c *gin.Context) {
+	c.JSON(http.StatusNotImplemented, gin.H{"error": gin.H{
+		"code":    "unsupported_endpoint",
+		"message": "QuotaNet groups do not support Responses WebSocket ingress yet",
+	}})
 }

@@ -233,10 +233,190 @@ func TestQuotaNetOpenAIChatCompletionsPropagatesCallerContext(t *testing.T) {
 	}
 }
 
+func TestQuotaNetResponsesStreamWrapsPayloadWithResponseCompleted(t *testing.T) {
+	w := httptest.NewRecorder()
+	c := newQuotaNetResponsesTestContext(w, `{"model":"gpt-5.5","stream":true,"input":"ping"}`)
+	h := &QuotaNetHandler{taskService: &stubQuotaNetTaskService{
+		result: &tasks.DispatchResult{
+			Response: protocol.TaskResponse{
+				TaskID: "qnt_stream_1",
+				Status: protocol.TaskStatusSuccess,
+				Payload: map[string]any{
+					"id":     "resp_1",
+					"object": "response",
+					"status": "completed",
+					"model":  "gpt-5.5",
+					"output": []any{},
+				},
+			},
+		},
+	}}
+
+	h.Responses(c)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200, body=%s", w.Code, w.Body.String())
+	}
+	if ct := w.Header().Get("Content-Type"); !strings.Contains(ct, "text/event-stream") {
+		t.Fatalf("content-type = %q, want text/event-stream", ct)
+	}
+	body := w.Body.String()
+	for _, want := range []string{
+		"event: response.completed",
+		`"type":"response.completed"`,
+		`"id":"resp_1"`,
+		`"input_tokens":0`,
+		`"output_tokens":0`,
+		`"total_tokens":0`,
+		"data: [DONE]",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("body missing %q: %s", want, body)
+		}
+	}
+	input := h.taskService.(*stubQuotaNetTaskService).input
+	if !input.Stream || input.Endpoint != "/responses" || input.Model != "gpt-5.5" {
+		t.Fatalf("input = %+v", input)
+	}
+}
+
+func TestQuotaNetResponsesStreamNormalizesChatUsage(t *testing.T) {
+	w := httptest.NewRecorder()
+	c := newQuotaNetResponsesTestContext(w, `{"model":"gpt-5.5","stream":true,"input":"ping"}`)
+	h := &QuotaNetHandler{taskService: &stubQuotaNetTaskService{
+		result: &tasks.DispatchResult{
+			Response: protocol.TaskResponse{
+				TaskID: "qnt_stream_usage",
+				Status: protocol.TaskStatusSuccess,
+				Payload: map[string]any{
+					"id":     "resp_usage",
+					"object": "chat.completion",
+					"choices": []any{map[string]any{
+						"index": 0,
+						"message": map[string]any{
+							"role":    "assistant",
+							"content": "Hello! What would you like to work on?",
+						},
+						"finish_reason": "stop",
+					}},
+					"usage": map[string]any{
+						"prompt_tokens":     3,
+						"completion_tokens": 2,
+					},
+				},
+			},
+		},
+	}}
+
+	h.Responses(c)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200, body=%s", w.Code, w.Body.String())
+	}
+	body := w.Body.String()
+	for _, want := range []string{
+		`"type":"response.output_text.delta"`,
+		`"delta":"Hello! What would you like to work on?"`,
+		`"text":"Hello! What would you like to work on?"`,
+		`"type":"output_text"`,
+		`"input_tokens":3`,
+		`"output_tokens":2`,
+		`"total_tokens":5`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("body missing %q: %s", want, body)
+		}
+	}
+}
+
+func TestQuotaNetResponsesNonStreamConvertsChatCompletionPayload(t *testing.T) {
+	w := httptest.NewRecorder()
+	c := newQuotaNetResponsesTestContext(w, `{"model":"gpt-5.5","input":"ping"}`)
+	h := &QuotaNetHandler{taskService: &stubQuotaNetTaskService{
+		result: &tasks.DispatchResult{
+			Response: protocol.TaskResponse{
+				TaskID: "qnt_json_chat",
+				Status: protocol.TaskStatusSuccess,
+				Payload: map[string]any{
+					"id":     "resp_chat_json",
+					"object": "chat.completion",
+					"model":  "gpt-5.5",
+					"choices": []any{map[string]any{
+						"message": map[string]any{
+							"role":    "assistant",
+							"content": "Visible answer",
+						},
+					}},
+					"usage": map[string]any{
+						"prompt_tokens":     4,
+						"completion_tokens": 2,
+					},
+				},
+			},
+		},
+	}}
+
+	h.Responses(c)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200, body=%s", w.Code, w.Body.String())
+	}
+	body := w.Body.String()
+	for _, want := range []string{
+		`"object":"response"`,
+		`"text":"Visible answer"`,
+		`"type":"output_text"`,
+		`"input_tokens":4`,
+		`"output_tokens":2`,
+		`"total_tokens":6`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("body missing %q: %s", want, body)
+		}
+	}
+	if strings.Contains(body, `"object":"chat.completion"`) {
+		t.Fatalf("body should not expose chat.completion shape: %s", body)
+	}
+}
+
+func TestQuotaNetResponsesNonStreamReturnsJSONPayload(t *testing.T) {
+	w := httptest.NewRecorder()
+	c := newQuotaNetResponsesTestContext(w, `{"model":"gpt-5.5","input":"ping"}`)
+	h := &QuotaNetHandler{taskService: &stubQuotaNetTaskService{
+		result: &tasks.DispatchResult{
+			Response: protocol.TaskResponse{
+				TaskID:  "qnt_json_1",
+				Status:  protocol.TaskStatusSuccess,
+				Payload: map[string]any{"id": "resp_json_1", "object": "response"},
+			},
+		},
+	}}
+
+	h.Responses(c)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200, body=%s", w.Code, w.Body.String())
+	}
+	if ct := w.Header().Get("Content-Type"); strings.Contains(ct, "text/event-stream") {
+		t.Fatalf("content-type = %q, want JSON", ct)
+	}
+	if got := w.Body.String(); !strings.Contains(got, `"resp_json_1"`) {
+		t.Fatalf("body = %s", got)
+	}
+}
+
 func newQuotaNetTestContext(w *httptest.ResponseRecorder, body string) *gin.Context {
 	gin.SetMode(gin.TestMode)
 	c, _ := gin.CreateTestContext(w)
 	c.Request = httptest.NewRequest(http.MethodPost, "/api/v1/quotanet/openai/v1/chat/completions", bytes.NewBufferString(body))
+	c.Request.Header.Set("Content-Type", "application/json")
+	return c
+}
+
+func newQuotaNetResponsesTestContext(w *httptest.ResponseRecorder, body string) *gin.Context {
+	gin.SetMode(gin.TestMode)
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest(http.MethodPost, "/responses", bytes.NewBufferString(body))
 	c.Request.Header.Set("Content-Type", "application/json")
 	return c
 }

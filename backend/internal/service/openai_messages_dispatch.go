@@ -98,3 +98,35 @@ func sanitizeGroupMessagesDispatchFields(g *Group) {
 	g.DefaultMappedModel = ""
 	g.MessagesDispatchModelConfig = OpenAIMessagesDispatchModelConfig{}
 }
+
+func sanitizeGroupPlatformFields(g *Group) {
+	if g == nil {
+		return
+	}
+	sanitizeGroupMessagesDispatchFields(g)
+	if g.Platform != PlatformAntigravity {
+		g.SupportedModelScopes = nil
+		g.MCPXMLInject = false
+	}
+	if g.Platform != PlatformAnthropic {
+		g.ModelRouting = nil
+		g.ModelRoutingEnabled = false
+		g.ClaudeCodeOnly = false
+		g.FallbackGroupID = nil
+	}
+	if g.Platform != PlatformAnthropic && g.Platform != PlatformAntigravity {
+		g.FallbackGroupIDOnInvalidRequest = nil
+	}
+	if g.Platform != PlatformOpenAI && g.Platform != PlatformGemini && g.Platform != PlatformAntigravity {
+		g.AllowImageGeneration = false
+		g.ImageRateIndependent = false
+		g.ImageRateMultiplier = 1
+		g.ImagePrice1K = nil
+		g.ImagePrice2K = nil
+		g.ImagePrice4K = nil
+	}
+	if g.Platform != PlatformOpenAI && g.Platform != PlatformAntigravity && g.Platform != PlatformAnthropic && g.Platform != PlatformGemini {
+		g.RequireOAuthOnly = false
+		g.RequirePrivacySet = false
+	}
+}

@@ -2966,6 +2966,8 @@
                         ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
                         : group.platform === 'antigravity'
                           ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                          : group.platform === 'quotanet'
+                            ? 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400'
                           : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
                   ]"
                 >
@@ -3138,6 +3140,7 @@ const platformOptions = computed(() => [
   { value: "openai", label: "OpenAI" },
   { value: "gemini", label: "Gemini" },
   { value: "antigravity", label: "Antigravity" },
+  { value: "quotanet", label: "QuotaNet" },
 ]);
 
 const platformFilterOptions = computed(() => [
@@ -3146,6 +3149,7 @@ const platformFilterOptions = computed(() => [
   { value: "openai", label: "OpenAI" },
   { value: "gemini", label: "Gemini" },
   { value: "antigravity", label: "Antigravity" },
+  { value: "quotanet", label: "QuotaNet" },
 ]);
 
 const editStatusOptions = computed(() => [
@@ -3965,6 +3969,15 @@ const normalizeImageRateMultiplier = (
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : 1;
 };
 
+const resolveAPIErrorMessage = (error: any, fallback: string): string => {
+  return (
+    error?.response?.data?.detail ||
+    error?.response?.data?.message ||
+    error?.message ||
+    fallback
+  );
+};
+
 const handleCreateGroup = async () => {
   if (!createForm.name.trim()) {
     appStore.showError(t("admin.groups.nameRequired"));
@@ -4020,9 +4033,7 @@ const handleCreateGroup = async () => {
       onboardingStore.nextStep(500);
     }
   } catch (error: any) {
-    appStore.showError(
-      error.response?.data?.detail || t("admin.groups.failedToCreate"),
-    );
+    appStore.showError(resolveAPIErrorMessage(error, t("admin.groups.failedToCreate")));
     console.error("Error creating group:", error);
     // Don't advance tour on error
   } finally {
@@ -4155,9 +4166,7 @@ const handleUpdateGroup = async () => {
     closeEditModal();
     loadGroups();
   } catch (error: any) {
-    appStore.showError(
-      error.response?.data?.detail || t("admin.groups.failedToUpdate"),
-    );
+    appStore.showError(resolveAPIErrorMessage(error, t("admin.groups.failedToUpdate")));
     console.error("Error updating group:", error);
   } finally {
     submitting.value = false;
@@ -4213,9 +4222,7 @@ const confirmDelete = async () => {
     deletingGroup.value = null;
     loadGroups();
   } catch (error: any) {
-    appStore.showError(
-      error.response?.data?.detail || t("admin.groups.failedToDelete"),
-    );
+    appStore.showError(resolveAPIErrorMessage(error, t("admin.groups.failedToDelete")));
     console.error("Error deleting group:", error);
   }
 };
@@ -4328,9 +4335,7 @@ const saveSortOrder = async () => {
     closeSortModal();
     loadGroups();
   } catch (error: any) {
-    appStore.showError(
-      error.response?.data?.detail || t("admin.groups.failedToUpdateSortOrder"),
-    );
+    appStore.showError(resolveAPIErrorMessage(error, t("admin.groups.failedToUpdateSortOrder")));
     console.error("Error updating sort order:", error);
   } finally {
     sortSubmitting.value = false;
